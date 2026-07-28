@@ -123,7 +123,22 @@ solidificação em um documento de especificação formal.
   `PATCH /admin/empresas/{id}/verificacao`) ainda sem autenticação de
   admin — ver pendências abaixo
 
+## Mensageria — implementação
+
+- `POST /conversas` cria consulta + conversa + primeira mensagem numa
+  única chamada, protegida por autenticação de usuário final
+- Isolamento de dados garantido por `_carregar_conversa_autorizada`:
+  cliente só acessa suas próprias conversas, empresa só as endereçadas
+  a ela — testado com dois usuários distintos tentando se bisbilhotar
+- Status `aguardando → respondida` é automático (primeira resposta da
+  empresa); o terceiro estado `sem_resposta` ainda não é calculado —
+  depende de uma tarefa agendada (cron/worker) que varre conversas
+  paradas há mais que o SLA configurado. Não implementado ainda.
+
 ## Pendências em aberto
+
+- Tarefa agendada (cron/worker) para marcar conversas como
+  `sem_resposta` após o SLA configurado
 
 - Conceito de usuário admin/autenticação de admin (o router
   `/admin/empresas` existe mas está desprotegido — só para uso interno

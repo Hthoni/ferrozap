@@ -80,3 +80,41 @@ class UsuarioFinalLogin(BaseModel):
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class ConversaCreate(BaseModel):
+    veiculo_desmonte_id: int
+    modelo_id: int
+    submodelo_id: int | None = None
+    ano: int
+    cep: str | None = None
+    texto: str = Field(min_length=1, max_length=2000)
+
+
+class MensagemOut(BaseModel):
+    id: int
+    conversa_id: int
+    remetente_tipo: str
+    texto: str
+    criado_em: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ConversaOut(BaseModel):
+    id: int
+    consulta_id: int
+    empresa_id: int
+    veiculo_desmonte_id: int
+    status: str
+    criado_em: datetime
+    primeira_resposta_em: datetime | None
+    ultima_atividade_em: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class MensagemCreate(BaseModel):
+    texto: str = Field(min_length=1, max_length=2000)

@@ -42,3 +42,13 @@ def get_usuario_atual(
     if usuario is None:
         raise HTTPException(status_code=401, detail="Usuário não encontrado.")
     return usuario
+
+
+def get_sujeito_atual(token: str = Depends(oauth2_scheme)) -> dict:
+    """
+    Para rotas acessadas tanto por empresa quanto por usuário final
+    (ex: mensageria), onde a checagem de "quem pode ver o quê" depende
+    do dado sendo acessado, não do tipo em si. Retorna {"tipo", "id"}.
+    """
+    payload = _extrair_payload(token)
+    return {"tipo": payload.get("tipo"), "id": int(payload["sub"])}
