@@ -1,9 +1,10 @@
 from fastapi import FastAPI
 
-from app.routers import auth, busca, cadastro, catalogo
+from app.routers import admin, auth, busca, cadastro, catalogo
 
 app = FastAPI(title="Ferrozap API")
 
+app.include_router(admin.router)
 app.include_router(auth.router)
 app.include_router(busca.router)
 app.include_router(cadastro.router)

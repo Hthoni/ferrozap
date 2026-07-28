@@ -19,13 +19,12 @@ def cadastrar_empresa(dados: EmpresaCreate, db: Session = Depends(get_db)):
         nome=dados.nome,
         cnpj=dados.cnpj,
         credenciamento_detran=dados.credenciamento_detran,
+        uf=dados.uf.upper(),
         email=dados.email,
         senha_hash=hash_senha(dados.senha),
         telefone=dados.telefone,
         endereco=dados.endereco,
         cep=dados.cep,
-        latitude=dados.latitude,
-        longitude=dados.longitude,
     )
     db.add(empresa)
     try:

@@ -105,8 +105,29 @@ solidificação em um documento de especificação formal.
   controlado de fabricantes/modelos)
 - Área de conta com plano de pagamento
 
+## Verificação de credenciamento (Detran)
+
+- Credenciamento junto ao Detran é regulado por estado, sem base
+  nacional única — cada UF tem seu próprio sistema (SP e MG usam
+  sistemas próprios com certificado digital; outros estados terceirizam)
+- São Paulo oferece consulta pública gratuita da lista de desmontadoras
+  credenciadas, sem exigir documentos — bom candidato a ser o primeiro
+  estado com verificação semi-automatizada
+- **Decisão**: `credenciamento_detran` e `uf` são obrigatórios no
+  cadastro. Empresa nasce com `status_verificacao = 'pendente'` e **não
+  aparece nos resultados de busca do consumidor** até ser aprovada
+- Verificação manual pelo time no início (conferindo no portal público
+  do Detran do estado); automação futura começando pelos estados com
+  consulta pública mais acessível
+- Endpoint de admin (`/admin/empresas/pendentes`,
+  `PATCH /admin/empresas/{id}/verificacao`) ainda sem autenticação de
+  admin — ver pendências abaixo
+
 ## Pendências em aberto
 
+- Conceito de usuário admin/autenticação de admin (o router
+  `/admin/empresas` existe mas está desprotegido — só para uso interno
+  em ambiente de desenvolvimento)
 - Escolha final de framework de frontend
 - Modelo de LLM específico a usar em produção (ver comparativo de custo)
 - Definição de thresholds de SLA

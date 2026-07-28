@@ -6,14 +6,13 @@ from pydantic import BaseModel, EmailStr, Field
 class EmpresaCreate(BaseModel):
     nome: str
     cnpj: str
-    credenciamento_detran: str | None = None
+    credenciamento_detran: str
+    uf: str = Field(min_length=2, max_length=2)
     email: EmailStr
     senha: str = Field(min_length=8)
     telefone: str | None = None
     endereco: str | None = None
     cep: str
-    latitude: float
-    longitude: float
 
 
 class EmpresaOut(BaseModel):
@@ -22,6 +21,9 @@ class EmpresaOut(BaseModel):
     cnpj: str
     email: EmailStr
     plano: str
+    status_verificacao: str
+    latitude: float | None
+    longitude: float | None
     ativo: bool
     criado_em: datetime
 

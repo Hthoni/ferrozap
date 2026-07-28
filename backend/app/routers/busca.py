@@ -43,6 +43,9 @@ def buscar(
         JOIN empresas e ON e.id = v.empresa_id
         WHERE v.modelo_id = :modelo_id
           AND e.ativo = TRUE
+          AND e.status_verificacao = 'verificado'
+          AND e.latitude IS NOT NULL
+          AND e.longitude IS NOT NULL
           AND v.status = 'disponivel'
         ORDER BY
             CASE WHEN :ordenar_por = 'distancia' THEN 0 ELSE
