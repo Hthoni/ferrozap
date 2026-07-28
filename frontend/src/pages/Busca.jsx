@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
+import Corners from "../components/Corners";
 
 export default function Busca() {
   const [fabricantes, setFabricantes] = useState([]);
@@ -52,48 +53,64 @@ export default function Busca() {
   }
 
   return (
-    <div className="container">
-      <h2>Qual peça você precisa?</h2>
-      <form onSubmit={buscar} className="card">
-        <select value={fabricanteId} onChange={(e) => setFabricanteId(e.target.value)} required>
-          <option value="">Fabricante</option>
-          {fabricantes.map((f) => (
-            <option key={f.id} value={f.id}>{f.nome}</option>
-          ))}
-        </select>
+    <div className="fz-wrap fz-secao" style={{ borderTop: 0 }}>
+      <p className="fz-rotulo fz-rotulo--aco">Marketplace de peças usadas</p>
+      <h1 style={{ fontSize: 56, lineHeight: 0.98, margin: "16px 0 24px", maxWidth: "16ch" }}>
+        A peça existe. A gente mostra onde.
+      </h1>
 
-        <select value={modeloId} onChange={(e) => setModeloId(e.target.value)} disabled={!fabricanteId} required>
-          <option value="">Modelo</option>
-          {modelos.map((m) => (
-            <option key={m.id} value={m.id}>{m.nome}</option>
-          ))}
-        </select>
-
-        {temSubmodelo && (
-          <select value={submodeloId} onChange={(e) => setSubmodeloId(e.target.value)}>
-            <option value="">Versão (opcional)</option>
-            {submodelos.map((s) => (
-              <option key={s.id} value={s.id}>{s.nome}</option>
+      <form onSubmit={buscar} className="blueprint" style={{ padding: 24, maxWidth: 480 }}>
+        <Corners />
+        <div className="field" style={{ marginBottom: 16 }}>
+          <label>Fabricante</label>
+          <select className="input" value={fabricanteId} onChange={(e) => setFabricanteId(e.target.value)} required>
+            <option value="">Selecione</option>
+            {fabricantes.map((f) => (
+              <option key={f.id} value={f.id}>{f.nome}</option>
             ))}
           </select>
+        </div>
+
+        <div className="field" style={{ marginBottom: 16 }}>
+          <label>Modelo</label>
+          <select
+            className="input"
+            value={modeloId}
+            onChange={(e) => setModeloId(e.target.value)}
+            disabled={!fabricanteId}
+            required
+          >
+            <option value="">Selecione</option>
+            {modelos.map((m) => (
+              <option key={m.id} value={m.id}>{m.nome}</option>
+            ))}
+          </select>
+        </div>
+
+        {temSubmodelo && (
+          <div className="field" style={{ marginBottom: 16 }}>
+            <label>Versão (opcional)</label>
+            <select className="input" value={submodeloId} onChange={(e) => setSubmodeloId(e.target.value)}>
+              <option value="">Selecione</option>
+              {submodelos.map((s) => (
+                <option key={s.id} value={s.id}>{s.nome}</option>
+              ))}
+            </select>
+          </div>
         )}
 
-        <input
-          type="number"
-          placeholder="Ano de fabricação"
-          value={ano}
-          onChange={(e) => setAno(e.target.value)}
-          required
-        />
-        <input
-          placeholder="Seu CEP"
-          value={cep}
-          onChange={(e) => setCep(e.target.value)}
-          required
-        />
+        <div className="field" style={{ marginBottom: 16 }}>
+          <label>Ano de fabricação</label>
+          <input className="input" type="number" value={ano} onChange={(e) => setAno(e.target.value)} required />
+        </div>
 
-        {erro && <p className="erro">{erro}</p>}
-        <button type="submit">Buscar</button>
+        <div className="field" style={{ marginBottom: 16 }}>
+          <label>Seu CEP</label>
+          <input className="input" value={cep} onChange={(e) => setCep(e.target.value)} required />
+        </div>
+
+        {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}
+        <button className="btn btn-primary btn-block" type="submit">Buscar</button>
       </form>
     </div>
   );

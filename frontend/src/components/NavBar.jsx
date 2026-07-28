@@ -1,33 +1,44 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Corners from "./Corners";
 
 export default function NavBar() {
   const { cliente, empresa, setCliente, setEmpresa } = useAuth();
 
   return (
-    <nav className="navbar">
-      <Link to="/buscar" className="marca">ferrozap</Link>
-      <div>
-        {!cliente && !empresa && (
-          <>
-            <Link to="/entrar">Entrar</Link>
-            <Link to="/empresa/entrar">Sou ferro-velho</Link>
-          </>
-        )}
-        {cliente && (
-          <>
-            <Link to="/conversas">Minhas conversas</Link>
-            <a href="#" onClick={() => setCliente(null)}>Sair</a>
-          </>
-        )}
-        {empresa && (
-          <>
-            <Link to="/estoque">Estoque</Link>
-            <Link to="/conversas-recebidas">Conversas</Link>
-            <a href="#" onClick={() => setEmpresa(null)}>Sair</a>
-          </>
-        )}
-      </div>
-    </nav>
+    <header className="nav">
+      <Link className="fz-logo nav-brand" to="/buscar">
+        <svg viewBox="0 0 48 48" width="28" height="28" aria-hidden="true">
+          <polygon points="2,2 46,2 46,36 36,46 2,46" fill="var(--fz-aco-forte)"></polygon>
+          <path d="M15 12 H35 V19 H23 V23.5 H33 V30.5 H23 V37 H15 Z" fill="var(--fz-papel)"></path>
+        </svg>
+        <span className="fz-logo-nome">FERROZAP</span>
+      </Link>
+
+      {!cliente && !empresa && (
+        <>
+          <Link className="btn btn-ghost" to="/entrar">Entrar</Link>
+          <Link className="btn btn-primary blueprint" to="/empresa/entrar">
+            <Corners />
+            Sou desmontadora
+          </Link>
+        </>
+      )}
+
+      {cliente && (
+        <>
+          <Link className="btn btn-ghost" to="/conversas">Minhas conversas</Link>
+          <button className="btn btn-secondary" onClick={() => setCliente(null)}>Sair</button>
+        </>
+      )}
+
+      {empresa && (
+        <>
+          <Link className="btn btn-ghost" to="/estoque">Estoque</Link>
+          <Link className="btn btn-ghost" to="/conversas-recebidas">Conversas</Link>
+          <button className="btn btn-secondary" onClick={() => setEmpresa(null)}>Sair</button>
+        </>
+      )}
+    </header>
   );
 }

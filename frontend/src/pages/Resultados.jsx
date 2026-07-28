@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { BadgeCheck, MapPin } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
+import Corners from "../components/Corners";
 
 export default function Resultados() {
   const [params] = useSearchParams();
@@ -49,7 +51,7 @@ export default function Resultados() {
         },
         cliente.token
       );
-      setSucesso("Mensagem enviada! Acompanhe a resposta em Minhas conversas.");
+      setSucesso("Mensagem enviada. Acompanhe a resposta em Minhas conversas.");
       setCardSelecionado(null);
       setTexto("");
     } catch (err) {
@@ -60,60 +62,78 @@ export default function Resultados() {
   }
 
   return (
-    <div className="container">
-      <h2>Resultados</h2>
+    <div className="fz-wrap fz-secao">
+      <h2 style={{ fontSize: 32, margin: "0 0 24px" }}>Resultados</h2>
 
-      <div className="toggle-linha">
-        <button
-          className={ordenarPor === "compatibilidade" ? "" : "secundario"}
-          onClick={() => setOrdenarPor("compatibilidade")}
-        >
+      <div className="seg" style={{ marginBottom: 24 }}>
+        <label className="seg-opt">
+          <input
+            type="radio"
+            checked={ordenarPor === "compatibilidade"}
+            onChange={() => setOrdenarPor("compatibilidade")}
+          />
           Compatibilidade
-        </button>
-        <button
-          className={ordenarPor === "distancia" ? "" : "secundario"}
-          onClick={() => setOrdenarPor("distancia")}
-        >
+        </label>
+        <label className="seg-opt">
+          <input
+            type="radio"
+            checked={ordenarPor === "distancia"}
+            onChange={() => setOrdenarPor("distancia")}
+          />
           Distância
-        </button>
+        </label>
       </div>
 
       {carregando && <p>Buscando...</p>}
-      {erro && <p className="erro">{erro}</p>}
-      {sucesso && <p className="card">{sucesso}</p>}
+      {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
+      {sucesso && <p className="card"><span className="card-body">{sucesso}</span></p>}
       {!carregando && !erro && resultados.length === 0 && (
         <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
       )}
 
-      {resultados.map((r) => (
-        <div className="card" key={r.veiculo_id}>
-          <p style={{ fontWeight: 500, margin: 0 }}>{r.nome}</p>
-          <p style={{ fontSize: 13, color: "#666", margin: "4px 0" }}>
-            {Number(r.distancia_km).toFixed(0)} km · veículo {r.ano_fabricacao}
-          </p>
-          <span className={`badge ${r.nivel_confianca === "compativel_exato" ? "exato" : "provavel"}`}>
-            {r.nivel_confianca === "compativel_exato" ? "Encontrado" : "Encaixe provável"}
-          </span>
-          <div style={{ marginTop: 10 }}>
-            <button onClick={() => setCardSelecionado(r)}>
-              Fazer contato
-            </button>
-          </div>
-        </div>
-      ))}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 }}>
+        {resultados.map((r) => {
+          const exato = r.nivel_confianca === "compativel_exato";
+          return (
+            <article className="fz-card-peca blueprint" key={r.veiculo_id}>
+              <Corners />
+              {exato && (
+                <p className="fz-selo"><BadgeCheck size={15} strokeWidth={1.5} /> Desmontadora verificada</p>
+              )}
+              <h3 className="fz-card-titulo">{r.nome}</h3>
+              <div className="fz-tags">
+                <span className="tag tag-neutral">
+                  <MapPin size={13} strokeWidth={1.5} style={{ marginRight: 4 }} />
+                  {Number(r.distancia_km).toFixed(0)} km
+                </span>
+                <span className={`tag ${exato ? "tag-accent" : "tag-neutral"}`}>
+                  {exato ? "Encontrado" : "Encaixe provável"}
+                </span>
+              </div>
+              <p className="fz-codigo">Veículo ano {r.ano_fabricacao}</p>
+              <button className="btn btn-primary btn-block blueprint" onClick={() => setCardSelecionado(r)}>
+                <Corners />
+                Falar com a desmontadora
+              </button>
+            </article>
+          );
+        })}
+      </div>
 
       {cardSelecionado && (
-        <div className="card">
-          <p style={{ fontWeight: 500 }}>Descreva o que você precisa</p>
+        <div className="blueprint" style={{ padding: 24, marginTop: 24, maxWidth: 480 }}>
+          <Corners />
+          <p className="card-title" style={{ marginBottom: 12 }}>Descreva o que você precisa</p>
           <form onSubmit={enviarMensagem}>
             <textarea
+              className="input"
               rows={4}
               placeholder="Ex: preciso do para-lama dianteiro direito, na cor original se tiver"
               value={texto}
               onChange={(e) => setTexto(e.target.value)}
               required
             />
-            <button type="submit" disabled={enviando}>
+            <button className="btn btn-primary btn-block" type="submit" disabled={enviando}>
               {enviando ? "Enviando..." : "Enviar mensagem"}
             </button>
           </form>

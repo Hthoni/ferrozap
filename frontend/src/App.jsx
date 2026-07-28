@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import NavBar from "./components/NavBar";
 
@@ -15,7 +15,7 @@ import AdminPainel from "./pages/AdminPainel";
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <HashRouter>
         <NavBar />
         <Routes>
           <Route path="/" element={<Busca />} />
@@ -29,7 +29,7 @@ export default function App() {
           <Route path="/conversas-recebidas" element={<ConversasRecebidas />} />
           <Route path="/admin" element={<AdminPainel />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </AuthProvider>
   );
 }

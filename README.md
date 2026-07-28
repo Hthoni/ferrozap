@@ -60,3 +60,28 @@ git branch -M main
 git remote add origin https://github.com/SEU_USUARIO/ferrozap.git
 git push -u origin main
 ```
+
+## Deploy (Cloud Run + Supabase + GitHub Pages)
+
+Mesmo padrão do Clube Backbone e do Pata Negra: push no `main` builda
+e publica sozinho, tanto backend (Cloud Build → Cloud Run) quanto
+frontend (GitHub Actions → GitHub Pages).
+
+1. **Banco**: crie um projeto no Supabase, rode `database/schema.sql`
+   no SQL Editor, copie a connection string
+2. **Backend**: crie um serviço no Cloud Run apontando para
+   `backend/` (usa o `Dockerfile` da pasta), configure as variáveis
+   `DATABASE_URL`, `SECRET_KEY`, `FRONTEND_ORIGIN`
+3. **Frontend**: ative GitHub Pages no repositório (Settings → Pages
+   → Source: GitHub Actions) e configure a variável `VITE_API_URL`
+   em Settings → Secrets and variables → Actions → Variables, com a
+   URL pública do Cloud Run
+
+Detalhes e decisões em `docs/decisoes.md`, seção "Infraestrutura de
+deploy".
+
+## Para retomar em novo chat
+
+1. Anexar `docs/decisoes.md` (histórico completo de decisões)
+2. Descrever qual pendência quer atacar primeiro — lista completa no
+   final de `docs/decisoes.md`

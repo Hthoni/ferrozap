@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
+import Corners from "../components/Corners";
 
 const CAMPOS_CADASTRO = [
   { nome: "nome", label: "Nome da empresa" },
@@ -37,8 +38,8 @@ export default function AuthEmpresa() {
       if (modo === "cadastro") {
         await api.cadastrarEmpresa({ ...form, senha });
         setAviso(
-          "Cadastro enviado. Sua empresa entra em análise e você recebe um aviso quando o " +
-            "credenciamento for verificado — só depois disso o estoque fica visível na busca."
+          "Cadastro enviado. Sua desmontadora entra em análise — o estoque só fica visível " +
+            "na busca depois que o credenciamento for verificado."
         );
         setModo("login");
         return;
@@ -54,48 +55,65 @@ export default function AuthEmpresa() {
   }
 
   return (
-    <div className="container">
-      <h2>Área da empresa</h2>
-      <div className="toggle-linha">
-        <button className={modo === "login" ? "" : "secundario"} onClick={() => setModo("login")}>
+    <div className="fz-wrap fz-secao" style={{ maxWidth: 520 }}>
+      <p className="fz-rotulo fz-rotulo--aco">Desmontadora</p>
+      <h1 style={{ fontSize: 40, margin: "8px 0 24px" }}>Área da empresa</h1>
+
+      <div className="seg" style={{ marginBottom: 24, width: "100%" }}>
+        <label className="seg-opt" style={{ flex: 1, justifyContent: "center" }}>
+          <input type="radio" checked={modo === "login"} onChange={() => setModo("login")} />
           Já tenho conta
-        </button>
-        <button className={modo === "cadastro" ? "" : "secundario"} onClick={() => setModo("cadastro")}>
-          Cadastrar empresa
-        </button>
+        </label>
+        <label className="seg-opt" style={{ flex: 1, justifyContent: "center" }}>
+          <input type="radio" checked={modo === "cadastro"} onChange={() => setModo("cadastro")} />
+          Cadastrar desmontadora
+        </label>
       </div>
 
-      {aviso && <p className="card">{aviso}</p>}
+      {aviso && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <p className="card-body">{aviso}</p>
+        </div>
+      )}
 
-      <form onSubmit={enviar} className="card">
+      <form onSubmit={enviar} className="blueprint" style={{ padding: 24 }}>
+        <Corners />
         {modo === "cadastro" &&
           CAMPOS_CADASTRO.map((campo) => (
-            <input
-              key={campo.nome}
-              placeholder={campo.label}
-              value={form[campo.nome] || ""}
-              onChange={(e) => atualizarCampo(campo.nome, e.target.value)}
-              required={campo.nome !== "telefone" && campo.nome !== "endereco"}
-            />
+            <div className="field" style={{ marginBottom: 16 }} key={campo.nome}>
+              <label>{campo.label}</label>
+              <input
+                className="input"
+                value={form[campo.nome] || ""}
+                onChange={(e) => atualizarCampo(campo.nome, e.target.value)}
+                required={campo.nome !== "telefone" && campo.nome !== "endereco"}
+              />
+            </div>
           ))}
         {modo === "login" && (
+          <div className="field" style={{ marginBottom: 16 }}>
+            <label>E-mail</label>
+            <input
+              className="input"
+              value={form.email || ""}
+              onChange={(e) => atualizarCampo("email", e.target.value)}
+              required
+            />
+          </div>
+        )}
+        <div className="field" style={{ marginBottom: 16 }}>
+          <label>Senha</label>
           <input
-            placeholder="E-mail"
-            value={form.email || ""}
-            onChange={(e) => atualizarCampo("email", e.target.value)}
+            className="input"
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            minLength={8}
             required
           />
-        )}
-        <input
-          type="password"
-          placeholder="Senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          minLength={8}
-          required
-        />
-        {erro && <p className="erro">{erro}</p>}
-        <button type="submit" disabled={carregando}>
+        </div>
+        {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}
+        <button className="btn btn-primary btn-block" type="submit" disabled={carregando}>
           {carregando ? "Aguarde..." : modo === "login" ? "Entrar" : "Enviar cadastro"}
         </button>
       </form>

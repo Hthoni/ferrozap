@@ -15,10 +15,7 @@ export default function ConversaDetalhe() {
   const [enviando, setEnviando] = useState(false);
 
   function carregar() {
-    api
-      .listarMensagens(id, token)
-      .then(setMensagens)
-      .catch((err) => setErro(err.message));
+    api.listarMensagens(id, token).then(setMensagens).catch((err) => setErro(err.message));
   }
 
   useEffect(() => {
@@ -40,36 +37,44 @@ export default function ConversaDetalhe() {
     }
   }
 
-  if (!token) return <div className="container"><p>Você precisa estar autenticado.</p></div>;
+  if (!token) return <div className="fz-wrap fz-secao"><p>Você precisa estar autenticado.</p></div>;
 
   return (
-    <div className="container">
-      <h2>Conversa #{id}</h2>
-      {erro && <p className="erro">{erro}</p>}
+    <div className="fz-wrap fz-secao" style={{ maxWidth: 560 }}>
+      <p className="fz-rotulo fz-rotulo--aco">Conversa #{id}</p>
+      {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
 
-      <div style={{ display: "flex", flexDirection: "column" }}>
-        {mensagens.map((m) => (
-          <div
-            key={m.id}
-            className={`mensagem ${m.remetente_tipo === meuTipo ? "empresa" : "cliente"}`}
-          >
-            <p style={{ margin: 0 }}>{m.texto}</p>
-            <p style={{ margin: 0, fontSize: 11, opacity: 0.6 }}>
-              {new Date(m.criado_em).toLocaleString("pt-BR")}
-            </p>
-          </div>
-        ))}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, margin: "24px 0" }}>
+        {mensagens.map((m) => {
+          const minha = m.remetente_tipo === meuTipo;
+          return (
+            <div
+              key={m.id}
+              className="card"
+              style={{
+                maxWidth: "78%",
+                alignSelf: minha ? "flex-end" : "flex-start",
+                background: minha ? "var(--color-accent-100)" : "var(--color-neutral-100)",
+                border: "1px solid var(--fz-linha)",
+              }}
+            >
+              <p className="card-body" style={{ opacity: 1 }}>{m.texto}</p>
+              <p className="card-meta">{new Date(m.criado_em).toLocaleString("pt-BR")}</p>
+            </div>
+          );
+        })}
       </div>
 
-      <form onSubmit={enviar} className="card">
+      <form onSubmit={enviar} className="field">
+        <label>Responder</label>
         <textarea
+          className="input"
           rows={3}
-          placeholder="Escreva sua mensagem"
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
           required
         />
-        <button type="submit" disabled={enviando}>
+        <button className="btn btn-primary btn-block" type="submit" disabled={enviando}>
           {enviando ? "Enviando..." : "Enviar"}
         </button>
       </form>

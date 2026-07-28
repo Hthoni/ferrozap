@@ -158,6 +158,78 @@ solidificação em um documento de especificação formal.
 - Painel de admin **sem autenticação** — mesmo aviso já registrado
   para os endpoints de backend correspondentes.
 
+## Identidade visual
+
+- Sistema de design "Industry" + camada de marca Ferrozap, recebidos
+  prontos do Claude Design (`design-reference/` guarda o material
+  original: manual de marca navegável, README com as regras, página de
+  exemplo). `frontend/src/styles/industry.css` e `ferrozap.css` são a
+  fonte de verdade — carregados nessa ordem em `main.jsx`, sem edição.
+- Todas as 9 telas foram reconstruídas em cima do sistema: `.btn`,
+  `.field`/`.input`, `.card`, `.tag`, `.seg` (segmento de escolha,
+  substituiu os botões de toggle improvisados), moldura `.blueprint` +
+  `<Corners />` (componente que injeta as 4 marcas de canto), `.fz-*`
+  para os padrões específicos da marca (`.fz-card-peca`, `.fz-selo`,
+  `.fz-codigo`, `.fz-status`, `.fz-wrap`/`.fz-secao`)
+- Ícones via `lucide-react` (não o script UMD do `exemplo.html`, já
+  que o app é React) — sempre `strokeWidth={1.5}`, conforme a regra
+  "Lucide, traço 1.5, sempre"
+- **Extensão deliberada**: o sistema original só definia dois estados
+  funcionais (`disponivel`/`vendido`, verde/vermelho). O produto
+  precisa de um terceiro (`aguardando`, conversas sem resposta ainda)
+  — adicionado como `.fz-status--aguardando` reaproveitando o token
+  `--fz-aco` já existente, sem introduzir cor nova
+- Pendente: fotografia real de peça/pátio (o próprio pacote de design
+  já sinaliza isso como faltante) — hoje as telas de resultado não têm
+  imagem de peça, só o card de texto/dados
+
+## Infraestrutura de deploy
+
+- **Banco de dados: mantém-se PostgreSQL relacional**, diferente do
+  padrão de Cloud Storage (JSON em bucket, sem banco) usado no Clube
+  Backbone e no Pata Negra. Motivo: a busca do Ferrozap depende de
+  junção relacional em tempo real (veículo × empresa × geração ×
+  distância, com índice, integridade referencial entre conversa e
+  mensagem, e isolamento de dados testado) — replicar isso em arquivo
+  solto significaria refazer em Python, a cada busca, o que o Postgres
+  já resolve nativamente.
+- **Backend: Cloud Run**, mesmo padrão dos outros dois projetos —
+  `backend/Dockerfile` (gunicorn + worker uvicorn, escuta na variável
+  `$PORT`), deploy automático via Cloud Build a cada push
+- **Banco hospedado no Supabase** (não Cloud SQL) — evita configurar
+  proxy/VPC para o Cloud Run alcançar um banco dentro do mesmo projeto
+  GCP; Supabase também tem painel visual, útil para conferir cadastro
+  de empresa pendente manualmente (mesmo uso que o Cloud Storage
+  console dá nos outros projetos)
+- **Frontend: GitHub Pages**, como Backbone e Pata Negra — mas com uma
+  diferença técnica importante: o Ferrozap é React com rotas
+  client-side (`react-router-dom`), então:
+  - Trocado `BrowserRouter` por `HashRouter` (URLs viram `/#/buscar`)
+    porque o GitHub Pages não redireciona rota desconhecida para
+    `index.html` como Vercel/Railway fazem
+  - `vite.config.js` usa `base: "./"` (caminho relativo), porque o
+    Pages publica em `usuario.github.io/repo/`, não na raiz
+  - Diferente dos outros dois projetos (HTML/JS puro, editável direto
+    pelo editor web do GitHub), o Ferrozap **precisa de build**
+    (`npm run build`) antes de virar arquivo estático — resolvido com
+    `.github/workflows/deploy-frontend.yml`, que builda e publica
+    automaticamente a cada push no `main`, preservando o fluxo de
+    "commitou, subiu sozinho" que os outros projetos já têm
+
+### Pendente para o primeiro deploy
+
+1. Criar o projeto/serviço no Cloud Run (Console GCP), apontando para
+   `backend/` como contexto de build
+2. Configurar variáveis de ambiente no Cloud Run: `DATABASE_URL`
+   (Supabase), `SECRET_KEY`, `FRONTEND_ORIGIN` (URL do GitHub Pages)
+3. Criar o projeto no Supabase, rodar `database/schema.sql` no SQL
+   Editor
+4. Ativar GitHub Pages no repositório (Settings → Pages → Source:
+   GitHub Actions)
+5. Configurar a variável `VITE_API_URL` nas Actions variables do
+   repositório (Settings → Secrets and variables → Actions → Variables),
+   apontando para a URL pública do Cloud Run
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje
