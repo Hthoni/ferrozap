@@ -160,6 +160,14 @@ export default function Busca() {
                 Usar
               </button>
             </div>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ marginTop: 8, padding: 0, fontSize: 13 }}
+              onClick={() => { setModoTextoFabricante(false); setTextoFabricante(""); }}
+            >
+              Voltar para a lista
+            </button>
           </div>
         )}
         {fabricanteId && (
@@ -216,6 +224,14 @@ export default function Busca() {
                 Usar
               </button>
             </div>
+            <button
+              type="button"
+              className="btn btn-ghost"
+              style={{ marginTop: 8, padding: 0, fontSize: 13 }}
+              onClick={() => { setModoTextoModelo(false); setTextoModelo(""); }}
+            >
+              Voltar para a lista
+            </button>
           </div>
         )}
 
