@@ -1,0 +1,49 @@
+from datetime import datetime
+
+from pydantic import BaseModel, EmailStr, Field
+
+
+class EmpresaCreate(BaseModel):
+    nome: str
+    cnpj: str
+    credenciamento_detran: str | None = None
+    email: EmailStr
+    senha: str = Field(min_length=8)
+    telefone: str | None = None
+    endereco: str | None = None
+    cep: str
+    latitude: float
+    longitude: float
+
+
+class EmpresaOut(BaseModel):
+    id: int
+    nome: str
+    cnpj: str
+    email: EmailStr
+    plano: str
+    ativo: bool
+    criado_em: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class VeiculoDesmonteCreate(BaseModel):
+    modelo_id: int
+    submodelo_id: int | None = None
+    ano_fabricacao: int
+
+
+class VeiculoDesmonteOut(BaseModel):
+    id: int
+    empresa_id: int
+    modelo_id: int
+    submodelo_id: int | None
+    ano_fabricacao: int
+    geracao_id: int | None
+    status: str
+    criado_em: datetime
+
+    class Config:
+        from_attributes = True
