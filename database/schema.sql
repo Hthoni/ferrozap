@@ -33,7 +33,8 @@ CREATE TABLE geracoes (
     nome VARCHAR(30) NOT NULL,
     ano_inicio INT NOT NULL,
     ano_fim INT NOT NULL,
-    CHECK (ano_fim >= ano_inicio)
+    CHECK (ano_fim >= ano_inicio),
+    UNIQUE (modelo_id, nome)
 );
 CREATE INDEX idx_geracoes_modelo_range ON geracoes (modelo_id, ano_inicio, ano_fim);
 

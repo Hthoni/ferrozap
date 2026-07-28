@@ -240,12 +240,11 @@ solidificação em um documento de especificação formal.
   FIPE mistura motorização/versão no nome (ex: "COROLLA XEi 1.8 Flex
   16V Aut"), o que não bate com a separação limpa fabricante → modelo
   → submodelo do schema. Modelos são curados manualmente.
-- `database/seed_fabricantes_modelos.sql` — seed inicial com ~106
-  marcas normalizadas (nomes normalizados, ex: "VW - VolksWagen" da
-  FIPE vira "Volkswagen") e ~33 modelos mais comuns em desmonte no
-  Brasil, com gerações aproximadas só para Gol/Onix/HB20 como ponto
-  de partida — anos ainda precisam de validação (fontes de mercado
-  divergem)
+- `database/seed_fabricantes_modelos.sql` — seed inicial com ~35
+  marcas relevantes (nomes normalizados, ex: "VW - VolksWagen" da FIPE
+  vira "Volkswagen") e ~32 modelos mais comuns em desmonte no Brasil,
+  com gerações aproximadas só para Gol/Onix/HB20 como ponto de partida
+  — anos ainda precisam de validação (fontes de mercado divergem)
 
 ## Cobertura de catálogo — marca completa, modelo por texto livre
 
@@ -253,8 +252,10 @@ solidificação em um documento de especificação formal.
   descartada. Donos de veículo raro/extinto (Gurgel, Envemo etc.) são
   justamente quem mais depende de desmonte para achar peça — cortar
   essas marcas prejudicava exatamente o público que mais se beneficia
-  do produto. Seed agora traz ~106 marcas normalizadas, e ~33 modelos
-  curados
+  do produto. Seed agora traz ~106 marcas normalizadas, e ~119 modelos
+  curados — cobertura ampliada após identificar que marcas mainstream
+  como Audi ficavam sem nenhum modelo; texto livre deve ser exceção
+  para casos raros, não a experiência padrão de uma marca comum
 - **Modelo continua sem importação em massa** (mesmo motivo de sempre:
   granularidade da FIPE não bate com o schema), mas o problema de
   cobertura é resolvido no produto, não no dado: `POST /catalogo/fabricantes`

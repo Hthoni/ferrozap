@@ -34,7 +34,12 @@ export default function Busca() {
     if (!fabricanteId) return;
     setModeloId("");
     setSubmodelos([]);
-    api.listarModelos(fabricanteId).then(setModelos);
+    api.listarModelos(fabricanteId).then((lista) => {
+      setModelos(lista);
+      // Sem nenhum modelo cadastrado para essa marca ainda: pula
+      // direto pro texto livre, em vez de mostrar um dropdown vazio.
+      if (lista.length === 0) setModoTextoModelo(true);
+    });
   }, [fabricanteId]);
 
   useEffect(() => {
