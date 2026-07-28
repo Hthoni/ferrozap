@@ -25,6 +25,10 @@ export const api = {
   listarFabricantes: () => chamar("/catalogo/fabricantes"),
   listarModelos: (fabricanteId) => chamar(`/catalogo/fabricantes/${fabricanteId}/modelos`),
   listarSubmodelos: (modeloId) => chamar(`/catalogo/modelos/${modeloId}/submodelos`),
+  criarOuObterFabricante: (nome) =>
+    chamar("/catalogo/fabricantes", { method: "POST", body: { nome } }),
+  criarOuObterModelo: (fabricanteId, nome) =>
+    chamar("/catalogo/modelos", { method: "POST", body: { fabricante_id: fabricanteId, nome } }),
 
   // Busca
   buscar: ({ modeloId, ano, cep, ordenarPor }) => {

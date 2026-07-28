@@ -230,6 +230,45 @@ solidificação em um documento de especificação formal.
    repositório (Settings → Secrets and variables → Actions → Variables),
    apontando para a URL pública do Cloud Run
 
+## Dados de fabricantes e modelos
+
+- FIPE não tem API própria nem exportação em massa (proibido por
+  termos de uso deles) — usamos a API pública de terceiros Parallelum
+  (`fipe.parallelum.com.br`, gratuita, 500 req/dia sem token) só para
+  a lista de marcas, testada e confirmada funcionando
+- **Não importamos os modelos da FIPE em massa**: o campo "modelo" da
+  FIPE mistura motorização/versão no nome (ex: "COROLLA XEi 1.8 Flex
+  16V Aut"), o que não bate com a separação limpa fabricante → modelo
+  → submodelo do schema. Modelos são curados manualmente.
+- `database/seed_fabricantes_modelos.sql` — seed inicial com ~35
+  marcas relevantes (nomes normalizados, ex: "VW - VolksWagen" da FIPE
+  vira "Volkswagen") e ~32 modelos mais comuns em desmonte no Brasil,
+  com gerações aproximadas só para Gol/Onix/HB20 como ponto de partida
+  — anos ainda precisam de validação (fontes de mercado divergem)
+
+## Cobertura de catálogo — marca completa, modelo por texto livre
+
+- **Decisão revertida**: a curadoria inicial de ~35 marcas foi
+  descartada. Donos de veículo raro/extinto (Gurgel, Envemo etc.) são
+  justamente quem mais depende de desmonte para achar peça — cortar
+  essas marcas prejudicava exatamente o público que mais se beneficia
+  do produto. Seed agora traz as ~96 marcas da FIPE, nomes normalizados
+- **Modelo continua sem importação em massa** (mesmo motivo de sempre:
+  granularidade da FIPE não bate com o schema), mas o problema de
+  cobertura é resolvido no produto, não no dado: `POST /catalogo/fabricantes`
+  e `POST /catalogo/modelos` são endpoints get-or-create (idempotentes
+  por nome, case-insensitive) — cliente ou empresa que não encontra a
+  marca/modelo no dropdown pode digitar, e o catálogo cresce sob
+  demanda, criado por quem realmente precisa daquele registro
+- Modelo criado por texto livre nasce sem geração mapeada — cai
+  automaticamente no fallback por tolerância de ano já existente,
+  sem exigir nenhum tratamento especial
+- Avaliado e descartado: `rafaelgou/fipe-crawler` (scraper PHP/MySQL
+  do serviço interno da FIPE, não da API pública) — stack incompatível,
+  raspa endpoint não documentado que a FIPE não sanciona, e mesmo
+  assim entrega ~6.500 "modelos" por marca com nome+motorização+versão
+  misturados, não resolvendo o problema de curadoria
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje

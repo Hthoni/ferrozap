@@ -9,12 +9,20 @@ export default function Busca() {
   const [submodelos, setSubmodelos] = useState([]);
 
   const [fabricanteId, setFabricanteId] = useState("");
+  const [fabricanteNome, setFabricanteNome] = useState("");
+  const [modoTextoFabricante, setModoTextoFabricante] = useState(false);
+  const [textoFabricante, setTextoFabricante] = useState("");
+
   const [modeloId, setModeloId] = useState("");
+  const [modoTextoModelo, setModoTextoModelo] = useState(false);
+  const [textoModelo, setTextoModelo] = useState("");
+
   const [submodeloId, setSubmodeloId] = useState("");
   const [temSubmodelo, setTemSubmodelo] = useState(false);
   const [ano, setAno] = useState("");
   const [cep, setCep] = useState("");
   const [erro, setErro] = useState("");
+  const [resolvendo, setResolvendo] = useState(false);
 
   const navigate = useNavigate();
 
@@ -41,6 +49,45 @@ export default function Busca() {
     }
   }, [modeloId, modelos]);
 
+  async function confirmarFabricanteLivre() {
+    if (!textoFabricante.trim()) return;
+    setResolvendo(true);
+    setErro("");
+    try {
+      const resultado = await api.criarOuObterFabricante(textoFabricante.trim());
+      setFabricanteId(String(resultado.id));
+      setFabricanteNome(resultado.nome);
+      setModoTextoFabricante(false);
+    } catch (err) {
+      setErro(err.message);
+    } finally {
+      setResolvendo(false);
+    }
+  }
+
+  async function confirmarModeloLivre() {
+    if (!textoModelo.trim()) return;
+    setResolvendo(true);
+    setErro("");
+    try {
+      const resultado = await api.criarOuObterModelo(fabricanteId, textoModelo.trim());
+      setModeloId(String(resultado.id));
+      setModoTextoModelo(false);
+    } catch (err) {
+      setErro(err.message);
+    } finally {
+      setResolvendo(false);
+    }
+  }
+
+  function trocarFabricante() {
+    setFabricanteId("");
+    setFabricanteNome("");
+    setTextoFabricante("");
+    setModeloId("");
+    setModelos([]);
+  }
+
   function buscar(e) {
     e.preventDefault();
     setErro("");
@@ -61,31 +108,116 @@ export default function Busca() {
 
       <form onSubmit={buscar} className="blueprint" style={{ padding: 24, maxWidth: 480 }}>
         <Corners />
-        <div className="field" style={{ marginBottom: 16 }}>
-          <label>Fabricante</label>
-          <select className="input" value={fabricanteId} onChange={(e) => setFabricanteId(e.target.value)} required>
-            <option value="">Selecione</option>
-            {fabricantes.map((f) => (
-              <option key={f.id} value={f.id}>{f.nome}</option>
-            ))}
-          </select>
-        </div>
 
-        <div className="field" style={{ marginBottom: 16 }}>
-          <label>Modelo</label>
-          <select
-            className="input"
-            value={modeloId}
-            onChange={(e) => setModeloId(e.target.value)}
-            disabled={!fabricanteId}
-            required
+        {/* Fabricante */}
+        {!fabricanteId && !modoTextoFabricante && (
+          <div className="field" style={{ marginBottom: 8 }}>
+            <label>Fabricante</label>
+            <select
+              className="input"
+              value=""
+              onChange={(e) => {
+                const f = fabricantes.find((x) => String(x.id) === e.target.value);
+                setFabricanteId(e.target.value);
+                setFabricanteNome(f?.nome || "");
+              }}
+              required
+            >
+              <option value="">Selecione</option>
+              {fabricantes.map((f) => (
+                <option key={f.id} value={f.id}>{f.nome}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        {!fabricanteId && !modoTextoFabricante && (
+          <button
+            type="button"
+            className="btn btn-ghost"
+            style={{ marginBottom: 16, padding: 0, fontSize: 13 }}
+            onClick={() => setModoTextoFabricante(true)}
           >
-            <option value="">Selecione</option>
-            {modelos.map((m) => (
-              <option key={m.id} value={m.id}>{m.nome}</option>
-            ))}
-          </select>
-        </div>
+            Não encontrou sua marca? Digite aqui
+          </button>
+        )}
+        {!fabricanteId && modoTextoFabricante && (
+          <div className="field" style={{ marginBottom: 16 }}>
+            <label>Nome da marca</label>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                className="input"
+                value={textoFabricante}
+                onChange={(e) => setTextoFabricante(e.target.value)}
+                placeholder="Ex: Gurgel"
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ width: "auto", whiteSpace: "nowrap" }}
+                disabled={resolvendo}
+                onClick={confirmarFabricanteLivre}
+              >
+                Usar
+              </button>
+            </div>
+          </div>
+        )}
+        {fabricanteId && (
+          <div className="field" style={{ marginBottom: 16 }}>
+            <label>Fabricante</label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span className="fz-codigo">{fabricanteNome}</span>
+              <button type="button" className="btn btn-ghost" style={{ width: "auto", fontSize: 12 }} onClick={trocarFabricante}>
+                Trocar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Modelo — só aparece depois que o fabricante está resolvido */}
+        {fabricanteId && !modeloId && !modoTextoModelo && (
+          <div className="field" style={{ marginBottom: 8 }}>
+            <label>Modelo</label>
+            <select className="input" value={modeloId} onChange={(e) => setModeloId(e.target.value)} required>
+              <option value="">Selecione</option>
+              {modelos.map((m) => (
+                <option key={m.id} value={m.id}>{m.nome}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        {fabricanteId && !modeloId && !modoTextoModelo && (
+          <button
+            type="button"
+            className="btn btn-ghost"
+            style={{ marginBottom: 16, padding: 0, fontSize: 13 }}
+            onClick={() => setModoTextoModelo(true)}
+          >
+            Não encontrou seu modelo? Digite aqui
+          </button>
+        )}
+        {fabricanteId && !modeloId && modoTextoModelo && (
+          <div className="field" style={{ marginBottom: 16 }}>
+            <label>Nome do modelo</label>
+            <div style={{ display: "flex", gap: 8 }}>
+              <input
+                className="input"
+                value={textoModelo}
+                onChange={(e) => setTextoModelo(e.target.value)}
+                placeholder="Ex: BR-800"
+              />
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ width: "auto", whiteSpace: "nowrap" }}
+                disabled={resolvendo}
+                onClick={confirmarModeloLivre}
+              >
+                Usar
+              </button>
+            </div>
+          </div>
+        )}
 
         {temSubmodelo && (
           <div className="field" style={{ marginBottom: 16 }}>
