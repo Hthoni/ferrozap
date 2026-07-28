@@ -8,6 +8,7 @@ async function chamar(caminho, { method = "GET", body, token } = {}) {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    cache: "no-store",
   });
 
   const dados = await resposta.json().catch(() => null);
@@ -25,6 +26,7 @@ export const api = {
   listarFabricantes: () => chamar("/catalogo/fabricantes"),
   listarModelos: (fabricanteId) => chamar(`/catalogo/fabricantes/${fabricanteId}/modelos`),
   listarSubmodelos: (modeloId) => chamar(`/catalogo/modelos/${modeloId}/submodelos`),
+  listarAnos: (modeloId) => chamar(`/catalogo/modelos/${modeloId}/anos`),
   criarOuObterFabricante: (nome) =>
     chamar("/catalogo/fabricantes", { method: "POST", body: { nome } }),
   criarOuObterModelo: (fabricanteId, nome) =>

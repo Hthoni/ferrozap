@@ -36,7 +36,7 @@ INSERT INTO fabricantes (nome) VALUES
   ('Rely'), ('Renault'), ('Rolls-Royce'), ('Rover'), ('Seres'),
   ('Shineray'), ('SsangYong'), ('Saab'), ('Saturn'), ('Seat'),
   ('Subaru'), ('Suzuki'), ('TAC'), ('Toyota'), ('Troller'),
-  ('Volkswagen'), ('Volvo'), ('Wake'), ('Walk'), ('Zeekr'), ('smart')
+  ('Volkswagen'), ('Volvo'), ('Wake'), ('Walk'), ('Willys'), ('Zeekr'), ('smart')
 ON CONFLICT (nome) DO NOTHING;
 
 -- ============================================================
@@ -125,10 +125,31 @@ INSERT INTO modelos (fabricante_id, nome, tem_submodelo_relevante) VALUES
   ((SELECT id FROM fabricantes WHERE nome = 'Peugeot'), '2008', false),
   ((SELECT id FROM fabricantes WHERE nome = 'Peugeot'), '3008', false),
   ((SELECT id FROM fabricantes WHERE nome = 'Peugeot'), 'Partner', false),
-  -- Citroën
-  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C3', false),
-  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C4 Cactus', false),
+  -- Citroën (lista completa, conferida contra catálogo do Webmotors)
   ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'Aircross', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'AX', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'Basalt', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C3', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C3 Aircross', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C3 Picasso', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C3 Sonora', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C4', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C4 Cactus', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C4 Grand Picasso', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C4 Lounge', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C4 Picasso', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C5', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'C6', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'DS3', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'DS4', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'DS5', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'Evasion', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'Grand C4', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'Jumper', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'Jumpy', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'Xsara', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'Xsara Picasso', false),
+  ((SELECT id FROM fabricantes WHERE nome = 'Citroën'), 'ZX', false),
   -- Kia
   ((SELECT id FROM fabricantes WHERE nome = 'Kia'), 'Sportage', false),
   ((SELECT id FROM fabricantes WHERE nome = 'Kia'), 'Cerato', false),

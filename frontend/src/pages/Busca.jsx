@@ -19,6 +19,7 @@ export default function Busca() {
 
   const [submodeloId, setSubmodeloId] = useState("");
   const [temSubmodelo, setTemSubmodelo] = useState(false);
+  const [anos, setAnos] = useState([]);
   const [ano, setAno] = useState("");
   const [cep, setCep] = useState("");
   const [erro, setErro] = useState("");
@@ -36,14 +37,16 @@ export default function Busca() {
     setSubmodelos([]);
     api.listarModelos(fabricanteId).then((lista) => {
       setModelos(lista);
-      // Sem nenhum modelo cadastrado para essa marca ainda: pula
-      // direto pro texto livre, em vez de mostrar um dropdown vazio.
       if (lista.length === 0) setModoTextoModelo(true);
     });
   }, [fabricanteId]);
 
   useEffect(() => {
-    if (!modeloId) return;
+    if (!modeloId) {
+      setAnos([]);
+      setAno("");
+      return;
+    }
     const modelo = modelos.find((m) => String(m.id) === String(modeloId));
     setTemSubmodelo(Boolean(modelo?.tem_submodelo_relevante));
     if (modelo?.tem_submodelo_relevante) {
@@ -52,6 +55,7 @@ export default function Busca() {
       setSubmodelos([]);
       setSubmodeloId("");
     }
+    api.listarAnos(modeloId).then(setAnos);
   }, [modeloId, modelos]);
 
   async function confirmarFabricanteLivre() {
@@ -254,7 +258,18 @@ export default function Busca() {
 
         <div className="field" style={{ marginBottom: 16 }}>
           <label>Ano de fabricação</label>
-          <input className="input" type="number" value={ano} onChange={(e) => setAno(e.target.value)} required />
+          <select
+            className="input"
+            value={ano}
+            onChange={(e) => setAno(e.target.value)}
+            disabled={!modeloId}
+            required
+          >
+            <option value="">{modeloId ? "Selecione" : "Escolha o modelo primeiro"}</option>
+            {anos.map((a) => (
+              <option key={a} value={a}>{a}</option>
+            ))}
+          </select>
         </div>
 
         <div className="field" style={{ marginBottom: 16 }}>

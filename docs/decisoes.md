@@ -272,6 +272,41 @@ solidificação em um documento de especificação formal.
   assim entrega ~6.500 "modelos" por marca com nome+motorização+versão
   misturados, não resolvendo o problema de curadoria
 
+## Ano de fabricação — dropdown em vez de campo livre
+
+- **Decisão**: no formulário de busca do cliente, "ano de fabricação"
+  virou dropdown (dependente do modelo escolhido), não mais número
+  digitado — mesmo padrão de duas camadas visto no Webmotors
+  (marca → modelo → versão), aplicado também ao ano
+- `GET /catalogo/modelos/{modelo_id}/anos`: quando o modelo tem
+  geração mapeada, retorna só os anos reais (união dos intervalos de
+  `geracoes`) — dropdown "inteligente" de verdade. Quando não tem
+  nenhuma geração ainda (a maioria dos modelos hoje), cai num fallback
+  amplo (ano atual até 1970) — não trava a busca, só ainda não filtra
+  bem. Fica mais inteligente à medida que mais gerações são mapeadas.
+- **Cadastro da empresa mantém campo numérico livre** (não virou
+  dropdown) — decisão deliberada: a empresa está informando o ano
+  real de um veículo físico que ela tem na mão, e travar isso a uma
+  lista pré-calculada bloquearia cadastro válido de veículo cujo
+  modelo ainda não tem geração mapeada (a maioria)
+
+## Importação de modelos via API (Parallelum/FIPE)
+
+- `database/importar_modelos_fipe.py`: script standalone (só
+  biblioteca padrão do Python, sem dependência) que busca a lista real
+  de modelos de todas as marcas via API Parallelum, extrai o nome
+  limpo do modelo (heurística: primeira palavra, ou nameplate composto
+  conhecido tipo "New Beetle") e gera SQL pronto pra colar no Supabase
+- Não roda no ambiente do Claude (rede restrita) — precisa ser
+  executado em ambiente com internet livre, ex: Google Cloud Shell
+- Testado com dado real da Volkswagen (~340 variantes brutas da FIPE
+  → ~40 nomes de modelo limpos e corretos: Gol, Golf, Fox, Amarok,
+  Santana, Kombi, Parati, Voyage, T-Cross, Tiguan, etc.)
+- Marca `tem_submodelo_relevante = true` quando o modelo tem 3+
+  variantes brutas na FIPE (heurística de "provavelmente tem versão
+  relevante") — não popula a tabela `submodelos` ainda, fica como
+  próximo passo natural depois que os modelos estiverem importados
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje

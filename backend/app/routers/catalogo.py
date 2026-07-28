@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Fabricante, Modelo, Submodelo
+from app.services.geracao import anos_disponiveis
 
 router = APIRouter(prefix="/catalogo", tags=["catalogo"])
 
@@ -93,3 +94,8 @@ def listar_submodelos(modelo_id: int, db: Session = Depends(get_db)):
         .all()
     )
     return [{"id": s.id, "nome": s.nome} for s in submodelos]
+
+
+@router.get("/modelos/{modelo_id}/anos")
+def listar_anos(modelo_id: int, db: Session = Depends(get_db)):
+    return anos_disponiveis(db, modelo_id)
