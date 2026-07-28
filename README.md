@@ -33,6 +33,17 @@ uvicorn app.main:app --reload
 A API sobe em `http://localhost:8000`. Documentação automática em
 `http://localhost:8000/docs`.
 
+## Como rodar o frontend localmente
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+O app sobe em `http://localhost:5173` e já espera o backend rodando em
+`http://localhost:8000` (configurável via `VITE_API_URL`).
+
 ## Banco de dados
 
 O schema completo está em `database/schema.sql`. Requer PostgreSQL

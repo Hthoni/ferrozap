@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.services.geocodificacao import obter_coordenadas_por_cep
 
 router = APIRouter(prefix="/busca", tags=["busca"])
 
@@ -14,8 +15,7 @@ TOLERANCIA_ANOS_FALLBACK = 2
 def buscar(
     modelo_id: int,
     ano: int,
-    lat: float,
-    lon: float,
+    cep: str,
     ordenar_por: str = "compatibilidade",  # ou "distancia"
     db: Session = Depends(get_db),
 ):
@@ -25,9 +25,18 @@ def buscar(
 
     Ver docs/decisoes.md para a lógica completa de matching e fallback.
     """
+    coordenadas = obter_coordenadas_por_cep(cep)
+    if coordenadas is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Não foi possível localizar esse CEP. Confira e tente novamente.",
+        )
+    lat, lon = coordenadas
+
     query = text(
         """
         SELECT
+            v.id AS veiculo_id,
             e.id AS empresa_id,
             e.nome,
             e.telefone,

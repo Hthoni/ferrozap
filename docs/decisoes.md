@@ -135,17 +135,40 @@ solidificação em um documento de especificação formal.
   depende de uma tarefa agendada (cron/worker) que varre conversas
   paradas há mais que o SLA configurado. Não implementado ainda.
 
+## Frontend — implementação
+
+- **Decisão**: React + Vite (sem framework de UI pesado por ora — CSS
+  simples próprio). Mobile-first, mas ainda sem configuração de PWA.
+- Telas implementadas: busca passo-a-passo (fabricante → modelo →
+  submodelo condicional → ano → CEP), resultados com toggle de
+  ordenação e início de conversa, login/cadastro de cliente final,
+  login/cadastro de empresa, minhas conversas, thread de mensagens
+  (componente compartilhado entre cliente e empresa), estoque da
+  empresa, conversas recebidas da empresa, painel de admin (aprovação
+  de empresas pendentes com preenchimento de coordenadas)
+- Sessão de cliente e de empresa guardadas separadamente no
+  `localStorage` (`AuthContext`) — permite, tecnicamente, estar logado
+  como cliente e como empresa ao mesmo tempo em abas diferentes
+- **Geocodificação de CEP implementada de forma simplificada**: ViaCEP
+  resolve CEP → UF, depois UF → coordenada aproximada da capital (tabela
+  fixa no backend, `services/geocodificacao.py`). Não é o centróide de
+  município nem endereço exato — é uma simplificação deliberada para o
+  MVP, suficiente para diferenciar "13 km" de "120 km" como combinado,
+  mas listada como pendência para refinar com base municipal do IBGE.
+- Painel de admin **sem autenticação** — mesmo aviso já registrado
+  para os endpoints de backend correspondentes.
+
 ## Pendências em aberto
 
+- Geocodificação de CEP por centróide de município (IBGE), hoje
+  aproximada por capital do estado
+- Autenticação de admin (bloqueia tanto `/admin/empresas` no backend
+  quanto a tela `/admin` no frontend)
 - Tarefa agendada (cron/worker) para marcar conversas como
   `sem_resposta` após o SLA configurado
-
-- Conceito de usuário admin/autenticação de admin (o router
-  `/admin/empresas` existe mas está desprotegido — só para uso interno
-  em ambiente de desenvolvimento)
-- Escolha final de framework de frontend
 - Modelo de LLM específico a usar em produção (ver comparativo de custo)
 - Definição de thresholds de SLA
 - Decisão de monetização do "genius" (premium do consumidor final?)
 - Estratégia de aquisição inicial (uso das bases de contato dos
   ferro-velhos parceiros, mencionado no início do projeto)
+- Configuração de PWA no frontend
