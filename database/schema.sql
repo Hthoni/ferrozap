@@ -89,7 +89,7 @@ CREATE TABLE categorias_peca (
 CREATE TABLE usuarios_finais (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    telefone VARCHAR(20) NOT NULL,
+    telefone VARCHAR(20) NOT NULL UNIQUE,
     senha_hash VARCHAR(255) NOT NULL,
     criado_em TIMESTAMP DEFAULT now()
 );

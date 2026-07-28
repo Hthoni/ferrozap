@@ -3,7 +3,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Empresa, VeiculoDesmonte, Fabricante, Modelo
+from app.deps import get_empresa_atual
+from app.models import Empresa, VeiculoDesmonte, Modelo
 from app.schemas import EmpresaCreate, EmpresaOut, VeiculoDesmonteCreate, VeiculoDesmonteOut
 from app.security import hash_senha
 from app.services.geracao import resolver_geracao
@@ -13,6 +14,7 @@ router = APIRouter(prefix="/empresas", tags=["cadastro"])
 
 @router.post("/", response_model=EmpresaOut, status_code=201)
 def cadastrar_empresa(dados: EmpresaCreate, db: Session = Depends(get_db)):
+    """Cadastro público — sem autenticação, é aqui que a empresa nasce."""
     empresa = Empresa(
         nome=dados.nome,
         cnpj=dados.cnpj,
@@ -35,31 +37,24 @@ def cadastrar_empresa(dados: EmpresaCreate, db: Session = Depends(get_db)):
     return empresa
 
 
-@router.post(
-    "/{empresa_id}/veiculos",
-    response_model=VeiculoDesmonteOut,
-    status_code=201,
-)
+@router.post("/veiculos", response_model=VeiculoDesmonteOut, status_code=201)
 def cadastrar_veiculo_desmonte(
-    empresa_id: int,
     dados: VeiculoDesmonteCreate,
+    empresa: Empresa = Depends(get_empresa_atual),
     db: Session = Depends(get_db),
 ):
-    empresa = db.query(Empresa).filter(Empresa.id == empresa_id).first()
-    if not empresa:
-        raise HTTPException(status_code=404, detail="Empresa não encontrada.")
-
+    """
+    Protegida: usa a empresa autenticada pelo token, nunca um id vindo
+    da URL — evita que uma empresa cadastre estoque em nome de outra.
+    """
     modelo = db.query(Modelo).filter(Modelo.id == dados.modelo_id).first()
     if not modelo:
         raise HTTPException(status_code=404, detail="Modelo não encontrado.")
 
-    # Resolve a geração automaticamente a partir do ano informado.
-    # Fica None quando o modelo ainda não tem geração mapeada nesse
-    # intervalo — o veículo continua funcional via fallback na busca.
     geracao_id = resolver_geracao(db, dados.modelo_id, dados.ano_fabricacao)
 
     veiculo = VeiculoDesmonte(
-        empresa_id=empresa_id,
+        empresa_id=empresa.id,
         modelo_id=dados.modelo_id,
         submodelo_id=dados.submodelo_id,
         ano_fabricacao=dados.ano_fabricacao,
@@ -71,10 +66,13 @@ def cadastrar_veiculo_desmonte(
     return veiculo
 
 
-@router.get("/{empresa_id}/veiculos", response_model=list[VeiculoDesmonteOut])
-def listar_veiculos_desmonte(empresa_id: int, db: Session = Depends(get_db)):
+@router.get("/veiculos", response_model=list[VeiculoDesmonteOut])
+def listar_meus_veiculos_desmonte(
+    empresa: Empresa = Depends(get_empresa_atual),
+    db: Session = Depends(get_db),
+):
     return (
         db.query(VeiculoDesmonte)
-        .filter(VeiculoDesmonte.empresa_id == empresa_id)
+        .filter(VeiculoDesmonte.empresa_id == empresa.id)
         .all()
     )

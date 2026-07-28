@@ -47,3 +47,34 @@ class VeiculoDesmonteOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class EmpresaLogin(BaseModel):
+    email: EmailStr
+    senha: str
+
+
+class UsuarioFinalCreate(BaseModel):
+    nome: str
+    telefone: str
+    senha: str = Field(min_length=8)
+
+
+class UsuarioFinalOut(BaseModel):
+    id: int
+    nome: str
+    telefone: str
+    criado_em: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class UsuarioFinalLogin(BaseModel):
+    telefone: str
+    senha: str
+
+
+class TokenOut(BaseModel):
+    access_token: str
+    token_type: str = "bearer"

@@ -9,6 +9,6 @@ class UsuarioFinal(Base):
 
     id = Column(Integer, primary_key=True)
     nome = Column(String(100), nullable=False)
-    telefone = Column(String(20), nullable=False)
+    telefone = Column(String(20), nullable=False, unique=True)
     senha_hash = Column(String(255), nullable=False)
     criado_em = Column(DateTime, server_default=func.now())
