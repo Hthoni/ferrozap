@@ -45,15 +45,23 @@ export default function Busca() {
     if (!modeloId) {
       setAnos([]);
       setAno("");
+      setSubmodelos([]);
+      setSubmodeloId("");
+      setTemSubmodelo(false);
       return;
     }
     const modelo = modelos.find((m) => String(m.id) === String(modeloId));
-    setTemSubmodelo(Boolean(modelo?.tem_submodelo_relevante));
     if (modelo?.tem_submodelo_relevante) {
-      api.listarSubmodelos(modeloId).then(setSubmodelos);
+      api.listarSubmodelos(modeloId).then((lista) => {
+        setSubmodelos(lista);
+        // Protege contra modelo marcado como "tem versão" sem
+        // nenhum submodelo cadastrado ainda — evita dropdown vazio.
+        setTemSubmodelo(lista.length > 0);
+      });
     } else {
       setSubmodelos([]);
       setSubmodeloId("");
+      setTemSubmodelo(false);
     }
     api.listarAnos(modeloId).then(setAnos);
   }, [modeloId, modelos]);
@@ -241,6 +249,24 @@ export default function Busca() {
             >
               Voltar para a lista
             </button>
+          </div>
+        )}
+        {modeloId && (
+          <div className="field" style={{ marginBottom: 16 }}>
+            <label>Modelo</label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span className="fz-codigo">
+                {modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo}
+              </span>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ width: "auto", fontSize: 12 }}
+                onClick={() => { setModeloId(""); setTextoModelo(""); }}
+              >
+                Trocar
+              </button>
+            </div>
           </div>
         )}
 

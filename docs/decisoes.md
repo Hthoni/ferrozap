@@ -306,6 +306,17 @@ solidificação em um documento de especificação formal.
   variantes brutas na FIPE (heurística de "provavelmente tem versão
   relevante") — não popula a tabela `submodelos` ainda, fica como
   próximo passo natural depois que os modelos estiverem importados
+- **Importação executada com sucesso via Google Colab** (não Cloud
+  Shell — o dono do projeto não usa terminal, nem o baseado em
+  navegador do GCP): 1.157 modelos extraídos da API real, catálogo
+  final em 1.194 modelos (185 da curadoria manual anterior + ~1.009
+  novos únicos; o resto eram nomes que já coincidiam e foram ignorados
+  pelo `ON CONFLICT DO NOTHING`)
+- Fica registrado como caminho replicável para o futuro: sempre que
+  quiser reimportar (ex: depois de melhorar a heurística de extração,
+  ou quando a FIPE atualizar o catálogo), o mesmo processo funciona —
+  colar `importar_modelos_fipe.py` num notebook novo do Colab, rodar,
+  baixar o `.sql` gerado, colar no Supabase
 
 ## Pendências em aberto
 

@@ -97,17 +97,20 @@ def normalizar_marca(nome_fipe):
     return nome_fipe.title() if nome_fipe.isupper() else nome_fipe
 
 
-def extrair_modelo(nome_completo):
+def extrair_modelo_e_submodelo(nome_completo):
     limpo = nome_completo.replace("(novo)", "").strip()
     tokens = limpo.split()
     if not tokens:
-        return nome_completo.strip()
+        return nome_completo.strip(), ""
     primeiro_dois = " ".join(tokens[:2]).lower()
     if primeiro_dois in COMPOSTOS:
         modelo = " ".join(tokens[:2])
+        resto = tokens[2:]
     else:
         modelo = tokens[0]
-    return modelo.strip(" /-").title()
+        resto = tokens[1:]
+    submodelo = " ".join(resto).strip(" /-")[:50]
+    return modelo.strip(" /-").title(), submodelo
 
 
 def escapar_sql(texto):
@@ -119,6 +122,7 @@ def main():
     print("-- Fonte: API pública Parallelum/FIPE (fipe.parallelum.com.br)")
     print("-- Extração: nome do modelo = primeira palavra (ou nameplate")
     print("-- composto conhecido) do nome completo retornado pela FIPE.")
+    print("-- Submodelo = o restante do nome, até 20 variantes por modelo.")
     print()
 
     marcas = buscar_json(f"{BASE_URL}/brands")
@@ -126,8 +130,9 @@ def main():
         print("-- ERRO: não foi possível buscar a lista de marcas. Abortando.")
         return
 
-    print("INSERT INTO modelos (fabricante_id, nome, tem_submodelo_relevante) VALUES")
-    linhas = []
+    linhas_modelo = []
+    # (nome_marca_normalizado, nome_modelo) -> set de submodelos
+    submodelos_por_modelo = collections.defaultdict(set)
 
     for marca in marcas:
         nome_normalizado = normalizar_marca(marca["name"])
@@ -141,21 +146,47 @@ def main():
 
         contagem = collections.Counter()
         for item in modelos_raw:
-            nome_modelo = extrair_modelo(item["name"])
-            if nome_modelo:
-                contagem[nome_modelo] += 1
+            nome_modelo, submodelo = extrair_modelo_e_submodelo(item["name"])
+            if not nome_modelo:
+                continue
+            contagem[nome_modelo] += 1
+            if submodelo and len(submodelos_por_modelo[(nome_normalizado, nome_modelo)]) < 20:
+                submodelos_por_modelo[(nome_normalizado, nome_modelo)].add(submodelo)
 
         for nome_modelo, qtd_variantes in contagem.items():
-            tem_sub = "true" if qtd_variantes >= 3 else "false"
-            linhas.append(
+            tem_sub = "true" if len(submodelos_por_modelo[(nome_normalizado, nome_modelo)]) >= 2 else "false"
+            linhas_modelo.append(
                 f"  ((SELECT id FROM fabricantes WHERE nome = '{escapar_sql(nome_normalizado)}'), "
                 f"'{escapar_sql(nome_modelo)}', {tem_sub})"
             )
 
-    print(",\n".join(linhas))
+    print("INSERT INTO modelos (fabricante_id, nome, tem_submodelo_relevante) VALUES")
+    print(",\n".join(linhas_modelo))
     print("ON CONFLICT (fabricante_id, nome) DO NOTHING;")
     print()
-    print(f"-- Total de modelos extraídos: {len(linhas)}", flush=True)
+    print(f"-- Total de modelos extraídos: {len(linhas_modelo)}", flush=True)
+
+    print()
+    print("-- ============================================================")
+    print("-- Submodelos (só para modelos com 2+ variantes distintas)")
+    print("-- ============================================================")
+    linhas_submodelo = []
+    for (nome_marca, nome_modelo), submodelos in submodelos_por_modelo.items():
+        if len(submodelos) < 2:
+            continue
+        for sub in submodelos:
+            linhas_submodelo.append(
+                "  ((SELECT m.id FROM modelos m JOIN fabricantes f ON f.id = m.fabricante_id "
+                f"WHERE f.nome = '{escapar_sql(nome_marca)}' AND m.nome = '{escapar_sql(nome_modelo)}'), "
+                f"'{escapar_sql(sub)}')"
+            )
+
+    if linhas_submodelo:
+        print("INSERT INTO submodelos (modelo_id, nome) VALUES")
+        print(",\n".join(linhas_submodelo))
+        print("ON CONFLICT (modelo_id, nome) DO NOTHING;")
+    print()
+    print(f"-- Total de submodelos extraídos: {len(linhas_submodelo)}", flush=True)
 
 
 if __name__ == "__main__":
