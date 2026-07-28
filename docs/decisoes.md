@@ -317,6 +317,11 @@ solidificação em um documento de especificação formal.
   ou quando a FIPE atualizar o catálogo), o mesmo processo funciona —
   colar `importar_modelos_fipe.py` num notebook novo do Colab, rodar,
   baixar o `.sql` gerado, colar no Supabase
+- **Submodelos importados também** (segunda rodada do script,
+  estendido para gerar esse bloco): 5.157 submodelos reais em 444
+  modelos com variante suficiente para valer a pena mostrar — dropdown
+  de "versão" no formulário de busca agora funciona com dado de
+  verdade, não fica mais vazio pros modelos mais comuns
 
 ## Pendências em aberto
 
