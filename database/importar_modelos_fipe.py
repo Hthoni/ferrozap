@@ -117,12 +117,38 @@ def escapar_sql(texto):
     return texto.replace("'", "''")
 
 
+def extrair_ano(nome_ano_fipe):
+    """FIPE retorna ano como '2020-3' (ano-combustível) ou '32000-1'
+    (código especial pra 'zero km'/sem ano definido). Extrai só o
+    ano numérico razoável, descarta os códigos especiais."""
+    try:
+        ano = int(nome_ano_fipe.split("-")[0])
+        if 1950 <= ano <= 2027:
+            return ano
+    except (ValueError, IndexError):
+        pass
+    return None
+
+
+def buscar_anos_do_modelo(brand_code, model_code):
+    dados = buscar_json(f"{BASE_URL}/brands/{brand_code}/models/{model_code}/years")
+    if not dados:
+        return None
+    anos = [extrair_ano(item["name"]) for item in dados]
+    anos = [a for a in anos if a is not None]
+    if not anos:
+        return None
+    return min(anos), max(anos)
+
+
 def main():
     print("-- Gerado automaticamente por importar_modelos_fipe.py")
     print("-- Fonte: API pública Parallelum/FIPE (fipe.parallelum.com.br)")
     print("-- Extração: nome do modelo = primeira palavra (ou nameplate")
     print("-- composto conhecido) do nome completo retornado pela FIPE.")
     print("-- Submodelo = o restante do nome, até 20 variantes por modelo.")
+    print("-- Geração = intervalo real de anos (endpoint /years da FIPE),")
+    print("-- buscado 1x por modelo usando o primeiro código encontrado.")
     print()
 
     marcas = buscar_json(f"{BASE_URL}/brands")
@@ -131,15 +157,16 @@ def main():
         return
 
     linhas_modelo = []
-    # (nome_marca_normalizado, nome_modelo) -> set de submodelos
     submodelos_por_modelo = collections.defaultdict(set)
+    # (nome_marca, nome_modelo) -> primeiro codigo bruto da FIPE visto
+    codigo_representante = {}
 
     for marca in marcas:
         nome_normalizado = normalizar_marca(marca["name"])
         print(f"-- Buscando modelos de: {marca['name']} -> {nome_normalizado}", flush=True)
 
         modelos_raw = buscar_json(f"{BASE_URL}/brands/{marca['code']}/models")
-        time.sleep(0.3)  # gentileza com a API gratuita
+        time.sleep(0.3)
 
         if not modelos_raw:
             continue
@@ -149,12 +176,16 @@ def main():
             nome_modelo, submodelo = extrair_modelo_e_submodelo(item["name"])
             if not nome_modelo:
                 continue
+            chave = (nome_normalizado, nome_modelo)
             contagem[nome_modelo] += 1
-            if submodelo and len(submodelos_por_modelo[(nome_normalizado, nome_modelo)]) < 20:
-                submodelos_por_modelo[(nome_normalizado, nome_modelo)].add(submodelo)
+            if chave not in codigo_representante:
+                codigo_representante[chave] = (marca["code"], item["code"])
+            if submodelo and len(submodelos_por_modelo[chave]) < 20:
+                submodelos_por_modelo[chave].add(submodelo)
 
         for nome_modelo, qtd_variantes in contagem.items():
-            tem_sub = "true" if len(submodelos_por_modelo[(nome_normalizado, nome_modelo)]) >= 2 else "false"
+            chave = (nome_normalizado, nome_modelo)
+            tem_sub = "true" if len(submodelos_por_modelo[chave]) >= 2 else "false"
             linhas_modelo.append(
                 f"  ((SELECT id FROM fabricantes WHERE nome = '{escapar_sql(nome_normalizado)}'), "
                 f"'{escapar_sql(nome_modelo)}', {tem_sub})"
@@ -180,13 +211,43 @@ def main():
                 f"WHERE f.nome = '{escapar_sql(nome_marca)}' AND m.nome = '{escapar_sql(nome_modelo)}'), "
                 f"'{escapar_sql(sub)}')"
             )
-
     if linhas_submodelo:
         print("INSERT INTO submodelos (modelo_id, nome) VALUES")
         print(",\n".join(linhas_submodelo))
         print("ON CONFLICT (modelo_id, nome) DO NOTHING;")
     print()
     print(f"-- Total de submodelos extraídos: {len(linhas_submodelo)}", flush=True)
+
+    print()
+    print("-- ============================================================")
+    print("-- Gerações (intervalo real de anos por modelo, via /years)")
+    print("-- Atenção: isso faz ~1 chamada extra por modelo. Pode bater no")
+    print("-- limite diário da API gratuita antes de terminar — nesse caso")
+    print("-- os avisos de falha abaixo são esperados, o resto do arquivo")
+    print("-- continua válido normalmente.")
+    print("-- ============================================================")
+    linhas_geracao = []
+    total_chaves = len(codigo_representante)
+    for i, ((nome_marca, nome_modelo), (brand_code, model_code)) in enumerate(codigo_representante.items(), 1):
+        if i % 50 == 0:
+            print(f"-- ... anos: {i}/{total_chaves} modelos processados", flush=True)
+        intervalo = buscar_anos_do_modelo(brand_code, model_code)
+        time.sleep(0.3)
+        if not intervalo:
+            continue
+        ano_inicio, ano_fim = intervalo
+        linhas_geracao.append(
+            "  ((SELECT m.id FROM modelos m JOIN fabricantes f ON f.id = m.fabricante_id "
+            f"WHERE f.nome = '{escapar_sql(nome_marca)}' AND m.nome = '{escapar_sql(nome_modelo)}'), "
+            f"'Geração única', {ano_inicio}, {ano_fim})"
+        )
+
+    if linhas_geracao:
+        print("INSERT INTO geracoes (modelo_id, nome, ano_inicio, ano_fim) VALUES")
+        print(",\n".join(linhas_geracao))
+        print("ON CONFLICT (modelo_id, nome) DO NOTHING;")
+    print()
+    print(f"-- Total de gerações extraídas: {len(linhas_geracao)} de {total_chaves} modelos", flush=True)
 
 
 if __name__ == "__main__":

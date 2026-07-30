@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 class EmpresaCreate(BaseModel):
@@ -51,6 +51,11 @@ class VeiculoDesmonteOut(BaseModel):
         from_attributes = True
 
 
+class VeiculoDesmonteComModeloOut(VeiculoDesmonteOut):
+    modelo_nome: str
+    fabricante_nome: str
+
+
 class EmpresaLogin(BaseModel):
     email: EmailStr
     senha: str
@@ -58,13 +63,24 @@ class EmpresaLogin(BaseModel):
 
 class UsuarioFinalCreate(BaseModel):
     nome: str
+    email: EmailStr
     telefone: str
     senha: str = Field(min_length=8)
+    aceite_termos: bool
+    aceite_promocional: bool = False
+
+    @field_validator("aceite_termos")
+    @classmethod
+    def termos_precisam_ser_aceitos(cls, v):
+        if not v:
+            raise ValueError("É necessário aceitar os termos de uso para criar a conta.")
+        return v
 
 
 class UsuarioFinalOut(BaseModel):
     id: int
     nome: str
+    email: EmailStr
     telefone: str
     criado_em: datetime
 

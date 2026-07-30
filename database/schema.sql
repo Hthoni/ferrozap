@@ -93,8 +93,13 @@ CREATE TABLE categorias_peca (
 CREATE TABLE usuarios_finais (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
+    email VARCHAR(120) NOT NULL UNIQUE,
     telefone VARCHAR(20) NOT NULL UNIQUE,
     senha_hash VARCHAR(255) NOT NULL,
+    aceite_termos BOOLEAN NOT NULL DEFAULT FALSE,
+    aceite_promocional BOOLEAN NOT NULL DEFAULT FALSE,
+    aceite_termos_em TIMESTAMP,
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
     criado_em TIMESTAMP DEFAULT now()
 );
 

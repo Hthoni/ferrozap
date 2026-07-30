@@ -52,9 +52,14 @@ export const api = {
   loginEmpresa: (dados) => chamar("/auth/empresas/login", { method: "POST", body: dados }),
 
   // Empresa autenticada
+  minhaEmpresa: (token) => chamar("/empresas/me", { token }),
   cadastrarVeiculo: (dados, token) =>
     chamar("/empresas/veiculos", { method: "POST", body: dados, token }),
   listarMeusVeiculos: (token) => chamar("/empresas/veiculos", { token }),
+  editarVeiculo: (id, dados, token) =>
+    chamar(`/empresas/veiculos/${id}`, { method: "PATCH", body: dados, token }),
+  apagarVeiculo: (id, token) =>
+    chamar(`/empresas/veiculos/${id}`, { method: "DELETE", token }),
 
   // Mensageria
   iniciarConversa: (dados, token) => chamar("/conversas/", { method: "POST", body: dados, token }),
@@ -68,4 +73,10 @@ export const api = {
   listarPendentes: () => chamar("/admin/empresas/pendentes"),
   aprovarEmpresa: (empresaId, dados) =>
     chamar(`/admin/empresas/${empresaId}/verificacao`, { method: "PATCH", body: dados }),
+  listarTodasEmpresas: () => chamar("/admin/empresas"),
+  listarTodosUsuarios: () => chamar("/admin/usuarios"),
+  atualizarAtivoEmpresa: (id, ativo) =>
+    chamar(`/admin/empresas/${id}/ativo`, { method: "PATCH", body: { ativo } }),
+  atualizarAtivoUsuario: (id, ativo) =>
+    chamar(`/admin/usuarios/${id}/ativo`, { method: "PATCH", body: { ativo } }),
 };

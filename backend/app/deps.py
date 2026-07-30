@@ -39,8 +39,8 @@ def get_usuario_atual(
     if payload.get("tipo") != "usuario_final":
         raise HTTPException(status_code=403, detail="Acesso restrito a clientes.")
     usuario = db.query(UsuarioFinal).filter(UsuarioFinal.id == int(payload["sub"])).first()
-    if usuario is None:
-        raise HTTPException(status_code=401, detail="Usuário não encontrado.")
+    if usuario is None or not usuario.ativo:
+        raise HTTPException(status_code=401, detail="Usuário não encontrado ou inativo.")
     return usuario
 
 

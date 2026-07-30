@@ -7,8 +7,11 @@ import Corners from "../components/Corners";
 export default function AuthCliente() {
   const [modo, setModo] = useState("login");
   const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
   const [senha, setSenha] = useState("");
+  const [aceiteTermos, setAceiteTermos] = useState(false);
+  const [aceitePromocional, setAceitePromocional] = useState(false);
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
   const { setCliente } = useAuth();
@@ -17,10 +20,23 @@ export default function AuthCliente() {
   async function enviar(e) {
     e.preventDefault();
     setErro("");
+
+    if (modo === "cadastro" && !aceiteTermos) {
+      setErro("É necessário aceitar os termos de uso para criar a conta.");
+      return;
+    }
+
     setCarregando(true);
     try {
       if (modo === "cadastro") {
-        await api.cadastrarUsuario({ nome, telefone, senha });
+        await api.cadastrarUsuario({
+          nome,
+          email,
+          telefone,
+          senha,
+          aceite_termos: aceiteTermos,
+          aceite_promocional: aceitePromocional,
+        });
       }
       const resultado = await api.loginUsuario({ telefone, senha });
       setCliente({ token: resultado.access_token, nome, telefone });
@@ -58,6 +74,18 @@ export default function AuthCliente() {
             <input className="input" value={nome} onChange={(e) => setNome(e.target.value)} required />
           </div>
         )}
+        {modo === "cadastro" && (
+          <div className="field" style={{ marginBottom: 16 }}>
+            <label>E-mail</label>
+            <input
+              className="input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+        )}
         <div className="field" style={{ marginBottom: 16 }}>
           <label>Telefone (com DDD)</label>
           <input className="input" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
@@ -73,7 +101,32 @@ export default function AuthCliente() {
             required
           />
         </div>
-        {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}
+
+        {modo === "cadastro" && (
+          <>
+            <label style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 12, fontSize: 13 }}>
+              <input
+                type="checkbox"
+                checked={aceiteTermos}
+                onChange={(e) => setAceiteTermos(e.target.checked)}
+                required
+                style={{ marginTop: 2 }}
+              />
+              <span>Aceito os termos de uso e a política de privacidade do Ferrozap.</span>
+            </label>
+            <label style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 16, fontSize: 13 }}>
+              <input
+                type="checkbox"
+                checked={aceitePromocional}
+                onChange={(e) => setAceitePromocional(e.target.checked)}
+                style={{ marginTop: 2 }}
+              />
+              <span>Aceito receber informações promocionais do Ferrozap e seus parceiros.</span>
+            </label>
+          </>
+        )}
+
+        {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
         <button className="btn btn-primary btn-block" type="submit" disabled={carregando}>
           {carregando ? "Aguarde..." : modo === "login" ? "Entrar" : "Criar conta e entrar"}
         </button>

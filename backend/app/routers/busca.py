@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.rate_limit import limiter
 from app.services.geocodificacao import obter_coordenadas_por_cep
 
 router = APIRouter(prefix="/busca", tags=["busca"])
@@ -12,7 +13,9 @@ TOLERANCIA_ANOS_FALLBACK = 2
 
 
 @router.get("/")
+@limiter.limit("20/minute")
 def buscar(
+    request: Request,
     modelo_id: int,
     ano: int,
     cep: str,

@@ -323,6 +323,44 @@ solidificação em um documento de especificação formal.
   de "versão" no formulário de busca agora funciona com dado de
   verdade, não fica mais vazio pros modelos mais comuns
 
+## Sessão de correções — gestão de estoque, contas e segurança básica
+
+- **Nome do modelo no estoque**: a listagem de veículos da empresa
+  agora retorna `modelo_nome`/`fabricante_nome` (join no backend), em
+  vez de só `modelo_id` — o card mostra "Volkswagen Gol · 2019", não
+  "Modelo #155"
+- **Editar/apagar veículo**: `PATCH /empresas/veiculos/{id}` e
+  `DELETE /empresas/veiculos/{id}`, protegidos por dono (empresa só
+  edita/apaga o próprio veículo)
+- **Identificação da empresa na tela de estoque**: novo endpoint
+  `GET /empresas/me`; o nome da empresa aparece no topo da página
+- **E-mail + aceite de termos no cadastro do cliente final**:
+  `usuarios_finais` ganhou `email` (único, obrigatório),
+  `aceite_termos` (obrigatório — bloqueado no schema Pydantic, não só
+  na tela), `aceite_promocional` (opcional), `aceite_termos_em`
+  (timestamp do aceite, para eventual necessidade de auditoria/prova)
+- **Rate limiting básico contra raspagem**: `/busca` limitado a
+  20 requisições/minuto por IP (biblioteca `slowapi`). Testado: 20
+  primeiras passam, a partir da 21ª recebe `429`. **Isto não é
+  proteção contra bot sofisticado** (só limita volume por IP; um
+  scraper distribuído ou com rotação de IP não é barrado) — se a
+  raspagem persistir, o próximo degrau seria CAPTCHA (Google
+  reCAPTCHA/hCaptcha) na busca, que exige registro externo e chave de
+  site, não implementado agora por ser fricção maior para o usuário
+  legítimo
+- **Painel de admin expandido**: além da aba de aprovação pendente,
+  agora tem abas "Empresas" (todas, com toggle ativar/desativar) e
+  "Clientes" (todos, com toggle ativar/desativar) —
+  `GET /admin/empresas`, `GET /admin/usuarios`,
+  `PATCH /admin/{empresas,usuarios}/{id}/ativo`
+- Campo `ativo` adicionado também em `usuarios_finais` (antes só
+  existia em `empresas`) — conta desativada não consegue mais
+  autenticar em nenhum endpoint protegido (testado)
+- `database/migracao_001_email_termos.sql`: script de migração
+  separado do `schema.sql`, porque o banco já estava em produção —
+  registra o padrão para futuras mudanças de schema em produção (não
+  dá mais pra só editar `schema.sql`, precisa de migração incremental)
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje
