@@ -24,6 +24,16 @@ import collections
 
 BASE_URL = "https://fipe.parallelum.com.br/api/v2/cars"
 
+# ============================================================
+# FATIAMENTO DA ETAPA DE ANOS (a mais cara em chamadas de API)
+# Edite esses dois números a cada dia e rode de novo — cobre uma
+# fatia diferente dos ~1.155 modelos por vez, sem repetir o que já
+# foi feito em dias anteriores. Ex: dia 1 = 0/400, dia 2 = 400/800,
+# dia 3 = 800/1200 (o script para sozinho quando passar do total).
+# ============================================================
+LOTE_INICIO = 0
+LOTE_FIM = 400
+
 # Mapa: nome como a FIPE usa -> nome normalizado que já está na tabela
 # fabricantes do Ferrozap (database/seed_fabricantes_modelos.sql).
 # Marcas da FIPE que não aparecem aqui são normalizadas automaticamente
@@ -80,7 +90,7 @@ def buscar_json(url, tentativas=3):
             req = urllib.request.Request(url, headers={"Accept": "application/json"})
             with urllib.request.urlopen(req, timeout=15) as resp:
                 return json.loads(resp.read().decode("utf-8"))
-        except (urllib.error.URLError, urllib.error.HTTPError) as e:
+        except Exception as e:
             if tentativa == tentativas - 1:
                 print(f"-- AVISO: falha ao buscar {url}: {e}", flush=True)
                 return None
@@ -221,16 +231,15 @@ def main():
     print()
     print("-- ============================================================")
     print("-- Gerações (intervalo real de anos por modelo, via /years)")
-    print("-- Atenção: isso faz ~1 chamada extra por modelo. Pode bater no")
-    print("-- limite diário da API gratuita antes de terminar — nesse caso")
-    print("-- os avisos de falha abaixo são esperados, o resto do arquivo")
-    print("-- continua válido normalmente.")
+    print(f"-- Fatia deste lote: modelos {LOTE_INICIO} a {LOTE_FIM} de {len(codigo_representante)}")
+    print("-- Rode de novo em outro dia com LOTE_INICIO/LOTE_FIM diferentes")
+    print("-- para cobrir o restante, sem repetir o que já foi feito.")
     print("-- ============================================================")
     linhas_geracao = []
-    total_chaves = len(codigo_representante)
-    for i, ((nome_marca, nome_modelo), (brand_code, model_code)) in enumerate(codigo_representante.items(), 1):
+    itens_da_fatia = list(codigo_representante.items())[LOTE_INICIO:LOTE_FIM]
+    for i, ((nome_marca, nome_modelo), (brand_code, model_code)) in enumerate(itens_da_fatia, 1):
         if i % 50 == 0:
-            print(f"-- ... anos: {i}/{total_chaves} modelos processados", flush=True)
+            print(f"-- ... anos: {i}/{len(itens_da_fatia)} modelos processados (nesta fatia)", flush=True)
         intervalo = buscar_anos_do_modelo(brand_code, model_code)
         time.sleep(0.3)
         if not intervalo:
@@ -247,8 +256,10 @@ def main():
         print(",\n".join(linhas_geracao))
         print("ON CONFLICT (modelo_id, nome) DO NOTHING;")
     print()
-    print(f"-- Total de gerações extraídas: {len(linhas_geracao)} de {total_chaves} modelos", flush=True)
+    print(f"-- Total de gerações extraídas nesta fatia: {len(linhas_geracao)} de {len(itens_da_fatia)} tentados", flush=True)
+    print(f"-- Proximo lote sugerido: LOTE_INICIO = {LOTE_FIM}, LOTE_FIM = {LOTE_FIM + (LOTE_FIM - LOTE_INICIO)}", flush=True)
 
-
-if __name__ == "__main__":
-    main()
+# Sem "if __name__ == '__main__'" de propósito — este arquivo é
+# carregado no Colab via exec() e chamado manualmente numa célula
+# separada (dá tempo de ajustar LOTE_INICIO/LOTE_FIM antes de rodar).
+# Para rodar por linha de comando local, chame main() explicitamente.
