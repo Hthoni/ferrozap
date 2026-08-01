@@ -98,4 +98,5 @@ def listar_submodelos(modelo_id: int, db: Session = Depends(get_db)):
 
 @router.get("/modelos/{modelo_id}/anos")
 def listar_anos(modelo_id: int, db: Session = Depends(get_db)):
-    return anos_disponiveis(db, modelo_id)
+    anos, tem_geracao_real = anos_disponiveis(db, modelo_id)
+    return {"anos": anos, "tem_geracao_real": tem_geracao_real}

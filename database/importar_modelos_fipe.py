@@ -259,7 +259,6 @@ def main():
     print(f"-- Total de gerações extraídas nesta fatia: {len(linhas_geracao)} de {len(itens_da_fatia)} tentados", flush=True)
     print(f"-- Proximo lote sugerido: LOTE_INICIO = {LOTE_FIM}, LOTE_FIM = {LOTE_FIM + (LOTE_FIM - LOTE_INICIO)}", flush=True)
 
-# Sem "if __name__ == '__main__'" de propósito — este arquivo é
-# carregado no Colab via exec() e chamado manualmente numa célula
-# separada (dá tempo de ajustar LOTE_INICIO/LOTE_FIM antes de rodar).
-# Para rodar por linha de comando local, chame main() explicitamente.
+
+if __name__ == "__main__":
+    main()

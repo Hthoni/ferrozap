@@ -20,6 +20,7 @@ export default function Busca() {
   const [submodeloId, setSubmodeloId] = useState("");
   const [temSubmodelo, setTemSubmodelo] = useState(false);
   const [anos, setAnos] = useState([]);
+  const [temGeracaoReal, setTemGeracaoReal] = useState(true);
   const [ano, setAno] = useState("");
   const [cep, setCep] = useState("");
   const [erro, setErro] = useState("");
@@ -44,6 +45,7 @@ export default function Busca() {
   useEffect(() => {
     if (!modeloId) {
       setAnos([]);
+      setTemGeracaoReal(true);
       setAno("");
       setSubmodelos([]);
       setSubmodeloId("");
@@ -63,7 +65,10 @@ export default function Busca() {
       setSubmodeloId("");
       setTemSubmodelo(false);
     }
-    api.listarAnos(modeloId).then(setAnos);
+    api.listarAnos(modeloId).then((resultado) => {
+      setAnos(resultado.anos);
+      setTemGeracaoReal(resultado.tem_geracao_real);
+    });
   }, [modeloId, modelos]);
 
   async function confirmarFabricanteLivre() {
@@ -284,18 +289,30 @@ export default function Busca() {
 
         <div className="field" style={{ marginBottom: 16 }}>
           <label>Ano de fabricação</label>
-          <select
-            className="input"
-            value={ano}
-            onChange={(e) => setAno(e.target.value)}
-            disabled={!modeloId}
-            required
-          >
-            <option value="">{modeloId ? "Selecione" : "Escolha o modelo primeiro"}</option>
-            {anos.map((a) => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
+          {temGeracaoReal ? (
+            <select
+              className="input"
+              value={ano}
+              onChange={(e) => setAno(e.target.value)}
+              disabled={!modeloId}
+              required
+            >
+              <option value="">{modeloId ? "Selecione" : "Escolha o modelo primeiro"}</option>
+              {anos.map((a) => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              className="input"
+              type="number"
+              placeholder={modeloId ? "Digite o ano" : "Escolha o modelo primeiro"}
+              value={ano}
+              onChange={(e) => setAno(e.target.value)}
+              disabled={!modeloId}
+              required
+            />
+          )}
         </div>
 
         <div className="field" style={{ marginBottom: 16 }}>

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, DateTime
 from sqlalchemy.sql import func
 
 from app.database import Base
@@ -36,4 +36,5 @@ class Mensagem(Base):
     conversa_id = Column(Integer, ForeignKey("conversas.id"), nullable=False)
     remetente_tipo = Column(String(10), nullable=False)  # cliente | empresa
     texto = Column(Text, nullable=False)
+    lida = Column(Boolean, nullable=False, default=False)
     criado_em = Column(DateTime, server_default=func.now())

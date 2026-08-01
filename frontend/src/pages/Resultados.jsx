@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { BadgeCheck, MapPin } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
@@ -88,7 +88,12 @@ export default function Resultados() {
       {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
       {sucesso && <p className="card"><span className="card-body">{sucesso}</span></p>}
       {!carregando && !erro && resultados.length === 0 && (
-        <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
+        <>
+          <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
+          <Link className="btn btn-primary" to="/buscar" style={{ display: "inline-block", width: "auto", marginTop: 12 }}>
+            Nova busca
+          </Link>
+        </>
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 }}>

@@ -136,6 +136,7 @@ CREATE TABLE mensagens (
     conversa_id INT NOT NULL REFERENCES conversas(id),
     remetente_tipo VARCHAR(10) NOT NULL, -- cliente | empresa
     texto TEXT NOT NULL,
+    lida BOOLEAN NOT NULL DEFAULT FALSE,
     criado_em TIMESTAMP DEFAULT now()
 );
 CREATE INDEX idx_mensagens_conversa ON mensagens (conversa_id);

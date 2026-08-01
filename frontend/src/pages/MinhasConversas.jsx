@@ -32,7 +32,7 @@ export default function MinhasConversas() {
       {conversas.map((c) => (
         <Link key={c.id} to={`/conversas/${c.id}`} style={{ textDecoration: "none", color: "inherit" }}>
           <div className="card" style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-            <span className="fz-codigo">Conversa #{c.id}</span>
+            <span className="fz-codigo">{c.fabricante_nome} {c.modelo_nome} · {c.ano_fabricacao}</span>
             <span className={`fz-status fz-status--${c.status}`}>{ROTULO_STATUS[c.status]}</span>
           </div>
         </Link>

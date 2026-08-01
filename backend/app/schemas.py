@@ -112,6 +112,7 @@ class MensagemOut(BaseModel):
     conversa_id: int
     remetente_tipo: str
     texto: str
+    lida: bool
     criado_em: datetime
 
     class Config:
@@ -130,6 +131,12 @@ class ConversaOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ConversaComVeiculoOut(ConversaOut):
+    fabricante_nome: str
+    modelo_nome: str
+    ano_fabricacao: int
 
 
 class MensagemCreate(BaseModel):

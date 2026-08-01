@@ -1,9 +1,52 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "./Corners";
 
+function Selo({ quantidade }) {
+  if (!quantidade) return null;
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minWidth: 16,
+        height: 16,
+        padding: "0 4px",
+        marginLeft: 4,
+        borderRadius: 8,
+        background: "var(--fz-vendido)",
+        color: "#fff",
+        fontSize: 10,
+        fontWeight: 600,
+        verticalAlign: "middle",
+      }}
+    >
+      {quantidade > 9 ? "9+" : quantidade}
+    </span>
+  );
+}
+
 export default function NavBar() {
   const { cliente, empresa, setCliente, setEmpresa } = useAuth();
+  const [naoLidas, setNaoLidas] = useState(0);
+
+  const token = cliente?.token || empresa?.token;
+
+  useEffect(() => {
+    if (!token) {
+      setNaoLidas(0);
+      return;
+    }
+    function atualizar() {
+      api.contarNaoLidas(token).then((r) => setNaoLidas(r.nao_lidas)).catch(() => {});
+    }
+    atualizar();
+    const intervalo = setInterval(atualizar, 30000); // atualiza a cada 30s
+    return () => clearInterval(intervalo);
+  }, [token]);
 
   return (
     <header className="nav">
@@ -27,7 +70,9 @@ export default function NavBar() {
 
       {cliente && (
         <>
-          <Link className="btn btn-ghost" to="/conversas">Minhas conversas</Link>
+          <Link className="btn btn-ghost" to="/conversas">
+            Minhas mensagens<Selo quantidade={naoLidas} />
+          </Link>
           <button className="btn btn-secondary" onClick={() => setCliente(null)}>Sair</button>
         </>
       )}
@@ -35,7 +80,9 @@ export default function NavBar() {
       {empresa && (
         <>
           <Link className="btn btn-ghost" to="/estoque">Estoque</Link>
-          <Link className="btn btn-ghost" to="/conversas-recebidas">Conversas</Link>
+          <Link className="btn btn-ghost" to="/conversas-recebidas">
+            Mensagens<Selo quantidade={naoLidas} />
+          </Link>
           <button className="btn btn-secondary" onClick={() => setEmpresa(null)}>Sair</button>
         </>
       )}

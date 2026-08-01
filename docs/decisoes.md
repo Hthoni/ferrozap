@@ -361,6 +361,52 @@ solidificação em um documento de especificação formal.
   registra o padrão para futuras mudanças de schema em produção (não
   dá mais pra só editar `schema.sql`, precisa de migração incremental)
 
+## Mensageria — melhorias de contexto e notificação
+
+- **Selo de mensagem não lida na barra de navegação**: `mensagens`
+  ganhou campo `lida` (boolean). Abrir uma conversa
+  (`GET /conversas/{id}/mensagens`) marca automaticamente como lida
+  tudo que veio do outro lado — sem precisar de ação explícita do
+  usuário. Novo endpoint `GET /conversas/contagem-nao-lidas` alimenta
+  o selo vermelho no menu, que atualiza a cada 30s
+- **Dados do veículo nas listagens e na conversa**: `/conversas/minhas`,
+  `/conversas/recebidas` e a criação de conversa agora retornam
+  `fabricante_nome`, `modelo_nome`, `ano_fabricacao` (join com
+  veiculo_desmonte → modelo → fabricante). As listas mostram
+  "Volkswagen Gol · 2019" em vez de "Conversa #7"; a tela de conversa
+  mostra isso como cabeçalho — o cliente só precisa descrever a peça
+  no texto livre, o veículo já vem identificado estruturalmente, sem
+  precisar repetir isso na mensagem
+- `database/migracao_002_mensagem_lida.sql`: nova migração incremental
+  (segunda desde que o banco foi pra produção — reforça o padrão de
+  não editar mais só o `schema.sql`)
+
+## Verificação de credenciamento (Detran) — esclarecimentos adicionais
+
+- **Confirmado**: a aprovação (`status_verificacao`) é por **empresa**,
+  não por veículo. Uma vez aprovada, todo veículo que a empresa
+  cadastrar aparece na busca automaticamente, sem verificação
+  individual por carro. A responsabilidade de procedência lícita de
+  cada veículo em estoque já é obrigação legal da empresa credenciada
+  perante o Detran do estado dela (declaração de procedência lícita
+  exigida na legislação) — o Ferrozap não reimplementa essa checagem,
+  herda a garantia da credencial aprovada
+- Detran não emite/exporta relatório de estoque para a empresa
+  reutilizar — é o contrário: a empresa é quem deve **submeter** um
+  inventário (em alguns estados, obrigatoriamente em planilha XLS) ao
+  Detran. Não há função de exportação encontrada nos sistemas
+  estaduais pesquisados (RJ, MG, DF) — são ferramentas de compliance
+  de mão única, não pensadas para portabilidade de dado
+- **Ideia registrada, não implementada ainda**: verificador de CNPJ
+  (validação de dígito verificador, sem rede) + consulta de dados
+  reais via API pública gratuita (BrasilAPI, `brasilapi.com.br/api/cnpj/v1/{cnpj}`,
+  sem necessidade de chave, dados da Receita Federal) para
+  auto-preencher nome/endereço no cadastro da empresa. Viabilidade
+  técnica confirmada, mas fica pra agregar com mais demandas
+  correlatas antes de implementar (junto com verificador de
+  credenciamento — esse sim sem solução automática viável, por causa
+  da fragmentação por estado já documentada acima)
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje

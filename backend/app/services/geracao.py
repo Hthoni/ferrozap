@@ -24,23 +24,28 @@ def resolver_geracao(db: Session, modelo_id: int, ano: int) -> int | None:
     return geracao.id if geracao else None
 
 
-def anos_disponiveis(db: Session, modelo_id: int) -> list[int]:
+def anos_disponiveis(db: Session, modelo_id: int) -> tuple[list[int], bool]:
     """
     Anos que devem aparecer no dropdown de ano de fabricação, pro
     modelo dado. Quando existem gerações mapeadas, é a união exata dos
-    intervalos (dropdown "inteligente", como no Webmotors). Quando não
-    existe nenhuma geração ainda (a maioria dos modelos hoje), cai num
-    intervalo amplo — não trava a busca, só ainda não filtra tão bem.
+    intervalos (dropdown "inteligente"). Quando não existe nenhuma
+    geração ainda, cai num intervalo amplo — não trava a busca, só
+    ainda não filtra tão bem.
+
+    Retorna (lista_de_anos, tem_geracao_real) — o segundo valor diz
+    pro chamador se o resultado é confiável (geração real) ou só o
+    fallback genérico, pra decidir entre mostrar dropdown ou texto
+    livre (ex: BYD Dolphin, carro novo, não devia mostrar 1970).
     """
     geracoes = db.query(Geracao).filter(Geracao.modelo_id == modelo_id).all()
     if not geracoes:
         ano_atual = datetime.now().year
-        return list(range(ano_atual, 1969, -1))
+        return list(range(ano_atual, 1969, -1)), False
 
     anos = set()
     for g in geracoes:
         anos.update(range(g.ano_inicio, g.ano_fim + 1))
-    return sorted(anos, reverse=True)
+    return sorted(anos, reverse=True), True
 
 
 def backfill_geracao(db: Session, geracao: Geracao) -> int:

@@ -9,6 +9,7 @@ export default function ConversaDetalhe() {
   const token = cliente?.token || empresa?.token;
   const meuTipo = empresa ? "empresa" : "cliente";
 
+  const [veiculo, setVeiculo] = useState(null);
   const [mensagens, setMensagens] = useState([]);
   const [texto, setTexto] = useState("");
   const [erro, setErro] = useState("");
@@ -19,7 +20,15 @@ export default function ConversaDetalhe() {
   }
 
   useEffect(() => {
-    if (token) carregar();
+    if (!token) return;
+    carregar();
+    // Busca o resumo do veiculo a partir da lista (ja carregada em
+    // Minhas conversas / Conversas recebidas) — evita endpoint novo.
+    const lista = cliente ? api.listarMinhasConversas : api.listarConversasRecebidas;
+    lista(token).then((conversas) => {
+      const atual = conversas.find((c) => String(c.id) === String(id));
+      if (atual) setVeiculo(atual);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, token]);
 
@@ -42,6 +51,11 @@ export default function ConversaDetalhe() {
   return (
     <div className="fz-wrap fz-secao" style={{ maxWidth: 560 }}>
       <p className="fz-rotulo fz-rotulo--aco">Conversa #{id}</p>
+      {veiculo && (
+        <h2 style={{ fontSize: 28, margin: "8px 0 24px" }}>
+          {veiculo.fabricante_nome} {veiculo.modelo_nome} · {veiculo.ano_fabricacao}
+        </h2>
+      )}
       {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12, margin: "24px 0" }}>

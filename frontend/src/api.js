@@ -68,6 +68,7 @@ export const api = {
   listarMensagens: (conversaId, token) => chamar(`/conversas/${conversaId}/mensagens`, { token }),
   enviarMensagem: (conversaId, texto, token) =>
     chamar(`/conversas/${conversaId}/mensagens`, { method: "POST", body: { texto }, token }),
+  contarNaoLidas: (token) => chamar("/conversas/contagem-nao-lidas", { token }),
 
   // Admin
   listarPendentes: () => chamar("/admin/empresas/pendentes"),

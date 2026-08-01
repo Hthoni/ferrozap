@@ -34,11 +34,12 @@ export default function AdminPainel() {
   async function decidir(empresaId, status) {
     setErro(""); setMensagem("");
     const coord = coordenadas[empresaId] || {};
+    const paraNumero = (v) => (v ? Number(String(v).replace(",", ".")) : undefined);
     try {
       await api.aprovarEmpresa(empresaId, {
         status_verificacao: status,
-        latitude: coord.latitude ? Number(coord.latitude) : undefined,
-        longitude: coord.longitude ? Number(coord.longitude) : undefined,
+        latitude: paraNumero(coord.latitude),
+        longitude: paraNumero(coord.longitude),
       });
       setMensagem(`Empresa #${empresaId} atualizada para "${status}".`);
       carregarPendentes();
@@ -108,7 +109,7 @@ export default function AdminPainel() {
                 <label>Latitude</label>
                 <input
                   className="input"
-                  placeholder="-23.55"
+                  placeholder="-23,550"
                   value={coordenadas[e.id]?.latitude || ""}
                   onChange={(ev) => atualizarCoordenada(e.id, "latitude", ev.target.value)}
                 />
@@ -117,7 +118,7 @@ export default function AdminPainel() {
                 <label>Longitude</label>
                 <input
                   className="input"
-                  placeholder="-46.63"
+                  placeholder="-46,633"
                   value={coordenadas[e.id]?.longitude || ""}
                   onChange={(ev) => atualizarCoordenada(e.id, "longitude", ev.target.value)}
                 />
