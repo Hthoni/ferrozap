@@ -100,6 +100,7 @@ CREATE TABLE usuarios_finais (
     aceite_promocional BOOLEAN NOT NULL DEFAULT FALSE,
     aceite_termos_em TIMESTAMP,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    cep VARCHAR(9),
     criado_em TIMESTAMP DEFAULT now()
 );
 

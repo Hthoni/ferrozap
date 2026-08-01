@@ -8,11 +8,31 @@ from app.services.geracao import anos_disponiveis
 
 router = APIRouter(prefix="/catalogo", tags=["catalogo"])
 
+# Ordem de prioridade por volume estimado de mercado no Brasil (julgamento
+# próprio, não é dado oficial de vendas) — as 10 primeiras aparecem no
+# topo do dropdown, nessa ordem; o resto vem em ordem alfabética depois.
+PRIORIDADE_FABRICANTES = {
+    "Volkswagen": 1,
+    "Chevrolet": 2,
+    "Fiat": 3,
+    "Hyundai": 4,
+    "Toyota": 5,
+    "Honda": 6,
+    "Jeep": 7,
+    "Renault": 8,
+    "Nissan": 9,
+    "Ford": 10,
+}
+
 
 @router.get("/fabricantes")
 def listar_fabricantes(db: Session = Depends(get_db)):
-    fabricantes = db.query(Fabricante).order_by(Fabricante.nome).all()
-    return [{"id": f.id, "nome": f.nome} for f in fabricantes]
+    fabricantes = db.query(Fabricante).all()
+    ordenados = sorted(
+        fabricantes,
+        key=lambda f: (PRIORIDADE_FABRICANTES.get(f.nome, 999), f.nome),
+    )
+    return [{"id": f.id, "nome": f.nome} for f in ordenados]
 
 
 class FabricanteCreate(BaseModel):

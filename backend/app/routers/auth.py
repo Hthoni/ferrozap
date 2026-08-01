@@ -1,15 +1,18 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth import criar_token
 from app.database import get_db
+from app.deps import get_usuario_atual
 from app.models import Empresa, UsuarioFinal
 from app.schemas import (
     EmpresaLogin,
     TokenOut,
+    UsuarioFinalCepUpdate,
     UsuarioFinalCreate,
     UsuarioFinalLogin,
     UsuarioFinalOut,
@@ -21,7 +24,11 @@ router = APIRouter(prefix="/auth", tags=["autenticacao"])
 
 @router.post("/empresas/login", response_model=TokenOut)
 def login_empresa(dados: EmpresaLogin, db: Session = Depends(get_db)):
-    empresa = db.query(Empresa).filter(Empresa.email == dados.email).first()
+    empresa = (
+        db.query(Empresa)
+        .filter(func.lower(Empresa.email) == dados.email.strip().lower())
+        .first()
+    )
     if not empresa or not verificar_senha(dados.senha, empresa.senha_hash):
         raise HTTPException(status_code=401, detail="E-mail ou senha inválidos.")
     if not empresa.ativo:
@@ -63,3 +70,20 @@ def login_usuario_final(dados: UsuarioFinalLogin, db: Session = Depends(get_db))
     if not usuario or not verificar_senha(dados.senha, usuario.senha_hash):
         raise HTTPException(status_code=401, detail="Telefone ou senha inválidos.")
     return TokenOut(access_token=criar_token(usuario.id, "usuario_final"))
+
+
+@router.get("/usuarios/me", response_model=UsuarioFinalOut)
+def meu_perfil(usuario: UsuarioFinal = Depends(get_usuario_atual)):
+    return usuario
+
+
+@router.patch("/usuarios/me/cep", response_model=UsuarioFinalOut)
+def atualizar_meu_cep(
+    dados: UsuarioFinalCepUpdate,
+    usuario: UsuarioFinal = Depends(get_usuario_atual),
+    db: Session = Depends(get_db),
+):
+    usuario.cep = dados.cep
+    db.commit()
+    db.refresh(usuario)
+    return usuario

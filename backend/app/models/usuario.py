@@ -16,4 +16,5 @@ class UsuarioFinal(Base):
     aceite_promocional = Column(Boolean, nullable=False, default=False)
     aceite_termos_em = Column(DateTime, nullable=True)
     ativo = Column(Boolean, nullable=False, default=True)
+    cep = Column(String(9), nullable=True)
     criado_em = Column(DateTime, server_default=func.now())

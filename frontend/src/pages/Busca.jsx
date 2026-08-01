@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
 
 export default function Busca() {
@@ -23,10 +24,22 @@ export default function Busca() {
   const [temGeracaoReal, setTemGeracaoReal] = useState(true);
   const [ano, setAno] = useState("");
   const [cep, setCep] = useState("");
+  const [cepSalvo, setCepSalvo] = useState(false);
   const [erro, setErro] = useState("");
   const [resolvendo, setResolvendo] = useState(false);
 
+  const { cliente } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!cliente) return;
+    api.meuPerfil(cliente.token).then((perfil) => {
+      if (perfil.cep) {
+        setCep(perfil.cep);
+        setCepSalvo(true);
+      }
+    }).catch(() => {});
+  }, [cliente]);
 
   useEffect(() => {
     api.listarFabricantes().then(setFabricantes).catch(() => setErro("Não foi possível carregar os fabricantes."));
@@ -116,6 +129,9 @@ export default function Busca() {
     if (!modeloId || !ano || !cep) {
       setErro("Preencha modelo, ano e CEP para buscar.");
       return;
+    }
+    if (cliente) {
+      api.atualizarMeuCep(cep, cliente.token).catch(() => {});
     }
     const params = new URLSearchParams({ modeloId, ano, cep });
     navigate(`/resultados?${params.toString()}`);
@@ -317,7 +333,21 @@ export default function Busca() {
 
         <div className="field" style={{ marginBottom: 16 }}>
           <label>Seu CEP</label>
-          <input className="input" value={cep} onChange={(e) => setCep(e.target.value)} required />
+          {cepSalvo ? (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span className="fz-codigo">{cep}</span>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ width: "auto", fontSize: 12 }}
+                onClick={() => setCepSalvo(false)}
+              >
+                Alterar CEP de entrega
+              </button>
+            </div>
+          ) : (
+            <input className="input" value={cep} onChange={(e) => setCep(e.target.value)} required />
+          )}
         </div>
 
         {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}

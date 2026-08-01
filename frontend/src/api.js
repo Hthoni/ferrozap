@@ -46,6 +46,9 @@ export const api = {
   // Autenticação — cliente final
   cadastrarUsuario: (dados) => chamar("/auth/usuarios", { method: "POST", body: dados }),
   loginUsuario: (dados) => chamar("/auth/usuarios/login", { method: "POST", body: dados }),
+  meuPerfil: (token) => chamar("/auth/usuarios/me", { token }),
+  atualizarMeuCep: (cep, token) =>
+    chamar("/auth/usuarios/me/cep", { method: "PATCH", body: { cep }, token }),
 
   // Autenticação — empresa
   cadastrarEmpresa: (dados) => chamar("/empresas/", { method: "POST", body: dados }),

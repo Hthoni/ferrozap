@@ -82,10 +82,15 @@ class UsuarioFinalOut(BaseModel):
     nome: str
     email: EmailStr
     telefone: str
+    cep: str | None
     criado_em: datetime
 
     class Config:
         from_attributes = True
+
+
+class UsuarioFinalCepUpdate(BaseModel):
+    cep: str
 
 
 class UsuarioFinalLogin(BaseModel):

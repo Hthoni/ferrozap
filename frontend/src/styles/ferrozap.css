@@ -123,9 +123,16 @@
    (aguardando resposta) — reaproveita --fz-aco, não introduz cor nova */
 .fz-status--aguardando::before { background: var(--fz-aco); }
 
+/* --- extensão do produto: legibilidade geral (desktop e mobile) --------- */
+body { font-size: 16px; }
+.card-body { font-size: 14px; }
+.field label { font-size: 13px; }
+.input, select.input, textarea.input { font-size: 16px; } /* 16px evita zoom automático do Safari no iOS ao focar campo */
+button, .btn { font-size: 15px; }
+
 /* --- responsivo --------------------------------------------------------- */
 @media (max-width: 900px) {
-  :root { --fz-gutter: 20px; }
+  :root { --fz-gutter: 24px; }
   .fz-categorias { grid-template-columns: repeat(3, 1fr); }
   .fz-secao { padding: 36px 0; }
 }
