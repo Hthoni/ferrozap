@@ -134,7 +134,11 @@ export default function Busca() {
       api.atualizarMeuCep(cep, cliente.token).catch(() => {});
     }
     const nomeModelo = modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo;
-    const params = new URLSearchParams({ modeloId, ano, cep, fabricanteNome, modeloNome: nomeModelo });
+    const nomeSubmodelo = submodelos.find((s) => String(s.id) === String(submodeloId))?.nome || "";
+    const params = new URLSearchParams({
+      modeloId, ano, cep, fabricanteNome, modeloNome: nomeModelo,
+      submodeloId: submodeloId || "", submodeloNome: nomeSubmodelo,
+    });
     navigate(`/resultados?${params.toString()}`);
   }
 

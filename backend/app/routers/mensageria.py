@@ -11,6 +11,7 @@ from app.models import (
     Mensagem,
     VeiculoDesmonte,
     Modelo,
+    Submodelo,
     Fabricante,
     UsuarioFinal,
 )
@@ -44,14 +45,17 @@ def _query_conversas_com_veiculo(db: Session):
             Fabricante.nome.label("fabricante_nome"),
             Modelo.nome.label("modelo_nome"),
             VeiculoDesmonte.ano_fabricacao,
+            Submodelo.nome.label("submodelo_nome"),
         )
         .join(VeiculoDesmonte, VeiculoDesmonte.id == Conversa.veiculo_desmonte_id)
         .join(Modelo, Modelo.id == VeiculoDesmonte.modelo_id)
         .join(Fabricante, Fabricante.id == Modelo.fabricante_id)
+        .join(Consulta, Consulta.id == Conversa.consulta_id)
+        .outerjoin(Submodelo, Submodelo.id == Consulta.submodelo_id)
     )
 
 
-def _linha_para_saida(conversa, fabricante_nome, modelo_nome, ano_fabricacao):
+def _linha_para_saida(conversa, fabricante_nome, modelo_nome, ano_fabricacao, submodelo_nome=None):
     return {
         "id": conversa.id,
         "consulta_id": conversa.consulta_id,
@@ -64,6 +68,7 @@ def _linha_para_saida(conversa, fabricante_nome, modelo_nome, ano_fabricacao):
         "fabricante_nome": fabricante_nome,
         "modelo_nome": modelo_nome,
         "ano_fabricacao": ano_fabricacao,
+        "submodelo_nome": submodelo_nome,
     }
 
 
@@ -105,7 +110,11 @@ def iniciar_conversa(
 
     modelo = db.query(Modelo).filter(Modelo.id == veiculo.modelo_id).first()
     fabricante = db.query(Fabricante).filter(Fabricante.id == modelo.fabricante_id).first()
-    return _linha_para_saida(conversa, fabricante.nome, modelo.nome, veiculo.ano_fabricacao)
+    submodelo_nome = None
+    if consulta.submodelo_id:
+        submodelo = db.query(Submodelo).filter(Submodelo.id == consulta.submodelo_id).first()
+        submodelo_nome = submodelo.nome if submodelo else None
+    return _linha_para_saida(conversa, fabricante.nome, modelo.nome, veiculo.ano_fabricacao, submodelo_nome)
 
 
 @router.get("/minhas", response_model=list[ConversaComVeiculoOut])
@@ -115,7 +124,6 @@ def listar_minhas_conversas(
 ):
     linhas = (
         _query_conversas_com_veiculo(db)
-        .join(Consulta, Consulta.id == Conversa.consulta_id)
         .filter(Consulta.usuario_final_id == usuario.id)
         .order_by(Conversa.ultima_atividade_em.desc())
         .all()

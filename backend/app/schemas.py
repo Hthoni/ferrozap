@@ -180,6 +180,7 @@ class ConversaComVeiculoOut(ConversaOut):
     fabricante_nome: str
     modelo_nome: str
     ano_fabricacao: int
+    submodelo_nome: str | None = None
 
 
 class MensagemCreate(BaseModel):

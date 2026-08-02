@@ -12,6 +12,8 @@ export default function Resultados() {
   const cep = params.get("cep");
   const fabricanteNome = params.get("fabricanteNome") || "";
   const modeloNome = params.get("modeloNome") || "";
+  const submodeloId = params.get("submodeloId") || null;
+  const submodeloNome = params.get("submodeloNome") || "";
 
   const [resultados, setResultados] = useState([]);
   const [ordenarPor, setOrdenarPor] = useState("compatibilidade");
@@ -48,6 +50,7 @@ export default function Resultados() {
         {
           veiculo_desmonte_id: melhorVeiculo.veiculo_id,
           modelo_id: Number(modeloId),
+          submodelo_id: submodeloId ? Number(submodeloId) : null,
           ano: Number(ano),
           cep,
           texto,
@@ -110,10 +113,10 @@ export default function Resultados() {
             <p className="fz-selo" style={{ margin: 0 }}>
               <BadgeCheck size={15} strokeWidth={1.5} /> Desmontadora verificada
             </p>
-            <span className="tag tag-neutral">
-              <MapPin size={13} strokeWidth={1.5} style={{ marginRight: 4 }} />
+            <p className="fz-selo" style={{ margin: 0 }}>
+              <MapPin size={13} strokeWidth={1.5} />
               {grupo.distancia_km.toFixed(0)} km
-            </span>
+            </p>
 
             <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
               {grupo.veiculos.map((v) => {

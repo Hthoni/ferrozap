@@ -53,7 +53,8 @@ export default function ConversaDetalhe() {
       <p className="fz-rotulo fz-rotulo--aco">Conversa #{id}</p>
       {veiculo && (
         <h2 style={{ fontSize: 28, margin: "8px 0 24px" }}>
-          {veiculo.fabricante_nome} {veiculo.modelo_nome} · {veiculo.ano_fabricacao}
+          {veiculo.fabricante_nome} {veiculo.modelo_nome}
+          {veiculo.submodelo_nome && ` ${veiculo.submodelo_nome}`} · {veiculo.ano_fabricacao}
         </h2>
       )}
       {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
