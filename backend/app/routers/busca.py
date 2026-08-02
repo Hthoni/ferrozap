@@ -23,10 +23,16 @@ def buscar(
     db: Session = Depends(get_db),
 ):
     """
-    Resolve a geração do veículo buscado (se mapeada) e retorna os
-    desmontes compatíveis, com distância linear até o usuário.
-
-    Ver docs/decisoes.md para a lógica completa de matching e fallback.
+    Retorna os desmontes compatíveis, agrupados por empresa — cada
+    empresa aparece uma vez, com a lista de veículos dela que casam
+    com a busca. Nível de confiança por veículo:
+      - compativel_exato: o ano do veículo bate exatamente com o
+        ano buscado (não é só "tem geração mapeada" — esse era o bug
+        que fazia o resultado errado aparecer primeiro)
+      - provavel: ano diferente, mas dentro da geração real mapeada
+        para o modelo, ou dentro da tolerância de fallback (±2 anos)
+        quando não há geração mapeada ainda
+      - baixa_confianca: fora da tolerância e sem geração mapeada
     """
     coordenadas = obter_coordenadas_por_cep(cep)
     if coordenadas is None:
@@ -41,11 +47,12 @@ def buscar(
         SELECT
             v.id AS veiculo_id,
             e.id AS empresa_id,
-            e.nome,
+            e.nome AS empresa_nome,
             e.telefone,
             v.ano_fabricacao,
             CASE
-                WHEN v.geracao_id IS NOT NULL THEN 'compativel_exato'
+                WHEN v.ano_fabricacao = :ano THEN 'compativel_exato'
+                WHEN v.geracao_id IS NOT NULL THEN 'provavel'
                 WHEN v.ano_fabricacao BETWEEN (:ano - :tolerancia)
                     AND (:ano + :tolerancia) THEN 'provavel'
                 ELSE 'baixa_confianca'
@@ -59,19 +66,9 @@ def buscar(
           AND e.latitude IS NOT NULL
           AND e.longitude IS NOT NULL
           AND v.status = 'disponivel'
-        ORDER BY
-            CASE WHEN :ordenar_por = 'distancia' THEN 0 ELSE
-                CASE
-                    WHEN v.geracao_id IS NOT NULL THEN 1
-                    WHEN v.ano_fabricacao BETWEEN (:ano - :tolerancia)
-                        AND (:ano + :tolerancia) THEN 2
-                    ELSE 3
-                END
-            END,
-            distancia_km ASC
         """
     )
-    resultado = db.execute(
+    linhas = db.execute(
         query,
         {
             "modelo_id": modelo_id,
@@ -79,7 +76,51 @@ def buscar(
             "tolerancia": TOLERANCIA_ANOS_FALLBACK,
             "lat": lat,
             "lon": lon,
-            "ordenar_por": ordenar_por,
         },
-    )
-    return [dict(row._mapping) for row in resultado]
+    ).fetchall()
+
+    # Agrupa por empresa em Python — SQL puro pra "lista aninhada por
+    # grupo" fica ilegível; isso aqui é bem mais simples de acompanhar.
+    grupos = {}
+    for linha in linhas:
+        m = linha._mapping
+        empresa_id = m["empresa_id"]
+        if empresa_id not in grupos:
+            grupos[empresa_id] = {
+                "empresa_id": empresa_id,
+                "empresa_nome": m["empresa_nome"],
+                "telefone": m["telefone"],
+                "distancia_km": float(m["distancia_km"]),
+                "tem_match_exato": False,
+                "veiculos": [],
+            }
+        grupo = grupos[empresa_id]
+        if m["nivel_confianca"] == "compativel_exato":
+            grupo["tem_match_exato"] = True
+        grupo["veiculos"].append(
+            {
+                "veiculo_id": m["veiculo_id"],
+                "ano_fabricacao": m["ano_fabricacao"],
+                "nivel_confianca": m["nivel_confianca"],
+            }
+        )
+
+    resultado = list(grupos.values())
+
+    # Ordena os veiculos dentro de cada card: match exato primeiro,
+    # depois por proximidade do ano buscado.
+    ordem_confianca = {"compativel_exato": 0, "provavel": 1, "baixa_confianca": 2}
+    for grupo in resultado:
+        grupo["veiculos"].sort(
+            key=lambda v: (ordem_confianca[v["nivel_confianca"]], abs(v["ano_fabricacao"] - ano))
+        )
+
+    # Ordena os cards (empresas): na aba compatibilidade, quem tem
+    # match exato vem primeiro, desempate por distância; na aba
+    # distância, é só distância, sem considerar match.
+    if ordenar_por == "distancia":
+        resultado.sort(key=lambda g: g["distancia_km"])
+    else:
+        resultado.sort(key=lambda g: (not g["tem_match_exato"], g["distancia_km"]))
+
+    return resultado

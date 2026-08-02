@@ -8,11 +8,13 @@ from app.models import Empresa, VeiculoDesmonte, Modelo, Fabricante
 from app.schemas import (
     EmpresaCreate,
     EmpresaOut,
+    EmpresaUpdate,
+    SenhaUpdate,
     VeiculoDesmonteCreate,
     VeiculoDesmonteOut,
     VeiculoDesmonteComModeloOut,
 )
-from app.security import hash_senha
+from app.security import hash_senha, verificar_senha
 from app.services.geracao import resolver_geracao
 
 router = APIRouter(prefix="/empresas", tags=["cadastro"])
@@ -45,6 +47,50 @@ def cadastrar_empresa(dados: EmpresaCreate, db: Session = Depends(get_db)):
 @router.get("/me", response_model=EmpresaOut)
 def minha_empresa(empresa: Empresa = Depends(get_empresa_atual)):
     return empresa
+
+
+@router.patch("/me", response_model=EmpresaOut)
+def atualizar_minha_empresa(
+    dados: EmpresaUpdate,
+    empresa: Empresa = Depends(get_empresa_atual),
+    db: Session = Depends(get_db),
+):
+    """
+    CNPJ, credenciamento e UF não entram aqui de propósito — são dados
+    ligados à verificação já aprovada; deixar a empresa trocar isso
+    livremente abriria brecha pra trocar de identidade sem passar pela
+    aprovação de novo. Só dados de contato são editáveis.
+    """
+    if dados.nome is not None:
+        empresa.nome = dados.nome
+    if dados.email is not None:
+        empresa.email = dados.email.strip().lower()
+    if dados.telefone is not None:
+        empresa.telefone = dados.telefone
+    if dados.endereco is not None:
+        empresa.endereco = dados.endereco
+    if dados.cep is not None:
+        empresa.cep = dados.cep
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="E-mail já em uso por outra conta.")
+    db.refresh(empresa)
+    return empresa
+
+
+@router.patch("/me/senha")
+def alterar_senha_empresa(
+    dados: SenhaUpdate,
+    empresa: Empresa = Depends(get_empresa_atual),
+    db: Session = Depends(get_db),
+):
+    if not verificar_senha(dados.senha_atual, empresa.senha_hash):
+        raise HTTPException(status_code=401, detail="Senha atual incorreta.")
+    empresa.senha_hash = hash_senha(dados.senha_nova)
+    db.commit()
+    return {"ok": True}
 
 
 @router.post("/veiculos", response_model=VeiculoDesmonteOut, status_code=201)

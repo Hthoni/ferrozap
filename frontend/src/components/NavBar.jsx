@@ -30,7 +30,7 @@ function Selo({ quantidade }) {
 }
 
 export default function NavBar() {
-  const { cliente, empresa, setCliente, setEmpresa } = useAuth();
+  const { cliente, empresa } = useAuth();
   const [naoLidas, setNaoLidas] = useState(0);
 
   const token = cliente?.token || empresa?.token;
@@ -71,9 +71,9 @@ export default function NavBar() {
       {cliente && (
         <>
           <Link className="btn btn-ghost" to="/conversas">
-            Minhas mensagens<Selo quantidade={naoLidas} />
+            Mensagens<Selo quantidade={naoLidas} />
           </Link>
-          <button className="btn btn-secondary" onClick={() => setCliente(null)}>Sair</button>
+          <Link className="btn btn-secondary" to="/minha-conta">Minha conta</Link>
         </>
       )}
 
@@ -83,7 +83,7 @@ export default function NavBar() {
           <Link className="btn btn-ghost" to="/conversas-recebidas">
             Mensagens<Selo quantidade={naoLidas} />
           </Link>
-          <button className="btn btn-secondary" onClick={() => setEmpresa(null)}>Sair</button>
+          <Link className="btn btn-secondary" to="/empresa/minha-conta">Minha conta</Link>
         </>
       )}
     </header>

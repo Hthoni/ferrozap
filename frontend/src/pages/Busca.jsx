@@ -133,7 +133,8 @@ export default function Busca() {
     if (cliente) {
       api.atualizarMeuCep(cep, cliente.token).catch(() => {});
     }
-    const params = new URLSearchParams({ modeloId, ano, cep });
+    const nomeModelo = modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo;
+    const params = new URLSearchParams({ modeloId, ano, cep, fabricanteNome, modeloNome: nomeModelo });
     navigate(`/resultados?${params.toString()}`);
   }
 

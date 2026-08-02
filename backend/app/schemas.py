@@ -80,7 +80,7 @@ class UsuarioFinalCreate(BaseModel):
 class UsuarioFinalOut(BaseModel):
     id: int
     nome: str
-    email: EmailStr
+    email: EmailStr | None
     telefone: str
     cep: str | None
     criado_em: datetime
@@ -91,6 +91,44 @@ class UsuarioFinalOut(BaseModel):
 
 class UsuarioFinalCepUpdate(BaseModel):
     cep: str
+
+    @field_validator("cep")
+    @classmethod
+    def normalizar_cep(cls, v):
+        numeros = "".join(c for c in v if c.isdigit())
+        if len(numeros) != 8:
+            raise ValueError("CEP precisa ter 8 dígitos.")
+        return f"{numeros[:5]}-{numeros[5:]}"
+
+
+class SenhaUpdate(BaseModel):
+    senha_atual: str
+    senha_nova: str = Field(min_length=8)
+
+
+class UsuarioFinalUpdate(BaseModel):
+    nome: str | None = None
+    email: EmailStr | None = None
+    telefone: str | None = None
+    cep: str | None = None
+
+    @field_validator("cep")
+    @classmethod
+    def normalizar_cep(cls, v):
+        if v is None:
+            return v
+        numeros = "".join(c for c in v if c.isdigit())
+        if len(numeros) != 8:
+            raise ValueError("CEP precisa ter 8 dígitos.")
+        return f"{numeros[:5]}-{numeros[5:]}"
+
+
+class EmpresaUpdate(BaseModel):
+    nome: str | None = None
+    email: EmailStr | None = None
+    telefone: str | None = None
+    endereco: str | None = None
+    cep: str | None = None
 
 
 class UsuarioFinalLogin(BaseModel):

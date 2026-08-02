@@ -133,6 +133,7 @@ button, .btn { font-size: 15px; }
 /* --- responsivo --------------------------------------------------------- */
 @media (max-width: 900px) {
   :root { --fz-gutter: 24px; }
+  .fz-wrap { padding-left: 20px !important; padding-right: 20px !important; }
   .fz-categorias { grid-template-columns: repeat(3, 1fr); }
   .fz-secao { padding: 36px 0; }
 }

@@ -10,6 +10,8 @@ export default function Resultados() {
   const modeloId = params.get("modeloId");
   const ano = params.get("ano");
   const cep = params.get("cep");
+  const fabricanteNome = params.get("fabricanteNome") || "";
+  const modeloNome = params.get("modeloNome") || "";
 
   const [resultados, setResultados] = useState([]);
   const [ordenarPor, setOrdenarPor] = useState("compatibilidade");
@@ -41,9 +43,10 @@ export default function Resultados() {
     }
     setEnviando(true);
     try {
+      const melhorVeiculo = cardSelecionado.veiculos[0]; // já vem ordenado, exato primeiro
       await api.iniciarConversa(
         {
-          veiculo_desmonte_id: cardSelecionado.veiculo_id,
+          veiculo_desmonte_id: melhorVeiculo.veiculo_id,
           modelo_id: Number(modeloId),
           ano: Number(ano),
           cep,
@@ -51,7 +54,7 @@ export default function Resultados() {
         },
         cliente.token
       );
-      setSucesso("Mensagem enviada. Acompanhe a resposta em Minhas conversas.");
+      setSucesso("Mensagem enviada. Acompanhe a resposta em Mensagens.");
       setCardSelecionado(null);
       setTexto("");
     } catch (err) {
@@ -96,33 +99,41 @@ export default function Resultados() {
         </>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 24 }}>
-        {resultados.map((r) => {
-          const exato = r.nivel_confianca === "compativel_exato";
-          return (
-            <article className="fz-card-peca blueprint" key={r.veiculo_id}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24 }}>
+        {resultados.map((grupo) => (
+          <article className="fz-card-peca blueprint" key={grupo.empresa_id}>
+            <Corners />
+            <p className="fz-selo"><BadgeCheck size={15} strokeWidth={1.5} /> Desmontadora verificada</p>
+            <h3 className="fz-card-titulo">{grupo.empresa_nome}</h3>
+            <span className="tag tag-neutral" style={{ display: "inline-flex", marginBottom: 12 }}>
+              <MapPin size={13} strokeWidth={1.5} style={{ marginRight: 4 }} />
+              {grupo.distancia_km.toFixed(0)} km
+            </span>
+
+            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 16px" }}>
+              {grupo.veiculos.map((v) => {
+                const exato = v.nivel_confianca === "compativel_exato";
+                return (
+                  <li
+                    key={v.veiculo_id}
+                    style={{
+                      fontSize: 14,
+                      color: exato ? "var(--fz-disponivel)" : "var(--fz-vendido)",
+                      fontWeight: exato ? 600 : 400,
+                    }}
+                  >
+                    — {fabricanteNome} / {modeloNome} / {v.ano_fabricacao}
+                  </li>
+                );
+              })}
+            </ul>
+
+            <button className="btn btn-primary btn-block blueprint" onClick={() => setCardSelecionado(grupo)}>
               <Corners />
-              {exato && (
-                <p className="fz-selo"><BadgeCheck size={15} strokeWidth={1.5} /> Desmontadora verificada</p>
-              )}
-              <h3 className="fz-card-titulo">{r.nome}</h3>
-              <div className="fz-tags">
-                <span className="tag tag-neutral">
-                  <MapPin size={13} strokeWidth={1.5} style={{ marginRight: 4 }} />
-                  {Number(r.distancia_km).toFixed(0)} km
-                </span>
-                <span className={`tag ${exato ? "tag-accent" : "tag-neutral"}`}>
-                  {exato ? "Encontrado" : "Encaixe provável"}
-                </span>
-              </div>
-              <p className="fz-codigo">Veículo ano {r.ano_fabricacao}</p>
-              <button className="btn btn-primary btn-block blueprint" onClick={() => setCardSelecionado(r)}>
-                <Corners />
-                Falar com a desmontadora
-              </button>
-            </article>
-          );
-        })}
+              Falar com a desmontadora
+            </button>
+          </article>
+        ))}
       </div>
 
       {cardSelecionado && (

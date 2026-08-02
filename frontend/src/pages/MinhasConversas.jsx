@@ -26,7 +26,10 @@ export default function MinhasConversas() {
 
   return (
     <div className="fz-wrap fz-secao">
-      <h2 style={{ fontSize: 32, margin: "0 0 24px" }}>Minhas conversas</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ fontSize: 32, margin: 0 }}>Mensagens</h2>
+        <Link className="btn btn-primary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
+      </div>
       {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
       {conversas.length === 0 && <p>Você ainda não iniciou nenhuma conversa.</p>}
       {conversas.map((c) => (

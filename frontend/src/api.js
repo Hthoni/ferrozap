@@ -47,6 +47,8 @@ export const api = {
   cadastrarUsuario: (dados) => chamar("/auth/usuarios", { method: "POST", body: dados }),
   loginUsuario: (dados) => chamar("/auth/usuarios/login", { method: "POST", body: dados }),
   meuPerfil: (token) => chamar("/auth/usuarios/me", { token }),
+  atualizarMeuPerfil: (dados, token) => chamar("/auth/usuarios/me", { method: "PATCH", body: dados, token }),
+  alterarMinhaSenha: (dados, token) => chamar("/auth/usuarios/me/senha", { method: "PATCH", body: dados, token }),
   atualizarMeuCep: (cep, token) =>
     chamar("/auth/usuarios/me/cep", { method: "PATCH", body: { cep }, token }),
 
@@ -56,6 +58,8 @@ export const api = {
 
   // Empresa autenticada
   minhaEmpresa: (token) => chamar("/empresas/me", { token }),
+  atualizarMinhaEmpresa: (dados, token) => chamar("/empresas/me", { method: "PATCH", body: dados, token }),
+  alterarSenhaEmpresa: (dados, token) => chamar("/empresas/me/senha", { method: "PATCH", body: dados, token }),
   cadastrarVeiculo: (dados, token) =>
     chamar("/empresas/veiculos", { method: "POST", body: dados, token }),
   listarMeusVeiculos: (token) => chamar("/empresas/veiculos", { token }),

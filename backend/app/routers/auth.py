@@ -11,11 +11,13 @@ from app.deps import get_usuario_atual
 from app.models import Empresa, UsuarioFinal
 from app.schemas import (
     EmpresaLogin,
+    SenhaUpdate,
     TokenOut,
     UsuarioFinalCepUpdate,
     UsuarioFinalCreate,
     UsuarioFinalLogin,
     UsuarioFinalOut,
+    UsuarioFinalUpdate,
 )
 from app.security import hash_senha, verificar_senha
 
@@ -75,6 +77,42 @@ def login_usuario_final(dados: UsuarioFinalLogin, db: Session = Depends(get_db))
 @router.get("/usuarios/me", response_model=UsuarioFinalOut)
 def meu_perfil(usuario: UsuarioFinal = Depends(get_usuario_atual)):
     return usuario
+
+
+@router.patch("/usuarios/me", response_model=UsuarioFinalOut)
+def atualizar_meu_perfil(
+    dados: UsuarioFinalUpdate,
+    usuario: UsuarioFinal = Depends(get_usuario_atual),
+    db: Session = Depends(get_db),
+):
+    if dados.nome is not None:
+        usuario.nome = dados.nome
+    if dados.email is not None:
+        usuario.email = dados.email.strip().lower()
+    if dados.telefone is not None:
+        usuario.telefone = dados.telefone
+    if dados.cep is not None:
+        usuario.cep = dados.cep
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="E-mail ou telefone já em uso por outra conta.")
+    db.refresh(usuario)
+    return usuario
+
+
+@router.patch("/usuarios/me/senha")
+def alterar_minha_senha(
+    dados: SenhaUpdate,
+    usuario: UsuarioFinal = Depends(get_usuario_atual),
+    db: Session = Depends(get_db),
+):
+    if not verificar_senha(dados.senha_atual, usuario.senha_hash):
+        raise HTTPException(status_code=401, detail="Senha atual incorreta.")
+    usuario.senha_hash = hash_senha(dados.senha_nova)
+    db.commit()
+    return {"ok": True}
 
 
 @router.patch("/usuarios/me/cep", response_model=UsuarioFinalOut)

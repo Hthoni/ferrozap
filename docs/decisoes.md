@@ -407,6 +407,27 @@ solidificação em um documento de especificação formal.
   credenciamento — esse sim sem solução automática viável, por causa
   da fragmentação por estado já documentada acima)
 
+## Bug real: "match exato" media a coisa errada
+
+- **Achado**: `nivel_confianca = 'compativel_exato'` estava baseado em
+  `v.geracao_id IS NOT NULL` — ou seja, "esse veículo tem geração
+  mapeada", não "o ano bate com o que foi buscado". Um Gol 2010 com
+  geração mapeada aparecia como "exato" mesmo buscando por 2011,
+  fazendo o resultado errado vir primeiro na ordenação.
+- **Correção**: `compativel_exato` agora é `v.ano_fabricacao = :ano`
+  (comparação direta), com `geracao_id IS NOT NULL` rebaixado pra
+  critério de `provavel` (junto com o fallback por tolerância).
+  Testado reproduzindo o cenário relatado (Gol 2010/2011/2012,
+  buscando 2011) — 2011 vem primeiro agora, como devia.
+- **Resultados agrupados por empresa**: `/busca` não retorna mais uma
+  linha por veículo — retorna uma entrada por empresa, com a lista de
+  veículos dela dentro (ordenados: exato primeiro, depois por
+  proximidade de ano). Ordenação dos cards por empresa também mudou:
+  aba "Compatibilidade" prioriza quem tem match exato (desempate por
+  distância); aba "Distância" ignora match, ordena só por distância.
+- Botão "Falar com a desmontadora" manda mensagem sobre o **melhor**
+  veículo daquela empresa (o primeiro da lista já ordenada).
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje
