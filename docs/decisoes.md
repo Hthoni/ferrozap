@@ -428,6 +428,57 @@ solidificação em um documento de especificação formal.
 - Botão "Falar com a desmontadora" manda mensagem sobre o **melhor**
   veículo daquela empresa (o primeiro da lista já ordenada).
 
+## Edição administrativa completa (empresas e clientes)
+
+- `PATCH /admin/empresas/{id}` e `PATCH /admin/usuarios/{id}` — além
+  de aprovar/rejeitar e ativar/desativar, admin agora edita qualquer
+  campo (nome, e-mail, telefone, endereço, CEP, e **coordenadas** no
+  caso da empresa) — importante justamente para corrigir latitude/
+  longitude erradas sem precisar desfazer a aprovação
+- Painel de admin: botão "Editar" nas abas Empresas e Clientes abre
+  formulário inline, testado nos dois casos
+
+## Precisão de distância — limitação conhecida, não bug
+
+- Confirmado com usuário um caso real: CEP de São Paulo e coordenada
+  de São Paulo resultando em 77 km de diferença. Isso é esperado dado
+  o fallback atual (CEP → UF → centróide da capital do estado, não do
+  município/endereço real) — se a empresa não estiver exatamente na
+  capital, a distância reflete essa aproximação grosseira. Reforça a
+  prioridade da pendência já registrada: trocar por centróide de
+  município via IBGE.
+
+## Geocodificação — de estado pra município (melhoria real de precisão)
+
+- Confirmado com usuário: as coordenadas da empresa (digitadas
+  manualmente pelo admin) já eram precisas — o problema era só do
+  lado do cliente, que caía sempre no centro da capital do estado,
+  não da cidade real.
+- Trocado por base real do IBGE (`kelvins/municipios-brasileiros`,
+  dado público, 5.571 municípios com coordenada), usando o campo
+  `localidade` que a ViaCEP já devolvia mas não era aproveitado.
+  Fallback pro centro do estado só quando o município não é
+  encontrado na base (deve ser raro agora).
+- `backend/app/services/municipios_data.py` — dicionário gerado
+  automaticamente a partir do CSV, indexado por `UF|nome_normalizado`
+  (sem acento, minúsculo, pra bater com a variação de grafia da
+  ViaCEP)
+- Testado sem depender de rede: São Paulo capital e Santos (mesma UF,
+  cidades diferentes) agora retornam coordenadas distintas — antes
+  caíam exatamente no mesmo ponto
+
+## Mensagem inline no card, não mais solta no fim da página
+
+- "Falar com a desmontadora" agora abre o formulário de mensagem
+  **dentro do próprio card** clicado, mantendo a relação visual com
+  qual empresa está recebendo a mensagem
+- Textarea reduzida pra 2 linhas com rolagem interna (`overflow-y:
+  auto`, `maxHeight: 80px`) — texto mais longo rola dentro da caixa
+  em vez de esticar o card e empurrar o resto da tela
+- Espaçamento vertical reduzido de forma geral (`--fz-secao` de 56px
+  para 40px desktop / 28px mobile; gap interno do card de peça
+  reduzido)
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje

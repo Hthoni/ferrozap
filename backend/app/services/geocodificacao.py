@@ -1,10 +1,13 @@
+import unicodedata
+
 import httpx
 
-# Fallback grosseiro para o MVP: coordenadas aproximadas da capital de
-# cada UF. Suficiente para distinguir "13 km" de "120 km" como
-# combinado, mas não tem precisão de bairro. Trocar pela tabela de
-# centróide por município (IBGE) quando o volume justificar o esforço
-# — ver docs/decisoes.md, "Pendências em aberto".
+from app.services.municipios_data import COORDENADAS_MUNICIPIO
+
+# Fallback de último recurso: coordenadas aproximadas da capital de
+# cada UF, usado só se o município não for encontrado na base do IBGE
+# (nome digitado de forma muito diferente, cidade extinta/renomeada,
+# etc.) — na prática deve ser raro agora que temos os 5.571 municípios.
 CENTROIDE_UF = {
     "AC": (-9.975, -67.824), "AL": (-9.649, -35.708), "AP": (0.034, -51.070),
     "AM": (-3.119, -60.021), "BA": (-12.971, -38.511), "CE": (-3.717, -38.543),
@@ -18,12 +21,17 @@ CENTROIDE_UF = {
 }
 
 
+def _normalizar(nome: str) -> str:
+    sem_acento = unicodedata.normalize("NFKD", nome).encode("ascii", "ignore").decode()
+    return sem_acento.strip().lower()
+
+
 def obter_coordenadas_por_cep(cep: str) -> tuple[float, float] | None:
     """
-    Resolve CEP -> UF via ViaCEP, depois UF -> coordenada aproximada.
-    Retorna None se o CEP for inválido ou o serviço estiver fora do ar
-    — o chamador deve tratar isso com uma mensagem clara, não travar
-    a busca do usuário.
+    Resolve CEP -> cidade/UF via ViaCEP, depois cidade -> coordenada
+    real do município (base do IBGE, ~5.571 municípios). Cai pro
+    centro do estado só se o município não for encontrado — bem mais
+    raro agora do que quando usávamos só a UF.
     """
     cep_limpo = cep.replace("-", "").strip()
     if len(cep_limpo) != 8 or not cep_limpo.isdigit():
@@ -38,4 +46,12 @@ def obter_coordenadas_por_cep(cep: str) -> tuple[float, float] | None:
     if dados.get("erro"):
         return None
 
-    return CENTROIDE_UF.get(dados.get("uf"))
+    uf = dados.get("uf")
+    localidade = dados.get("localidade")
+
+    if uf and localidade:
+        chave = f"{uf}|{_normalizar(localidade)}"
+        if chave in COORDENADAS_MUNICIPIO:
+            return COORDENADAS_MUNICIPIO[chave]
+
+    return CENTROIDE_UF.get(uf)

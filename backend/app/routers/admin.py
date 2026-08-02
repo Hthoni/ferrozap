@@ -1,7 +1,8 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -21,6 +22,23 @@ class VerificacaoUpdate(BaseModel):
 
 class AtivoUpdate(BaseModel):
     ativo: bool
+
+
+class AdminEmpresaUpdate(BaseModel):
+    nome: str | None = None
+    email: EmailStr | None = None
+    telefone: str | None = None
+    endereco: str | None = None
+    cep: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+
+
+class AdminUsuarioUpdate(BaseModel):
+    nome: str | None = None
+    email: EmailStr | None = None
+    telefone: str | None = None
+    cep: str | None = None
 
 
 @router.get("/empresas/pendentes")
@@ -126,6 +144,43 @@ def atualizar_ativo_empresa(empresa_id: int, dados: AtivoUpdate, db: Session = D
     return {"id": empresa.id, "ativo": empresa.ativo}
 
 
+@router.patch("/empresas/{empresa_id}")
+def editar_empresa_admin(empresa_id: int, dados: AdminEmpresaUpdate, db: Session = Depends(get_db)):
+    empresa = db.query(Empresa).filter(Empresa.id == empresa_id).first()
+    if not empresa:
+        raise HTTPException(status_code=404, detail="Empresa não encontrada.")
+    if dados.nome is not None:
+        empresa.nome = dados.nome
+    if dados.email is not None:
+        empresa.email = dados.email.strip().lower()
+    if dados.telefone is not None:
+        empresa.telefone = dados.telefone
+    if dados.endereco is not None:
+        empresa.endereco = dados.endereco
+    if dados.cep is not None:
+        empresa.cep = dados.cep
+    if dados.latitude is not None:
+        empresa.latitude = dados.latitude
+    if dados.longitude is not None:
+        empresa.longitude = dados.longitude
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="E-mail já em uso por outra empresa.")
+    db.refresh(empresa)
+    return {
+        "id": empresa.id,
+        "nome": empresa.nome,
+        "email": empresa.email,
+        "telefone": empresa.telefone,
+        "endereco": empresa.endereco,
+        "cep": empresa.cep,
+        "latitude": empresa.latitude,
+        "longitude": empresa.longitude,
+    }
+
+
 @router.patch("/usuarios/{usuario_id}/ativo")
 def atualizar_ativo_usuario(usuario_id: int, dados: AtivoUpdate, db: Session = Depends(get_db)):
     usuario = db.query(UsuarioFinal).filter(UsuarioFinal.id == usuario_id).first()
@@ -134,3 +189,31 @@ def atualizar_ativo_usuario(usuario_id: int, dados: AtivoUpdate, db: Session = D
     usuario.ativo = dados.ativo
     db.commit()
     return {"id": usuario.id, "ativo": usuario.ativo}
+
+
+@router.patch("/usuarios/{usuario_id}")
+def editar_usuario_admin(usuario_id: int, dados: AdminUsuarioUpdate, db: Session = Depends(get_db)):
+    usuario = db.query(UsuarioFinal).filter(UsuarioFinal.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    if dados.nome is not None:
+        usuario.nome = dados.nome
+    if dados.email is not None:
+        usuario.email = dados.email.strip().lower()
+    if dados.telefone is not None:
+        usuario.telefone = dados.telefone
+    if dados.cep is not None:
+        usuario.cep = dados.cep
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="E-mail ou telefone já em uso por outra conta.")
+    db.refresh(usuario)
+    return {
+        "id": usuario.id,
+        "nome": usuario.nome,
+        "email": usuario.email,
+        "telefone": usuario.telefone,
+        "cep": usuario.cep,
+    }

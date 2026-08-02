@@ -13,16 +13,15 @@ export default function Resultados() {
   const fabricanteNome = params.get("fabricanteNome") || "";
   const modeloNome = params.get("modeloNome") || "";
   const submodeloId = params.get("submodeloId") || null;
-  const submodeloNome = params.get("submodeloNome") || "";
 
   const [resultados, setResultados] = useState([]);
   const [ordenarPor, setOrdenarPor] = useState("compatibilidade");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(true);
-  const [cardSelecionado, setCardSelecionado] = useState(null);
+  const [empresaAbertaId, setEmpresaAbertaId] = useState(null);
   const [texto, setTexto] = useState("");
   const [enviando, setEnviando] = useState(false);
-  const [sucesso, setSucesso] = useState("");
+  const [sucessoId, setSucessoId] = useState(null);
 
   const { cliente } = useAuth();
   const navigate = useNavigate();
@@ -37,15 +36,21 @@ export default function Resultados() {
       .finally(() => setCarregando(false));
   }, [modeloId, ano, cep, ordenarPor]);
 
-  async function enviarMensagem(e) {
-    e.preventDefault();
+  function abrirMensagem(empresaId) {
     if (!cliente) {
       navigate("/entrar");
       return;
     }
+    setEmpresaAbertaId(empresaId === empresaAbertaId ? null : empresaId);
+    setTexto("");
+    setSucessoId(null);
+  }
+
+  async function enviarMensagem(e, grupo) {
+    e.preventDefault();
     setEnviando(true);
     try {
-      const melhorVeiculo = cardSelecionado.veiculos[0]; // já vem ordenado, exato primeiro
+      const melhorVeiculo = grupo.veiculos[0]; // já vem ordenado, exato primeiro
       await api.iniciarConversa(
         {
           veiculo_desmonte_id: melhorVeiculo.veiculo_id,
@@ -57,8 +62,8 @@ export default function Resultados() {
         },
         cliente.token
       );
-      setSucesso("Mensagem enviada. Acompanhe a resposta em Mensagens.");
-      setCardSelecionado(null);
+      setSucessoId(grupo.empresa_id);
+      setEmpresaAbertaId(null);
       setTexto("");
     } catch (err) {
       setErro(err.message);
@@ -69,12 +74,12 @@ export default function Resultados() {
 
   return (
     <div className="fz-wrap fz-secao">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h2 style={{ fontSize: 32, margin: 0 }}>Resultados</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <h2 style={{ fontSize: 28, margin: 0 }}>Resultados</h2>
         <Link className="btn btn-secondary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
       </div>
 
-      <div className="seg" style={{ marginBottom: 24 }}>
+      <div className="seg" style={{ marginBottom: 20 }}>
         <label className="seg-opt">
           <input
             type="radio"
@@ -95,7 +100,6 @@ export default function Resultados() {
 
       {carregando && <p>Buscando...</p>}
       {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
-      {sucesso && <p className="card"><span className="card-body">{sucesso}</span></p>}
       {!carregando && !erro && resultados.length === 0 && (
         <>
           <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
@@ -105,7 +109,7 @@ export default function Resultados() {
         </>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 24 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
         {resultados.map((grupo) => (
           <article className="fz-card-peca blueprint" key={grupo.empresa_id}>
             <Corners />
@@ -136,33 +140,43 @@ export default function Resultados() {
               })}
             </ul>
 
-            <button className="btn btn-primary btn-block blueprint" onClick={() => setCardSelecionado(grupo)}>
-              <Corners />
-              Falar com a desmontadora
-            </button>
+            {sucessoId === grupo.empresa_id ? (
+              <p style={{ fontSize: 13, margin: 0 }}>Mensagem enviada. Acompanhe em Mensagens.</p>
+            ) : empresaAbertaId === grupo.empresa_id ? (
+              <form onSubmit={(e) => enviarMensagem(e, grupo)} style={{ width: "100%" }}>
+                <textarea
+                  className="input"
+                  rows={2}
+                  style={{ resize: "vertical", maxHeight: 80, overflowY: "auto" }}
+                  placeholder="Descreva a peça que precisa"
+                  value={texto}
+                  onChange={(e) => setTexto(e.target.value)}
+                  autoFocus
+                  required
+                />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button className="btn btn-primary" style={{ flex: 1 }} type="submit" disabled={enviando}>
+                    {enviando ? "Enviando..." : "Enviar"}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    style={{ width: "auto" }}
+                    onClick={() => setEmpresaAbertaId(null)}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <button className="btn btn-primary btn-block blueprint" onClick={() => abrirMensagem(grupo.empresa_id)}>
+                <Corners />
+                Falar com a desmontadora
+              </button>
+            )}
           </article>
         ))}
       </div>
-
-      {cardSelecionado && (
-        <div className="blueprint" style={{ padding: 24, marginTop: 24, maxWidth: 480 }}>
-          <Corners />
-          <p className="card-title" style={{ marginBottom: 12 }}>Descreva o que você precisa</p>
-          <form onSubmit={enviarMensagem}>
-            <textarea
-              className="input"
-              rows={4}
-              placeholder="Ex: preciso do para-lama dianteiro direito, na cor original se tiver"
-              value={texto}
-              onChange={(e) => setTexto(e.target.value)}
-              required
-            />
-            <button className="btn btn-primary btn-block" type="submit" disabled={enviando}>
-              {enviando ? "Enviando..." : "Enviar mensagem"}
-            </button>
-          </form>
-        </div>
-      )}
     </div>
   );
 }

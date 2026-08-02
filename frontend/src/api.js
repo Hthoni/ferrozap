@@ -85,6 +85,8 @@ export const api = {
   listarTodosUsuarios: () => chamar("/admin/usuarios"),
   atualizarAtivoEmpresa: (id, ativo) =>
     chamar(`/admin/empresas/${id}/ativo`, { method: "PATCH", body: { ativo } }),
+  editarEmpresaAdmin: (id, dados) => chamar(`/admin/empresas/${id}`, { method: "PATCH", body: dados }),
   atualizarAtivoUsuario: (id, ativo) =>
     chamar(`/admin/usuarios/${id}/ativo`, { method: "PATCH", body: { ativo } }),
+  editarUsuarioAdmin: (id, dados) => chamar(`/admin/usuarios/${id}`, { method: "PATCH", body: dados }),
 };

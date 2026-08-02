@@ -8,6 +8,10 @@ export default function AdminPainel() {
   const [empresas, setEmpresas] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [coordenadas, setCoordenadas] = useState({});
+  const [editandoEmpresaId, setEditandoEmpresaId] = useState(null);
+  const [formEmpresa, setFormEmpresa] = useState({});
+  const [editandoUsuarioId, setEditandoUsuarioId] = useState(null);
+  const [formUsuario, setFormUsuario] = useState({});
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
 
@@ -61,6 +65,61 @@ export default function AdminPainel() {
   async function alternarAtivoUsuario(id, ativo) {
     try {
       await api.atualizarAtivoUsuario(id, !ativo);
+      carregarUsuarios();
+    } catch (err) {
+      setErro(err.message);
+    }
+  }
+
+  function iniciarEdicaoEmpresa(e) {
+    setEditandoEmpresaId(e.id);
+    setFormEmpresa({
+      nome: e.nome || "",
+      email: e.email || "",
+      telefone: e.telefone || "",
+      endereco: e.endereco || "",
+      cep: e.cep || "",
+      latitude: e.latitude ?? "",
+      longitude: e.longitude ?? "",
+    });
+  }
+
+  async function salvarEdicaoEmpresa(id) {
+    setErro(""); setMensagem("");
+    const paraNumero = (v) => (v === "" || v === null || v === undefined ? undefined : Number(String(v).replace(",", ".")));
+    try {
+      await api.editarEmpresaAdmin(id, {
+        nome: formEmpresa.nome,
+        email: formEmpresa.email,
+        telefone: formEmpresa.telefone,
+        endereco: formEmpresa.endereco,
+        cep: formEmpresa.cep,
+        latitude: paraNumero(formEmpresa.latitude),
+        longitude: paraNumero(formEmpresa.longitude),
+      });
+      setMensagem("Empresa atualizada.");
+      setEditandoEmpresaId(null);
+      carregarEmpresas();
+    } catch (err) {
+      setErro(err.message);
+    }
+  }
+
+  function iniciarEdicaoUsuario(u) {
+    setEditandoUsuarioId(u.id);
+    setFormUsuario({
+      nome: u.nome || "",
+      email: u.email || "",
+      telefone: u.telefone || "",
+    });
+  }
+
+  async function salvarEdicaoUsuario(id) {
+    setErro(""); setMensagem("");
+    try {
+      await api.editarUsuarioAdmin(id, formUsuario);
+      setMensagem("Cliente atualizado.");
+      setEditandoUsuarioId(null);
       carregarUsuarios();
     } catch (err) {
       setErro(err.message);
@@ -140,24 +199,66 @@ export default function AdminPainel() {
         <div>
           {empresas.map((e) => (
             <div key={e.id} className="card" style={{ marginBottom: 12 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              {editandoEmpresaId === e.id ? (
                 <div>
-                  <p style={{ fontWeight: 500, margin: 0 }}>{e.nome}</p>
-                  <p className="card-meta">{e.email} · UF {e.uf} · plano {e.plano}</p>
+                  <div className="field" style={{ marginBottom: 10 }}>
+                    <label>Nome</label>
+                    <input className="input" value={formEmpresa.nome} onChange={(ev) => setFormEmpresa({ ...formEmpresa, nome: ev.target.value })} />
+                  </div>
+                  <div className="field" style={{ marginBottom: 10 }}>
+                    <label>E-mail</label>
+                    <input className="input" value={formEmpresa.email} onChange={(ev) => setFormEmpresa({ ...formEmpresa, email: ev.target.value })} />
+                  </div>
+                  <div className="field" style={{ marginBottom: 10 }}>
+                    <label>Telefone</label>
+                    <input className="input" value={formEmpresa.telefone} onChange={(ev) => setFormEmpresa({ ...formEmpresa, telefone: ev.target.value })} />
+                  </div>
+                  <div className="field" style={{ marginBottom: 10 }}>
+                    <label>Endereço</label>
+                    <input className="input" value={formEmpresa.endereco} onChange={(ev) => setFormEmpresa({ ...formEmpresa, endereco: ev.target.value })} />
+                  </div>
+                  <div className="field" style={{ marginBottom: 10 }}>
+                    <label>CEP</label>
+                    <input className="input" value={formEmpresa.cep} onChange={(ev) => setFormEmpresa({ ...formEmpresa, cep: ev.target.value })} />
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <div className="field" style={{ marginBottom: 10, flex: 1 }}>
+                      <label>Latitude</label>
+                      <input className="input" value={formEmpresa.latitude} onChange={(ev) => setFormEmpresa({ ...formEmpresa, latitude: ev.target.value })} />
+                    </div>
+                    <div className="field" style={{ marginBottom: 10, flex: 1 }}>
+                      <label>Longitude</label>
+                      <input className="input" value={formEmpresa.longitude} onChange={(ev) => setFormEmpresa({ ...formEmpresa, longitude: ev.target.value })} />
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => salvarEdicaoEmpresa(e.id)}>Salvar</button>
+                    <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setEditandoEmpresaId(null)}>Cancelar</button>
+                  </div>
                 </div>
-                <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                  <span className={`tag ${e.status_verificacao === "verificado" ? "tag-accent" : "tag-neutral"}`}>
-                    {e.status_verificacao}
-                  </span>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ width: "auto", fontSize: 12, color: e.ativo ? "var(--fz-vendido)" : undefined }}
-                    onClick={() => alternarAtivoEmpresa(e.id, e.ativo)}
-                  >
-                    {e.ativo ? "Desativar" : "Ativar"}
-                  </button>
+              ) : (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p style={{ fontWeight: 500, margin: 0 }}>{e.nome}</p>
+                    <p className="card-meta">{e.email} · UF {e.uf} · plano {e.plano}</p>
+                  </div>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                    <span className={`tag ${e.status_verificacao === "verificado" ? "tag-accent" : "tag-neutral"}`}>
+                      {e.status_verificacao}
+                    </span>
+                    <button className="btn btn-ghost" style={{ width: "auto", fontSize: 12 }} onClick={() => iniciarEdicaoEmpresa(e)}>
+                      Editar
+                    </button>
+                    <button
+                      className="btn btn-ghost"
+                      style={{ width: "auto", fontSize: 12, color: e.ativo ? "var(--fz-vendido)" : undefined }}
+                      onClick={() => alternarAtivoEmpresa(e.id, e.ativo)}
+                    >
+                      {e.ativo ? "Desativar" : "Ativar"}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           ))}
         </div>
@@ -167,19 +268,45 @@ export default function AdminPainel() {
         <div>
           {usuarios.map((u) => (
             <div key={u.id} className="card" style={{ marginBottom: 12 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              {editandoUsuarioId === u.id ? (
                 <div>
-                  <p style={{ fontWeight: 500, margin: 0 }}>{u.nome}</p>
-                  <p className="card-meta">{u.email} · {u.telefone}</p>
+                  <div className="field" style={{ marginBottom: 10 }}>
+                    <label>Nome</label>
+                    <input className="input" value={formUsuario.nome} onChange={(ev) => setFormUsuario({ ...formUsuario, nome: ev.target.value })} />
+                  </div>
+                  <div className="field" style={{ marginBottom: 10 }}>
+                    <label>E-mail</label>
+                    <input className="input" value={formUsuario.email} onChange={(ev) => setFormUsuario({ ...formUsuario, email: ev.target.value })} />
+                  </div>
+                  <div className="field" style={{ marginBottom: 10 }}>
+                    <label>Telefone</label>
+                    <input className="input" value={formUsuario.telefone} onChange={(ev) => setFormUsuario({ ...formUsuario, telefone: ev.target.value })} />
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => salvarEdicaoUsuario(u.id)}>Salvar</button>
+                    <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setEditandoUsuarioId(null)}>Cancelar</button>
+                  </div>
                 </div>
-                <button
-                  className="btn btn-ghost"
-                  style={{ width: "auto", fontSize: 12, color: u.ativo ? "var(--fz-vendido)" : undefined }}
-                  onClick={() => alternarAtivoUsuario(u.id, u.ativo)}
-                >
-                  {u.ativo ? "Desativar" : "Ativar"}
-                </button>
-              </div>
+              ) : (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p style={{ fontWeight: 500, margin: 0 }}>{u.nome}</p>
+                    <p className="card-meta">{u.email} · {u.telefone}</p>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button className="btn btn-ghost" style={{ width: "auto", fontSize: 12 }} onClick={() => iniciarEdicaoUsuario(u)}>
+                      Editar
+                    </button>
+                    <button
+                      className="btn btn-ghost"
+                      style={{ width: "auto", fontSize: 12, color: u.ativo ? "var(--fz-vendido)" : undefined }}
+                      onClick={() => alternarAtivoUsuario(u.id, u.ativo)}
+                    >
+                      {u.ativo ? "Desativar" : "Ativar"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
