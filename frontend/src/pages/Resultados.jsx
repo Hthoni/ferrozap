@@ -66,7 +66,10 @@ export default function Resultados() {
 
   return (
     <div className="fz-wrap fz-secao">
-      <h2 style={{ fontSize: 32, margin: "0 0 24px" }}>Resultados</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ fontSize: 32, margin: 0 }}>Resultados</h2>
+        <Link className="btn btn-secondary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
+      </div>
 
       <div className="seg" style={{ marginBottom: 24 }}>
         <label className="seg-opt">
@@ -103,26 +106,28 @@ export default function Resultados() {
         {resultados.map((grupo) => (
           <article className="fz-card-peca blueprint" key={grupo.empresa_id}>
             <Corners />
-            <p className="fz-selo"><BadgeCheck size={15} strokeWidth={1.5} /> Desmontadora verificada</p>
-            <h3 className="fz-card-titulo">{grupo.empresa_nome}</h3>
-            <span className="tag tag-neutral" style={{ display: "inline-flex", marginBottom: 12 }}>
+            <h3 className="fz-card-titulo" style={{ margin: 0 }}>{grupo.empresa_nome}</h3>
+            <p className="fz-selo" style={{ margin: 0 }}>
+              <BadgeCheck size={15} strokeWidth={1.5} /> Desmontadora verificada
+            </p>
+            <span className="tag tag-neutral">
               <MapPin size={13} strokeWidth={1.5} style={{ marginRight: 4 }} />
               {grupo.distancia_km.toFixed(0)} km
             </span>
 
-            <ul style={{ listStyle: "none", padding: 0, margin: "0 0 16px" }}>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
               {grupo.veiculos.map((v) => {
                 const exato = v.nivel_confianca === "compativel_exato";
                 return (
-                  <li
-                    key={v.veiculo_id}
-                    style={{
-                      fontSize: 14,
-                      color: exato ? "var(--fz-disponivel)" : "var(--fz-vendido)",
-                      fontWeight: exato ? 600 : 400,
-                    }}
-                  >
-                    — {fabricanteNome} / {modeloNome} / {v.ano_fabricacao}
+                  <li key={v.veiculo_id} style={{ fontSize: 14 }}>
+                    <span style={{ color: "var(--fz-tinta)" }}>— </span>
+                    <span style={{ color: "var(--fz-disponivel)", fontWeight: 600 }}>{fabricanteNome}</span>
+                    <span style={{ color: "var(--fz-tinta)" }}> / </span>
+                    <span style={{ color: "var(--fz-disponivel)", fontWeight: 600 }}>{modeloNome}</span>
+                    <span style={{ color: "var(--fz-tinta)" }}> / </span>
+                    <span style={{ color: exato ? "var(--fz-disponivel)" : "var(--fz-vendido)", fontWeight: 600 }}>
+                      {v.ano_fabricacao}
+                    </span>
                   </li>
                 );
               })}
