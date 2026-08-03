@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 
@@ -50,7 +50,12 @@ export default function ConversaDetalhe() {
 
   return (
     <div className="fz-wrap fz-secao" style={{ maxWidth: 560 }}>
-      <p className="fz-rotulo fz-rotulo--aco">Conversa #{id}</p>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <p className="fz-rotulo fz-rotulo--aco" style={{ margin: 0 }}>Conversa #{id}</p>
+        {cliente && (
+          <Link className="btn btn-primary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
+        )}
+      </div>
       {veiculo && (
         <h2 style={{ fontSize: 28, margin: "8px 0 24px" }}>
           {veiculo.fabricante_nome} {veiculo.modelo_nome}

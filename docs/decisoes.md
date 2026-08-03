@@ -539,6 +539,29 @@ solidificação em um documento de especificação formal.
   (mensagem chega sem ler → aparece; abre a conversa → some; outro
   lado responde → aparece de novo do lado de quem recebeu)
 
+## Consistência de UX — "Nova busca" e botão de WhatsApp
+
+- "Nova busca" padronizado com a mesma cor (`btn-primary`) em todo
+  lugar que aparece: Mensagens, Resultados, Minha Conta (cliente),
+  dentro de cada conversa (só para cliente — empresa não tem esse
+  botão, o equivalente dela é "Estoque")
+- Botão "Enviar WhatsApp": verde oficial da marca WhatsApp
+  (`--fz-whatsapp: #25d366`, único caso deliberado de cor fora da
+  paleta do Industry, por ser reconhecimento de marca de terceiro).
+  Depois de clicado, vira um aviso de fundo azul (`--fz-aco`, cor já
+  existente do sistema) com texto preto: "Mensagem criada para envio,
+  você precisa enviá-la pelo seu próprio WhatsApp."
+
+## Legibilidade — fonte maior e mais contraste
+
+- Vários textos secundários (`.card-meta`, `.fz-selo`, `.fz-status`)
+  eram pequenos (11-12px) e de baixo contraste de propósito no
+  sistema original (`color-mix` a 50% de opacidade) — bom pra
+  decoração discreta, ruim pra leitura confortável. Aumentados pra
+  13px e contraste mais alto (`--color-neutral-800` em vez do mix a
+  50%), mantendo ainda menor que o texto principal (hierarquia
+  preservada, só não mais ilegível)
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje

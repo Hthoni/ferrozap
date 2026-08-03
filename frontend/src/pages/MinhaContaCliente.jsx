@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
@@ -76,7 +76,10 @@ export default function MinhaContaCliente() {
   return (
     <div className="fz-wrap fz-secao" style={{ maxWidth: 480 }}>
       <p className="fz-rotulo fz-rotulo--aco">Cliente final</p>
-      <h1 style={{ fontSize: 32, margin: "8px 0 24px" }}>Minha conta</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <h1 style={{ fontSize: 32, margin: 0 }}>Minha conta</h1>
+        <Link className="btn btn-primary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
+      </div>
 
       <form onSubmit={salvarPerfil} className="blueprint" style={{ padding: 24, marginBottom: 24 }}>
         <Corners />

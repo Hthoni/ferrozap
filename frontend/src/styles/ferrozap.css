@@ -22,6 +22,7 @@
   /* estados funcionais — NAO sao cores de marca, so status de anuncio */
   --fz-disponivel: #2f7a4d;
   --fz-vendido:    #9a3b32;
+  --fz-whatsapp:   #25d366; /* cor oficial da marca WhatsApp, uso deliberado só no botão de envio */
 
   --fz-max:        1180px;  /* largura maxima de conteudo */
   --fz-gutter:     40px;
@@ -128,10 +129,20 @@
 
 /* --- extensão do produto: legibilidade geral (desktop e mobile) --------- */
 body { font-size: 16px; }
-.card-body { font-size: 14px; }
-.field label { font-size: 13px; }
+.card-body { font-size: 15px; }
+.field label { font-size: 14px; }
 .input, select.input, textarea.input { font-size: 16px; } /* 16px evita zoom automático do Safari no iOS ao focar campo */
 button, .btn { font-size: 15px; }
+
+/* Textos secundários (data, distância, legenda) eram pequenos demais
+   e com contraste baixo de propósito no sistema original (decoração
+   discreta). Aumentado sem perder a hierarquia visual — ainda menor
+   que o texto principal, só não ilegível. */
+.card-meta { font-size: 13px !important; color: var(--color-neutral-800) !important; }
+.fz-selo { font-size: 13px; }
+.fz-status { font-size: 13px; }
+.fz-rotulo { font-size: 12px; }
+.fz-status--vendido { color: var(--color-neutral-800); }
 
 /* --- responsivo --------------------------------------------------------- */
 @media (max-width: 900px) {

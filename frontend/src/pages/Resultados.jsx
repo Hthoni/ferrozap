@@ -30,6 +30,7 @@ export default function Resultados() {
   const [empresaAbertaId, setEmpresaAbertaId] = useState(null);
   const [texto, setTexto] = useState("");
   const [linkSalvoId, setLinkSalvoId] = useState(null);
+  const [whatsappClicadoId, setWhatsappClicadoId] = useState(null);
   const [linkWhatsapp, setLinkWhatsapp] = useState("");
 
   const { cliente } = useAuth();
@@ -53,6 +54,7 @@ export default function Resultados() {
     setEmpresaAbertaId(empresaId === empresaAbertaId ? null : empresaId);
     setTexto("");
     setLinkSalvoId(null);
+    setWhatsappClicadoId(null);
     setErro("");
   }
 
@@ -93,7 +95,7 @@ export default function Resultados() {
     <div className="fz-wrap fz-secao">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h2 style={{ fontSize: 28, margin: 0 }}>Resultados</h2>
-        <Link className="btn btn-secondary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
+        <Link className="btn btn-primary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
       </div>
 
       <div className="seg" style={{ marginBottom: 20 }}>
@@ -157,13 +159,32 @@ export default function Resultados() {
               })}
             </ul>
 
-            {linkSalvoId === grupo.empresa_id ? (
+            {whatsappClicadoId === grupo.empresa_id ? (
+              <p
+                style={{
+                  background: "var(--fz-aco)",
+                  color: "#000",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  padding: "10px 12px",
+                  margin: 0,
+                  width: "100%",
+                  boxSizing: "border-box",
+                }}
+              >
+                Mensagem criada para envio, você precisa enviá-la pelo seu próprio WhatsApp.
+              </p>
+            ) : linkSalvoId === grupo.empresa_id ? (
               <a
-                className="btn btn-primary btn-block"
+                className="btn btn-block"
                 href={linkWhatsapp}
                 target="_blank"
                 rel="noopener noreferrer"
-                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+                onClick={() => setWhatsappClicadoId(grupo.empresa_id)}
+                style={{
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  background: "var(--fz-whatsapp)", color: "#fff", fontWeight: 600,
+                }}
               >
                 <MessageCircle size={16} strokeWidth={1.5} /> Enviar WhatsApp
               </a>
