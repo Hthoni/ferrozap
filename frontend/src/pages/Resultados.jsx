@@ -20,6 +20,7 @@ export default function Resultados() {
   const lon = params.get("lon");
   const fabricanteNome = params.get("fabricanteNome") || "";
   const modeloNome = params.get("modeloNome") || "";
+  const submodeloId = params.get("submodeloId") || null;
 
   const [resultados, setResultados] = useState([]);
   const [ordenarPor, setOrdenarPor] = useState("compatibilidade");
@@ -51,6 +52,7 @@ export default function Resultados() {
     setEmpresaAbertaId(empresaId === empresaAbertaId ? null : empresaId);
     setTexto("");
     setLinkSalvoId(null);
+    setErro("");
   }
 
   function salvarESalvarLink(e, grupo) {
@@ -176,6 +178,7 @@ export default function Resultados() {
                   autoFocus
                   required
                 />
+                {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13, margin: "4px 0" }}>{erro}</p>}
                 <div style={{ display: "flex", gap: 8 }}>
                   <button className="btn btn-primary" style={{ flex: 1 }} type="submit">Salvar</button>
                   <button
