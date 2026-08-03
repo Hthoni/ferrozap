@@ -39,7 +39,8 @@ export default function AuthCliente() {
         });
       }
       const resultado = await api.loginUsuario({ telefone, senha });
-      setCliente({ token: resultado.access_token, nome, telefone });
+      const perfil = await api.meuPerfil(resultado.access_token);
+      setCliente({ token: resultado.access_token, nome: perfil.nome, telefone: perfil.telefone });
       navigate("/buscar");
     } catch (err) {
       setErro(err.message);

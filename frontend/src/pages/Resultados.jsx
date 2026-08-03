@@ -21,6 +21,7 @@ export default function Resultados() {
   const fabricanteNome = params.get("fabricanteNome") || "";
   const modeloNome = params.get("modeloNome") || "";
   const submodeloId = params.get("submodeloId") || null;
+  const submodeloNome = params.get("submodeloNome") || "";
 
   const [resultados, setResultados] = useState([]);
   const [ordenarPor, setOrdenarPor] = useState("compatibilidade");
@@ -82,7 +83,7 @@ export default function Resultados() {
     const nomeCliente = cliente?.nome || "um cliente";
     const mensagem =
       `Olá, o cliente ${nomeCliente} encontrou o seu veículo no site Ferrozap.com.br.\n\n` +
-      `Veículo:\n${fabricanteNome}\n${modeloNome}\n${melhorVeiculo.ano_fabricacao}\n\n` +
+      `Veículo:\n${fabricanteNome}\n${modeloNome}${submodeloNome ? ` ${submodeloNome}` : ""}\n${melhorVeiculo.ano_fabricacao}\n\n` +
       `E a peça que ele precisa é:\n${texto}`;
     setLinkWhatsapp(montarLinkWhatsapp(grupo.whatsapp, mensagem));
     setLinkSalvoId(grupo.empresa_id);
