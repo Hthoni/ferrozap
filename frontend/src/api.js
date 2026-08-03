@@ -33,13 +33,15 @@ export const api = {
     chamar("/catalogo/modelos", { method: "POST", body: { fabricante_id: fabricanteId, nome } }),
 
   // Busca
-  buscar: ({ modeloId, ano, cep, ordenarPor }) => {
-    const query = new URLSearchParams({
-      modelo_id: modeloId,
-      ano,
-      cep,
-      ordenar_por: ordenarPor || "compatibilidade",
-    }).toString();
+  buscar: ({ modeloId, ano, cep, lat, lon, ordenarPor }) => {
+    const parametros = { modelo_id: modeloId, ano, ordenar_por: ordenarPor || "compatibilidade" };
+    if (lat && lon) {
+      parametros.lat = lat;
+      parametros.lon = lon;
+    } else {
+      parametros.cep = cep;
+    }
+    const query = new URLSearchParams(parametros).toString();
     return chamar(`/busca/?${query}`);
   },
 
@@ -70,6 +72,7 @@ export const api = {
 
   // Mensageria
   iniciarConversa: (dados, token) => chamar("/conversas/", { method: "POST", body: dados, token }),
+  registrarLeadWhatsapp: (dados, token) => chamar("/leads-whatsapp/", { method: "POST", body: dados, token }),
   listarMinhasConversas: (token) => chamar("/conversas/minhas", { token }),
   listarConversasRecebidas: (token) => chamar("/conversas/recebidas", { token }),
   listarMensagens: (conversaId, token) => chamar(`/conversas/${conversaId}/mensagens`, { token }),

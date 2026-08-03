@@ -53,6 +53,7 @@ CREATE TABLE empresas (
     email VARCHAR(120) NOT NULL UNIQUE,
     senha_hash VARCHAR(255) NOT NULL,
     telefone VARCHAR(20),
+    whatsapp VARCHAR(20),
     endereco TEXT,
     cep VARCHAR(9),
     latitude DECIMAL(9,6),
@@ -130,6 +131,23 @@ CREATE TABLE conversas (
     ultima_atividade_em TIMESTAMP DEFAULT now()
 );
 CREATE INDEX idx_conversas_status ON conversas (status);
+
+-- ============================================================
+-- Registro leve de contato via WhatsApp (não é conversa com thread —
+-- a conversa em si acontece fora do nosso sistema, no WhatsApp. Isso
+-- aqui é só "esse contato aconteceu, aqui está o quê", pra não perder
+-- 100% de visibilidade de métrica quando abandonamos a mensageria
+-- própria em favor do link direto pro WhatsApp.
+-- ============================================================
+CREATE TABLE leads_whatsapp (
+    id SERIAL PRIMARY KEY,
+    usuario_final_id INT NOT NULL REFERENCES usuarios_finais(id),
+    empresa_id INT NOT NULL REFERENCES empresas(id),
+    veiculo_desmonte_id INT NOT NULL REFERENCES veiculos_desmonte(id),
+    descricao_peca TEXT NOT NULL,
+    criado_em TIMESTAMP DEFAULT now()
+);
+CREATE INDEX idx_leads_whatsapp_empresa ON leads_whatsapp (empresa_id);
 CREATE INDEX idx_conversas_empresa ON conversas (empresa_id);
 
 CREATE TABLE mensagens (

@@ -31,6 +31,7 @@ def cadastrar_empresa(dados: EmpresaCreate, db: Session = Depends(get_db)):
         email=dados.email.strip().lower(),
         senha_hash=hash_senha(dados.senha),
         telefone=dados.telefone,
+        whatsapp=dados.whatsapp,
         endereco=dados.endereco,
         cep=dados.cep,
     )
@@ -67,6 +68,8 @@ def atualizar_minha_empresa(
         empresa.email = dados.email.strip().lower()
     if dados.telefone is not None:
         empresa.telefone = dados.telefone
+    if dados.whatsapp is not None:
+        empresa.whatsapp = dados.whatsapp
     if dados.endereco is not None:
         empresa.endereco = dados.endereco
     if dados.cep is not None:

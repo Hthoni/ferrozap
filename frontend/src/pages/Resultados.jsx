@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { BadgeCheck, MapPin } from "lucide-react";
+import { BadgeCheck, MapPin, MessageCircle } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
+
+function montarLinkWhatsapp(numero, mensagem) {
+  const digitos = numero.replace(/\D/g, "");
+  const comDDI = digitos.length <= 11 ? `55${digitos}` : digitos;
+  return `https://wa.me/${comDDI}?text=${encodeURIComponent(mensagem)}`;
+}
 
 export default function Resultados() {
   const [params] = useSearchParams();
   const modeloId = params.get("modeloId");
   const ano = params.get("ano");
   const cep = params.get("cep");
+  const lat = params.get("lat");
+  const lon = params.get("lon");
   const fabricanteNome = params.get("fabricanteNome") || "";
   const modeloNome = params.get("modeloNome") || "";
-  const submodeloId = params.get("submodeloId") || null;
 
   const [resultados, setResultados] = useState([]);
   const [ordenarPor, setOrdenarPor] = useState("compatibilidade");
@@ -20,8 +27,8 @@ export default function Resultados() {
   const [carregando, setCarregando] = useState(true);
   const [empresaAbertaId, setEmpresaAbertaId] = useState(null);
   const [texto, setTexto] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const [sucessoId, setSucessoId] = useState(null);
+  const [linkSalvoId, setLinkSalvoId] = useState(null);
+  const [linkWhatsapp, setLinkWhatsapp] = useState("");
 
   const { cliente } = useAuth();
   const navigate = useNavigate();
@@ -30,11 +37,11 @@ export default function Resultados() {
     setCarregando(true);
     setErro("");
     api
-      .buscar({ modeloId, ano, cep, ordenarPor })
+      .buscar({ modeloId, ano, cep, lat, lon, ordenarPor })
       .then(setResultados)
       .catch((err) => setErro(err.message))
       .finally(() => setCarregando(false));
-  }, [modeloId, ano, cep, ordenarPor]);
+  }, [modeloId, ano, cep, lat, lon, ordenarPor]);
 
   function abrirMensagem(empresaId) {
     if (!cliente) {
@@ -43,15 +50,21 @@ export default function Resultados() {
     }
     setEmpresaAbertaId(empresaId === empresaAbertaId ? null : empresaId);
     setTexto("");
-    setSucessoId(null);
+    setLinkSalvoId(null);
   }
 
-  async function enviarMensagem(e, grupo) {
+  function salvarESalvarLink(e, grupo) {
     e.preventDefault();
-    setEnviando(true);
-    try {
-      const melhorVeiculo = grupo.veiculos[0]; // já vem ordenado, exato primeiro
-      await api.iniciarConversa(
+    if (!grupo.whatsapp) {
+      setErro("Essa desmontadora ainda não cadastrou um número de WhatsApp.");
+      return;
+    }
+    const melhorVeiculo = grupo.veiculos[0]; // já vem ordenado, exato primeiro
+
+    // Mensageria própria de volta — cria a conversa de verdade no
+    // nosso sistema (histórico, selo de lida/não lida, etc.)
+    api
+      .iniciarConversa(
         {
           veiculo_desmonte_id: melhorVeiculo.veiculo_id,
           modelo_id: Number(modeloId),
@@ -61,15 +74,16 @@ export default function Resultados() {
           texto,
         },
         cliente.token
-      );
-      setSucessoId(grupo.empresa_id);
-      setEmpresaAbertaId(null);
-      setTexto("");
-    } catch (err) {
-      setErro(err.message);
-    } finally {
-      setEnviando(false);
-    }
+      )
+      .catch((err) => setErro(err.message));
+
+    const nomeCliente = cliente?.nome || "um cliente";
+    const mensagem =
+      `Olá, o cliente ${nomeCliente} encontrou o seu veículo no site Ferrozap.com.br.\n\n` +
+      `Veículo:\n${fabricanteNome}\n${modeloNome}\n${melhorVeiculo.ano_fabricacao}\n\n` +
+      `E a peça que ele precisa é:\n${texto}`;
+    setLinkWhatsapp(montarLinkWhatsapp(grupo.whatsapp, mensagem));
+    setLinkSalvoId(grupo.empresa_id);
   }
 
   return (
@@ -140,10 +154,18 @@ export default function Resultados() {
               })}
             </ul>
 
-            {sucessoId === grupo.empresa_id ? (
-              <p style={{ fontSize: 13, margin: 0 }}>Mensagem enviada. Acompanhe em Mensagens.</p>
+            {linkSalvoId === grupo.empresa_id ? (
+              <a
+                className="btn btn-primary btn-block"
+                href={linkWhatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+              >
+                <MessageCircle size={16} strokeWidth={1.5} /> Enviar WhatsApp
+              </a>
             ) : empresaAbertaId === grupo.empresa_id ? (
-              <form onSubmit={(e) => enviarMensagem(e, grupo)} style={{ width: "100%" }}>
+              <form onSubmit={(e) => salvarESalvarLink(e, grupo)} style={{ width: "100%" }}>
                 <textarea
                   className="input"
                   rows={2}
@@ -155,9 +177,7 @@ export default function Resultados() {
                   required
                 />
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button className="btn btn-primary" style={{ flex: 1 }} type="submit" disabled={enviando}>
-                    {enviando ? "Enviando..." : "Enviar"}
-                  </button>
+                  <button className="btn btn-primary" style={{ flex: 1 }} type="submit">Salvar</button>
                   <button
                     type="button"
                     className="btn btn-secondary"

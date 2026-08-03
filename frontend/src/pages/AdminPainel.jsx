@@ -77,6 +77,7 @@ export default function AdminPainel() {
       nome: e.nome || "",
       email: e.email || "",
       telefone: e.telefone || "",
+      whatsapp: e.whatsapp || "",
       endereco: e.endereco || "",
       cep: e.cep || "",
       latitude: e.latitude ?? "",
@@ -92,6 +93,7 @@ export default function AdminPainel() {
         nome: formEmpresa.nome,
         email: formEmpresa.email,
         telefone: formEmpresa.telefone,
+        whatsapp: formEmpresa.whatsapp,
         endereco: formEmpresa.endereco,
         cep: formEmpresa.cep,
         latitude: paraNumero(formEmpresa.latitude),
@@ -212,6 +214,10 @@ export default function AdminPainel() {
                   <div className="field" style={{ marginBottom: 10 }}>
                     <label>Telefone</label>
                     <input className="input" value={formEmpresa.telefone} onChange={(ev) => setFormEmpresa({ ...formEmpresa, telefone: ev.target.value })} />
+                  </div>
+                  <div className="field" style={{ marginBottom: 10 }}>
+                    <label>WhatsApp</label>
+                    <input className="input" value={formEmpresa.whatsapp} onChange={(ev) => setFormEmpresa({ ...formEmpresa, whatsapp: ev.target.value })} />
                   </div>
                   <div className="field" style={{ marginBottom: 10 }}>
                     <label>Endereço</label>

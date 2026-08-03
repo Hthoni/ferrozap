@@ -18,29 +18,35 @@ def buscar(
     request: Request,
     modelo_id: int,
     ano: int,
-    cep: str,
+    cep: str | None = None,
+    lat: float | None = None,
+    lon: float | None = None,
     ordenar_por: str = "compatibilidade",  # ou "distancia"
     db: Session = Depends(get_db),
 ):
     """
-    Retorna os desmontes compatíveis, agrupados por empresa — cada
-    empresa aparece uma vez, com a lista de veículos dela que casam
-    com a busca. Nível de confiança por veículo:
-      - compativel_exato: o ano do veículo bate exatamente com o
-        ano buscado (não é só "tem geração mapeada" — esse era o bug
-        que fazia o resultado errado aparecer primeiro)
-      - provavel: ano diferente, mas dentro da geração real mapeada
-        para o modelo, ou dentro da tolerância de fallback (±2 anos)
-        quando não há geração mapeada ainda
-      - baixa_confianca: fora da tolerância e sem geração mapeada
+    Retorna os desmontes compatíveis, agrupados por empresa.
+
+    Localização do cliente: se `lat`/`lon` vierem preenchidos (GPS do
+    dispositivo, via navigator.geolocation no navegador), usa direto —
+    é bem mais preciso que qualquer CEP. Senão, cai no fluxo de sempre
+    (CEP → ViaCEP → coordenada do município).
     """
-    coordenadas = obter_coordenadas_por_cep(cep)
-    if coordenadas is None:
+    if lat is not None and lon is not None:
+        lat_final, lon_final = lat, lon
+    elif cep:
+        coordenadas = obter_coordenadas_por_cep(cep)
+        if coordenadas is None:
+            raise HTTPException(
+                status_code=422,
+                detail="Não foi possível localizar esse CEP. Confira e tente novamente.",
+            )
+        lat_final, lon_final = coordenadas
+    else:
         raise HTTPException(
             status_code=422,
-            detail="Não foi possível localizar esse CEP. Confira e tente novamente.",
+            detail="Informe um CEP ou permita o uso da localização atual.",
         )
-    lat, lon = coordenadas
 
     query = text(
         """
@@ -49,6 +55,7 @@ def buscar(
             e.id AS empresa_id,
             e.nome AS empresa_nome,
             e.telefone,
+            e.whatsapp,
             v.ano_fabricacao,
             CASE
                 WHEN v.ano_fabricacao = :ano THEN 'compativel_exato'
@@ -74,8 +81,8 @@ def buscar(
             "modelo_id": modelo_id,
             "ano": ano,
             "tolerancia": TOLERANCIA_ANOS_FALLBACK,
-            "lat": lat,
-            "lon": lon,
+            "lat": lat_final,
+            "lon": lon_final,
         },
     ).fetchall()
 
@@ -90,6 +97,7 @@ def buscar(
                 "empresa_id": empresa_id,
                 "empresa_nome": m["empresa_nome"],
                 "telefone": m["telefone"],
+                "whatsapp": m["whatsapp"],
                 "distancia_km": float(m["distancia_km"]),
                 "tem_match_exato": False,
                 "veiculos": [],

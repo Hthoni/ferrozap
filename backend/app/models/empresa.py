@@ -18,6 +18,7 @@ class Empresa(Base):
     email = Column(String(120), nullable=False, unique=True)
     senha_hash = Column(String(255), nullable=False)
     telefone = Column(String(20))
+    whatsapp = Column(String(20), nullable=True)
     endereco = Column(String)
     cep = Column(String(9))
     latitude = Column(Numeric(9, 6), nullable=True)

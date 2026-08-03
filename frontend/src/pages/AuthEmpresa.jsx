@@ -10,7 +10,8 @@ const CAMPOS_CADASTRO = [
   { nome: "credenciamento_detran", label: "Número do credenciamento no Detran" },
   { nome: "uf", label: "UF (ex: SP)" },
   { nome: "email", label: "E-mail" },
-  { nome: "telefone", label: "Telefone / WhatsApp" },
+  { nome: "telefone", label: "Telefone" },
+  { nome: "whatsapp", label: "WhatsApp (com DDD, ex: 21999998888)" },
   { nome: "endereco", label: "Endereço completo" },
   { nome: "cep", label: "CEP" },
 ];

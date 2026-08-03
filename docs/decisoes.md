@@ -479,6 +479,66 @@ solidificação em um documento de especificação formal.
   para 40px desktop / 28px mobile; gap interno do card de peça
   reduzido)
 
+## Localização atual (GPS) como alternativa ao CEP
+
+- `/busca` aceita `lat`/`lon` diretos, opcionais — quando vêm
+  preenchidos (via `navigator.geolocation` no navegador), pulam a
+  geocodificação de CEP inteira e usam a posição real do dispositivo,
+  mais precisa que até o centróide de município
+- Testado: busca com GPS simulado ficou a 0,15 km de distância real
+  (contra o que seria o centro da cidade inteira)
+- Frontend: botão "Usar minha localização atual" no campo de CEP,
+  opcional — pede permissão do navegador (padrão do browser, não
+  something custom); se recusada ou indisponível, cai de volta pro
+  fluxo de CEP normal, sem travar a busca
+
+## Contato via link do WhatsApp — mensageria própria fica "dormindo"
+
+- **Decisão**: em vez de usar a mensageria própria (conversas/mensagens
+  dentro do site), o clique em "Falar com a desmontadora" agora gera
+  um link `wa.me` com mensagem pré-preenchida, direcionando pro
+  WhatsApp real da empresa. O código da mensageria (`/conversas`,
+  tabela `mensagens`, selo de não lida) **não foi apagado** — fica
+  parado, de propósito, caso a decisão seja revertida no futuro
+- Fluxo: cliente clica "Falar com a desmontadora" → escreve a peça
+  que precisa → clica "Salvar" (isso só monta o link, não chama
+  nenhum endpoint) → aparece o botão "Enviar WhatsApp" → abre o
+  WhatsApp de verdade, com a mensagem já escrita, endereçada ao
+  número da empresa
+- Modelo de mensagem: nome do cliente, veículo (fabricante/modelo/ano
+  do melhor match), e a descrição da peça que o cliente escreveu
+- Novo campo `whatsapp` em `empresas` (separado de `telefone`) —
+  obrigatório no cadastro novo, editável na conta própria e pelo
+  admin. `database/migracao_004_whatsapp_empresa.sql`
+- **Trade-off que a decisão reintroduz, registrado por transparência**:
+  perdemos a rastreabilidade de métrica que a mensageria própria
+  existia justamente pra resolver (lead gerado, taxa de resposta,
+  tempo de resposta — ver seção "Mensageria" mais acima neste
+  documento). Hoje não fica nenhum registro no nosso banco de que o
+  contato aconteceu, só o clique abre o WhatsApp do usuário. Se
+  precisar dessa métrica de volta, dá pra registrar um "lead" simples
+  no banco no momento do clique em "Salvar", sem reativar a
+  mensageria inteira — não implementado agora, só documentado.
+
+## Contato: mensageria própria E link do WhatsApp, as duas juntas
+
+- **Revertido**: a decisão anterior era WhatsApp *substituindo* a
+  mensageria própria. Voltamos atrás — agora as duas acontecem juntas
+  no mesmo clique de "Salvar": cria a conversa de verdade no nosso
+  sistema (`POST /conversas`, com histórico, selo de lida/não lida)
+  **e** monta o link `wa.me` com a mesma mensagem, que abre no
+  WhatsApp real da empresa
+- A tabela `leads_whatsapp` e o endpoint `/leads-whatsapp` (criados na
+  rodada anterior, quando a mensageria estava desligada) ficaram sem
+  uso agora — a mensageria de volta já cobre a mesma necessidade de
+  registro. Não apagados, só dormentes, seguindo o mesmo princípio de
+  não destruir código por precaução com arrependimento futuro
+- **Novo**: selo visível "Não lida" (fundo vermelho) nas listas de
+  conversa — tanto para o cliente quanto para a empresa — além do
+  contador agregado que já existia no menu. Testado nos três cenários
+  (mensagem chega sem ler → aparece; abre a conversa → some; outro
+  lado responde → aparece de novo do lado de quem recebeu)
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje

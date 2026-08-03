@@ -55,7 +55,7 @@ def _query_conversas_com_veiculo(db: Session):
     )
 
 
-def _linha_para_saida(conversa, fabricante_nome, modelo_nome, ano_fabricacao, submodelo_nome=None):
+def _linha_para_saida(conversa, fabricante_nome, modelo_nome, ano_fabricacao, submodelo_nome=None, tem_nao_lida=False):
     return {
         "id": conversa.id,
         "consulta_id": conversa.consulta_id,
@@ -69,7 +69,25 @@ def _linha_para_saida(conversa, fabricante_nome, modelo_nome, ano_fabricacao, su
         "modelo_nome": modelo_nome,
         "ano_fabricacao": ano_fabricacao,
         "submodelo_nome": submodelo_nome,
+        "tem_nao_lida": tem_nao_lida,
     }
+
+
+def _conversas_com_nao_lida(db: Session, conversa_ids: list[int], remetente_oposto: str) -> set[int]:
+    """IDs de conversa que têm pelo menos uma mensagem não lida vinda do outro lado."""
+    if not conversa_ids:
+        return set()
+    linhas = (
+        db.query(Mensagem.conversa_id)
+        .filter(
+            Mensagem.conversa_id.in_(conversa_ids),
+            Mensagem.remetente_tipo == remetente_oposto,
+            Mensagem.lida.is_(False),
+        )
+        .distinct()
+        .all()
+    )
+    return {l.conversa_id for l in linhas}
 
 
 @router.post("/", response_model=ConversaComVeiculoOut, status_code=201)
@@ -128,7 +146,10 @@ def listar_minhas_conversas(
         .order_by(Conversa.ultima_atividade_em.desc())
         .all()
     )
-    return [_linha_para_saida(*linha) for linha in linhas]
+    ids_nao_lidas = _conversas_com_nao_lida(db, [linha[0].id for linha in linhas], "empresa")
+    return [
+        _linha_para_saida(*linha, tem_nao_lida=linha[0].id in ids_nao_lidas) for linha in linhas
+    ]
 
 
 @router.get("/recebidas", response_model=list[ConversaComVeiculoOut])
@@ -144,7 +165,10 @@ def listar_conversas_recebidas(
         .order_by(Conversa.ultima_atividade_em.desc())
         .all()
     )
-    return [_linha_para_saida(*linha) for linha in linhas]
+    ids_nao_lidas = _conversas_com_nao_lida(db, [linha[0].id for linha in linhas], "cliente")
+    return [
+        _linha_para_saida(*linha, tem_nao_lida=linha[0].id in ids_nao_lidas) for linha in linhas
+    ]
 
 
 @router.get("/contagem-nao-lidas")

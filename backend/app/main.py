@@ -6,7 +6,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.rate_limit import limiter
-from app.routers import admin, auth, busca, cadastro, catalogo, mensageria
+from app.routers import admin, auth, busca, cadastro, catalogo, leads, mensageria
 
 app = FastAPI(title="Ferrozap API")
 app.state.limiter = limiter
@@ -33,6 +33,7 @@ app.include_router(auth.router)
 app.include_router(busca.router)
 app.include_router(cadastro.router)
 app.include_router(catalogo.router)
+app.include_router(leads.router)
 app.include_router(mensageria.router)
 
 

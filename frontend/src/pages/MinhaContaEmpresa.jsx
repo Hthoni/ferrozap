@@ -12,6 +12,7 @@ export default function MinhaContaEmpresa() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
   const [endereco, setEndereco] = useState("");
   const [cep, setCep] = useState("");
   const [erroPerfil, setErroPerfil] = useState("");
@@ -31,6 +32,7 @@ export default function MinhaContaEmpresa() {
       setNome(perfil.nome || "");
       setEmail(perfil.email || "");
       setTelefone(perfil.telefone || "");
+      setWhatsapp(perfil.whatsapp || "");
       setEndereco(perfil.endereco || "");
       setCep(perfil.cep || "");
     });
@@ -42,7 +44,7 @@ export default function MinhaContaEmpresa() {
     setSucessoPerfil("");
     setSalvandoPerfil(true);
     try {
-      await api.atualizarMinhaEmpresa({ nome, email, telefone, endereco, cep }, empresa.token);
+      await api.atualizarMinhaEmpresa({ nome, email, telefone, whatsapp, endereco, cep }, empresa.token);
       setSucessoPerfil("Dados atualizados.");
     } catch (err) {
       setErroPerfil(err.message);
@@ -107,6 +109,10 @@ export default function MinhaContaEmpresa() {
         <div className="field" style={{ marginBottom: 16 }}>
           <label>Telefone / WhatsApp</label>
           <input className="input" value={telefone} onChange={(e) => setTelefone(e.target.value)} />
+        </div>
+        <div className="field" style={{ marginBottom: 16 }}>
+          <label>WhatsApp (com DDD)</label>
+          <input className="input" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} />
         </div>
         <div className="field" style={{ marginBottom: 16 }}>
           <label>Endereço</label>

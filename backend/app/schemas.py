@@ -11,6 +11,7 @@ class EmpresaCreate(BaseModel):
     email: EmailStr
     senha: str = Field(min_length=8)
     telefone: str | None = None
+    whatsapp: str | None = None
     endereco: str | None = None
     cep: str
 
@@ -20,6 +21,8 @@ class EmpresaOut(BaseModel):
     nome: str
     cnpj: str
     email: EmailStr
+    telefone: str | None
+    whatsapp: str | None
     plano: str
     status_verificacao: str
     latitude: float | None
@@ -127,6 +130,7 @@ class EmpresaUpdate(BaseModel):
     nome: str | None = None
     email: EmailStr | None = None
     telefone: str | None = None
+    whatsapp: str | None = None
     endereco: str | None = None
     cep: str | None = None
 
@@ -134,6 +138,22 @@ class EmpresaUpdate(BaseModel):
 class UsuarioFinalLogin(BaseModel):
     telefone: str
     senha: str
+
+
+class LeadWhatsappCreate(BaseModel):
+    veiculo_desmonte_id: int
+    descricao_peca: str = Field(min_length=1, max_length=2000)
+
+
+class LeadWhatsappOut(BaseModel):
+    id: int
+    empresa_id: int
+    veiculo_desmonte_id: int
+    descricao_peca: str
+    criado_em: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class TokenOut(BaseModel):
@@ -181,6 +201,7 @@ class ConversaComVeiculoOut(ConversaOut):
     modelo_nome: str
     ano_fabricacao: int
     submodelo_nome: str | None = None
+    tem_nao_lida: bool = False
 
 
 class MensagemCreate(BaseModel):

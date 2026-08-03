@@ -33,7 +33,12 @@ export default function ConversasRecebidas() {
         <Link key={c.id} to={`/conversas/${c.id}`} style={{ textDecoration: "none", color: "inherit" }}>
           <div className="card" style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <span className="fz-codigo">{c.fabricante_nome} {c.modelo_nome} · {c.ano_fabricacao}</span>
-            <span className={`fz-status fz-status--${c.status}`}>{ROTULO_STATUS[c.status]}</span>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              {c.tem_nao_lida && (
+                <span className="tag" style={{ background: "var(--fz-vendido)", color: "#fff" }}>Não lida</span>
+              )}
+              <span className={`fz-status fz-status--${c.status}`}>{ROTULO_STATUS[c.status]}</span>
+            </div>
           </div>
         </Link>
       ))}

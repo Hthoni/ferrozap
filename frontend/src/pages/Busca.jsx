@@ -25,6 +25,9 @@ export default function Busca() {
   const [ano, setAno] = useState("");
   const [cep, setCep] = useState("");
   const [cepSalvo, setCepSalvo] = useState(false);
+  const [coordsGPS, setCoordsGPS] = useState(null);
+  const [buscandoLocalizacao, setBuscandoLocalizacao] = useState(false);
+  const [erroLocalizacao, setErroLocalizacao] = useState("");
   const [erro, setErro] = useState("");
   const [resolvendo, setResolvendo] = useState(false);
 
@@ -123,21 +126,42 @@ export default function Busca() {
     setModelos([]);
   }
 
+  function usarLocalizacaoAtual() {
+    if (!navigator.geolocation) {
+      setErroLocalizacao("Seu navegador não permite acessar a localização.");
+      return;
+    }
+    setBuscandoLocalizacao(true);
+    setErroLocalizacao("");
+    navigator.geolocation.getCurrentPosition(
+      (posicao) => {
+        setCoordsGPS({ lat: posicao.coords.latitude, lon: posicao.coords.longitude });
+        setBuscandoLocalizacao(false);
+      },
+      () => {
+        setErroLocalizacao("Não foi possível obter sua localização. Verifique a permissão do navegador, ou digite o CEP.");
+        setBuscandoLocalizacao(false);
+      },
+      { timeout: 10000 }
+    );
+  }
+
   function buscar(e) {
     e.preventDefault();
     setErro("");
-    if (!modeloId || !ano || !cep) {
-      setErro("Preencha modelo, ano e CEP para buscar.");
+    if (!modeloId || !ano || (!cep && !coordsGPS)) {
+      setErro("Preencha modelo, ano e CEP (ou use sua localização atual) para buscar.");
       return;
     }
-    if (cliente) {
+    if (cliente && cep) {
       api.atualizarMeuCep(cep, cliente.token).catch(() => {});
     }
     const nomeModelo = modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo;
     const nomeSubmodelo = submodelos.find((s) => String(s.id) === String(submodeloId))?.nome || "";
     const params = new URLSearchParams({
-      modeloId, ano, cep, fabricanteNome, modeloNome: nomeModelo,
+      modeloId, ano, cep: cep || "", fabricanteNome, modeloNome: nomeModelo,
       submodeloId: submodeloId || "", submodeloNome: nomeSubmodelo,
+      ...(coordsGPS ? { lat: coordsGPS.lat, lon: coordsGPS.lon } : {}),
     });
     navigate(`/resultados?${params.toString()}`);
   }
@@ -338,7 +362,19 @@ export default function Busca() {
 
         <div className="field" style={{ marginBottom: 16 }}>
           <label>Seu CEP</label>
-          {cepSalvo ? (
+          {coordsGPS ? (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span className="fz-codigo">Localização atual detectada</span>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ width: "auto", fontSize: 12 }}
+                onClick={() => setCoordsGPS(null)}
+              >
+                Usar CEP no lugar
+              </button>
+            </div>
+          ) : cepSalvo ? (
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="fz-codigo">{cep}</span>
               <button
@@ -351,7 +387,19 @@ export default function Busca() {
               </button>
             </div>
           ) : (
-            <input className="input" value={cep} onChange={(e) => setCep(e.target.value)} required />
+            <>
+              <input className="input" value={cep} onChange={(e) => setCep(e.target.value)} />
+              <button
+                type="button"
+                className="btn btn-ghost"
+                style={{ width: "auto", padding: 0, fontSize: 13 }}
+                onClick={usarLocalizacaoAtual}
+                disabled={buscandoLocalizacao}
+              >
+                {buscandoLocalizacao ? "Obtendo localização..." : "Usar minha localização atual"}
+              </button>
+              {erroLocalizacao && <p style={{ color: "var(--fz-vendido)", fontSize: 12, marginTop: 4 }}>{erroLocalizacao}</p>}
+            </>
           )}
         </div>
 
