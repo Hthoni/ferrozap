@@ -562,6 +562,25 @@ solidificação em um documento de especificação formal.
   50%), mantendo ainda menor que o texto principal (hierarquia
   preservada, só não mais ilegível)
 
+## Segurança: RLS desabilitado expunha o banco via API pública do Supabase
+
+- **Incidente**: alerta automático do Supabase ("Table publicly
+  accessible... Row-Level Security is not enabled") — toda vez que
+  rodamos SQL escolhendo "Run without RLS" (feito em todas as
+  migrações até aqui), a tabela ficava acessível pela API REST
+  pública do próprio Supabase (não é o nosso backend — é uma camada
+  paralela que o Supabase gera automaticamente), sem passar por
+  nenhuma autenticação ou regra de negócio nossa
+- **Correção**: `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;` em todas
+  as 12 tabelas, sem nenhuma policy adicional — isso bloqueia 100% o
+  acesso via API pública (nenhuma policy = acesso negado por padrão
+  pra quem não é dono da tabela), sem afetar o backend FastAPI, que
+  conecta como dono via connection string direta (RLS não se aplica
+  ao dono da tabela)
+- **Lição pra daqui pra frente**: toda tabela nova precisa terminar
+  com `ENABLE ROW LEVEL SECURITY` na mesma migração que a cria — não
+  esperar alerta de segurança pra lembrar disso
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje

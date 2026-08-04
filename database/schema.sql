@@ -9,6 +9,8 @@ CREATE TABLE fabricantes (
     id SERIAL PRIMARY KEY,
     nome VARCHAR(50) NOT NULL UNIQUE
 );
+ALTER TABLE fabricantes ENABLE ROW LEVEL SECURITY;
+
 
 CREATE TABLE modelos (
     id SERIAL PRIMARY KEY,
@@ -17,6 +19,8 @@ CREATE TABLE modelos (
     tem_submodelo_relevante BOOLEAN DEFAULT FALSE,
     UNIQUE (fabricante_id, nome)
 );
+ALTER TABLE modelos ENABLE ROW LEVEL SECURITY;
+
 
 CREATE TABLE submodelos (
     id SERIAL PRIMARY KEY,
@@ -24,6 +28,8 @@ CREATE TABLE submodelos (
     nome VARCHAR(50) NOT NULL,
     UNIQUE (modelo_id, nome)
 );
+ALTER TABLE submodelos ENABLE ROW LEVEL SECURITY;
+
 
 -- Camada opcional de refinamento. Populada aos poucos; ano/tolerância
 -- é usado como fallback quando um modelo ainda não tem geração mapeada.
@@ -36,6 +42,8 @@ CREATE TABLE geracoes (
     CHECK (ano_fim >= ano_inicio),
     UNIQUE (modelo_id, nome)
 );
+ALTER TABLE geracoes ENABLE ROW LEVEL SECURITY;
+
 CREATE INDEX idx_geracoes_modelo_range ON geracoes (modelo_id, ano_inicio, ano_fim);
 
 -- ============================================================
@@ -62,6 +70,8 @@ CREATE TABLE empresas (
     ativo BOOLEAN DEFAULT TRUE,
     criado_em TIMESTAMP DEFAULT now()
 );
+ALTER TABLE empresas ENABLE ROW LEVEL SECURITY;
+
 CREATE INDEX idx_empresas_coordenadas ON empresas (latitude, longitude);
 
 CREATE TABLE veiculos_desmonte (
@@ -74,6 +84,8 @@ CREATE TABLE veiculos_desmonte (
     status VARCHAR(20) DEFAULT 'disponivel',
     criado_em TIMESTAMP DEFAULT now()
 );
+ALTER TABLE veiculos_desmonte ENABLE ROW LEVEL SECURITY;
+
 CREATE INDEX idx_veiculos_modelo_ano ON veiculos_desmonte (modelo_id, ano_fabricacao);
 CREATE INDEX idx_veiculos_geracao ON veiculos_desmonte (geracao_id);
 
@@ -86,6 +98,8 @@ CREATE TABLE categorias_peca (
     nome VARCHAR(50) NOT NULL,
     categoria_pai_id INT NULL REFERENCES categorias_peca(id)
 );
+ALTER TABLE categorias_peca ENABLE ROW LEVEL SECURITY;
+
 
 -- ============================================================
 -- Consumidor final
@@ -104,6 +118,8 @@ CREATE TABLE usuarios_finais (
     cep VARCHAR(9),
     criado_em TIMESTAMP DEFAULT now()
 );
+ALTER TABLE usuarios_finais ENABLE ROW LEVEL SECURITY;
+
 
 -- Cada busca feita (histórico, alimenta personalização/LLM futuro)
 CREATE TABLE consultas (
@@ -115,6 +131,8 @@ CREATE TABLE consultas (
     cep VARCHAR(9),
     criado_em TIMESTAMP DEFAULT now()
 );
+ALTER TABLE consultas ENABLE ROW LEVEL SECURITY;
+
 
 -- ============================================================
 -- Mensageria própria
@@ -130,6 +148,8 @@ CREATE TABLE conversas (
     primeira_resposta_em TIMESTAMP NULL,
     ultima_atividade_em TIMESTAMP DEFAULT now()
 );
+ALTER TABLE conversas ENABLE ROW LEVEL SECURITY;
+
 CREATE INDEX idx_conversas_status ON conversas (status);
 
 -- ============================================================
@@ -147,6 +167,8 @@ CREATE TABLE leads_whatsapp (
     descricao_peca TEXT NOT NULL,
     criado_em TIMESTAMP DEFAULT now()
 );
+ALTER TABLE leads_whatsapp ENABLE ROW LEVEL SECURITY;
+
 CREATE INDEX idx_leads_whatsapp_empresa ON leads_whatsapp (empresa_id);
 CREATE INDEX idx_conversas_empresa ON conversas (empresa_id);
 
@@ -158,6 +180,8 @@ CREATE TABLE mensagens (
     lida BOOLEAN NOT NULL DEFAULT FALSE,
     criado_em TIMESTAMP DEFAULT now()
 );
+ALTER TABLE mensagens ENABLE ROW LEVEL SECURITY;
+
 CREATE INDEX idx_mensagens_conversa ON mensagens (conversa_id);
 
 -- ============================================================
