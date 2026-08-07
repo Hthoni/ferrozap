@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 84" width="140" height="84" role="img" aria-label="Ferrozap">
-  <g transform="translate(46 0)">
-    <polygon points="2,2 46,2 46,36 36,46 2,46" fill="#416180"></polygon>
-    <path d="M15 12 H35 V19 H23 V23.5 H33 V30.5 H23 V37 H15 Z" fill="#f2f2f3"></path>
-  </g>
-  <text x="70" y="78" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="600" font-size="26" letter-spacing="1.3" fill="#1d1f20">FERROZAP</text>
-</svg>
