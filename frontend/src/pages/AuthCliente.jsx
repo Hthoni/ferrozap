@@ -113,7 +113,7 @@ export default function AuthCliente() {
                 required
                 style={{ marginTop: 2 }}
               />
-              <span>Aceito os termos de uso e a política de privacidade do Ferrozap.</span>
+              <span>Aceito os termos de uso e a política de privacidade da Catasucata.</span>
             </label>
             <label style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 16, fontSize: 13 }}>
               <input
@@ -122,7 +122,7 @@ export default function AuthCliente() {
                 onChange={(e) => setAceitePromocional(e.target.checked)}
                 style={{ marginTop: 2 }}
               />
-              <span>Aceito receber informações promocionais do Ferrozap e seus parceiros.</span>
+              <span>Aceito receber informações promocionais da Catasucata e seus parceiros.</span>
             </label>
           </>
         )}

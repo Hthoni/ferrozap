@@ -8,18 +8,18 @@ function lerSessao(chave) {
 }
 
 export function AuthProvider({ children }) {
-  const [cliente, setClienteState] = useState(() => lerSessao("ferrozap_cliente"));
-  const [empresa, setEmpresaState] = useState(() => lerSessao("ferrozap_empresa"));
+  const [cliente, setClienteState] = useState(() => lerSessao("catasucata_cliente"));
+  const [empresa, setEmpresaState] = useState(() => lerSessao("catasucata_empresa"));
 
   const setCliente = (dados) => {
-    if (dados) localStorage.setItem("ferrozap_cliente", JSON.stringify(dados));
-    else localStorage.removeItem("ferrozap_cliente");
+    if (dados) localStorage.setItem("catasucata_cliente", JSON.stringify(dados));
+    else localStorage.removeItem("catasucata_cliente");
     setClienteState(dados);
   };
 
   const setEmpresa = (dados) => {
-    if (dados) localStorage.setItem("ferrozap_empresa", JSON.stringify(dados));
-    else localStorage.removeItem("ferrozap_empresa");
+    if (dados) localStorage.setItem("catasucata_empresa", JSON.stringify(dados));
+    else localStorage.removeItem("catasucata_empresa");
     setEmpresaState(dados);
   };
 
