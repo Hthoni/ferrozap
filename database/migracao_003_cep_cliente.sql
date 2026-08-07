@@ -1,0 +1,1 @@
+ALTER TABLE usuarios_finais ADD COLUMN IF NOT EXISTS cep VARCHAR(9);
