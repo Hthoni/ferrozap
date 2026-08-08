@@ -52,31 +52,38 @@ export default function NavBar() {
       <header className="cs-header">
         <div className="cs-header__tarja"></div>
         <img className="cs-header__logo" src={logoAzul} alt="Catasucata" />
-      </header>
-      <div className="cs-header__acoes">
         {!cliente && !empresa && (
-          <Link className="cs-header__acao" to="/entrar">Entrar</Link>
+          <Link className="cs-header__link-conta" to="/entrar">Entrar</Link>
         )}
-
         {cliente && (
-          <>
-            <Link className="cs-header__acao" to="/buscar">Nova busca</Link>
-            <Link className="cs-header__acao" to="/conversas">
-              Mensagens<Selo quantidade={naoLidas} />
-            </Link>
-          </>
+          <Link className="cs-header__link-conta" to="/minha-conta">Minha conta</Link>
         )}
-
         {empresa && (
-          <>
-            <Link className="cs-header__acao" to="/estoque">Novo cadastro</Link>
-            <Link className="cs-header__acao" to="/conversas-recebidas">
-              Mensagens<Selo quantidade={naoLidas} />
-            </Link>
-            <Link className="cs-header__acao" to="/buscar">Nova busca</Link>
-          </>
+          <Link className="cs-header__link-conta" to="/empresa/minha-conta">Minha conta</Link>
         )}
-      </div>
+      </header>
+      {(cliente || empresa) && (
+        <div className="cs-header__acoes">
+          {cliente && (
+            <>
+              <Link className="cs-header__acao" to="/buscar">Nova busca</Link>
+              <Link className="cs-header__acao" to="/conversas">
+                Mensagens<Selo quantidade={naoLidas} />
+              </Link>
+            </>
+          )}
+
+          {empresa && (
+            <>
+              <Link className="cs-header__acao" to="/estoque">Novo cadastro</Link>
+              <Link className="cs-header__acao" to="/conversas-recebidas">
+                Mensagens<Selo quantidade={naoLidas} />
+              </Link>
+              <Link className="cs-header__acao" to="/buscar">Nova busca</Link>
+            </>
+          )}
+        </div>
+      )}
     </>
   );
 }

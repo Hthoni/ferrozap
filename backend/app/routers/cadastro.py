@@ -31,7 +31,7 @@ def cadastrar_empresa(dados: EmpresaCreate, db: Session = Depends(get_db)):
         email=dados.email.strip().lower(),
         senha_hash=hash_senha(dados.senha),
         telefone=dados.telefone,
-        whatsapp=dados.whatsapp,
+        whatsapp=dados.telefone if dados.telefone_e_whatsapp else None,
         endereco=dados.endereco,
         cep=dados.cep,
     )
@@ -40,7 +40,7 @@ def cadastrar_empresa(dados: EmpresaCreate, db: Session = Depends(get_db)):
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=409, detail="CNPJ ou e-mail já cadastrado.")
+        raise HTTPException(status_code=409, detail="CNPJ, telefone ou e-mail já cadastrado.")
     db.refresh(empresa)
     return empresa
 
@@ -68,8 +68,14 @@ def atualizar_minha_empresa(
         empresa.email = dados.email.strip().lower()
     if dados.telefone is not None:
         empresa.telefone = dados.telefone
-    if dados.whatsapp is not None:
-        empresa.whatsapp = dados.whatsapp
+        # Se o telefone mudou e a empresa não disse explicitamente
+        # "não é WhatsApp" nesse mesmo pedido, mantém acompanhando o
+        # telefone novo (comportamento mais previsível que deixar o
+        # WhatsApp desatualizado silenciosamente).
+        if dados.telefone_e_whatsapp is not False:
+            empresa.whatsapp = dados.telefone
+    if dados.telefone_e_whatsapp is not None:
+        empresa.whatsapp = empresa.telefone if dados.telefone_e_whatsapp else None
     if dados.endereco is not None:
         empresa.endereco = dados.endereco
     if dados.cep is not None:

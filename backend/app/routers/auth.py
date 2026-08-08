@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -26,13 +25,9 @@ router = APIRouter(prefix="/auth", tags=["autenticacao"])
 
 @router.post("/empresas/login", response_model=TokenOut)
 def login_empresa(dados: EmpresaLogin, db: Session = Depends(get_db)):
-    empresa = (
-        db.query(Empresa)
-        .filter(func.lower(Empresa.email) == dados.email.strip().lower())
-        .first()
-    )
+    empresa = db.query(Empresa).filter(Empresa.telefone == dados.telefone).first()
     if not empresa or not verificar_senha(dados.senha, empresa.senha_hash):
-        raise HTTPException(status_code=401, detail="E-mail ou senha inválidos.")
+        raise HTTPException(status_code=401, detail="Telefone ou senha inválidos.")
     if not empresa.ativo:
         raise HTTPException(status_code=403, detail="Empresa inativa.")
     return TokenOut(access_token=criar_token(empresa.id, "empresa"))

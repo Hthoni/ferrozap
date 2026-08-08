@@ -1,4 +1,4 @@
-# Ferrozap
+# Catasucata
 
 Marketplace que conecta consumidores finais a ferro-velhos/desmontadoras
 para busca de peças automotivas usadas, com matching por geração de veículo
@@ -7,9 +7,9 @@ e mensageria própria entre as partes.
 ## Estrutura do repositório
 
 ```
-ferrozap/
+catasucata/
   backend/     API em Python (FastAPI) — busca, matching, mensageria, admin
-  frontend/    Aplicação web (framework a definir)
+  frontend/    Aplicação web (React + Vite)
   database/    Schema SQL e migrations
   docs/        Decisões de arquitetura e produto
 ```

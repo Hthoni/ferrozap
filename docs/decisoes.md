@@ -581,6 +581,48 @@ solidificação em um documento de especificação formal.
   com `ENABLE ROW LEVEL SECURITY` na mesma migração que a cria — não
   esperar alerta de segurança pra lembrar disso
 
+## Tela de entrada unificada e correção de WhatsApp na conversa
+
+- **Bug real corrigido**: a conversa nunca carregava o WhatsApp da
+  empresa (`empresa_nome`/`empresa_whatsapp` não existiam na saída da
+  API) — por isso o botão de WhatsApp nunca aparecia na tela de
+  mensagens, mesmo respondendo de novo. Corrigido nos três endpoints
+  (`iniciar_conversa`, `/minhas`, `/recebidas`), testado.
+- Empresa sem WhatsApp cadastrado: não trava mais o cliente com erro —
+  segue só por mensageria própria, com aviso claro na tela.
+- `ConversaDetalhe.jsx`: responder agora também abre WhatsApp (quando
+  a empresa tem número cadastrado), do mesmo jeito que já acontecia no
+  primeiro contato — os dois lados (contato inicial e resposta
+  seguinte) se comportam igual agora.
+- **Header**: "Minha conta"/"Entrar" saiu da barra de botões (abaixo
+  da tarja) e virou um link pequeno **acima** da tarja, canto direito
+  — mesma posição nos dois estados (logado/deslogado)
+- **Tela de login unificada** (`Entrar.jsx`, substitui `AuthCliente.jsx`
+  e `AuthEmpresa.jsx`): duas alternâncias — "Já tenho conta" / "Nova
+  conta?" e "Cliente" / "Desmontadora" — resolve o problema de clicar
+  em "Entrar" e não ter como escolher desmontadora. Login continua
+  usando o mecanismo de cada tipo como já era (cliente por telefone,
+  empresa por e-mail) — **decisão de unificar isso também pra
+  telefone fica pendente de confirmação** (ver próxima seção)
+
+## Login da empresa: e-mail → telefone (mesmo padrão do cliente)
+
+- **Decisão confirmada**: telefone é agora o identificador central da
+  empresa — login por `telefone` (era `email`), único e obrigatório
+  no banco (`empresas.telefone NOT NULL UNIQUE`,
+  `migracao_006_telefone_login_empresa.sql`)
+- **Simplificação de campo**: não existe mais um campo `whatsapp`
+  separado no formulário — é o mesmo `telefone`, com uma checkbox
+  "Esse número é WhatsApp" (marcada por padrão). O backend calcula
+  `empresa.whatsapp` sozinho a partir disso (`telefone` se marcado,
+  `null` se não) — todo o código que já dependia de `empresa.whatsapp`
+  pro botão de WhatsApp continua funcionando sem mudança nenhuma
+- Editar o telefone depois também atualiza o WhatsApp automaticamente,
+  a menos que a empresa desmarque a caixa explicitamente — testado
+  nos dois cenários
+- E-mail continua existindo (dado de contato), só não é mais usado
+  pra login
+
 ## Pendências em aberto
 
 - Geocodificação de CEP por centróide de município (IBGE), hoje

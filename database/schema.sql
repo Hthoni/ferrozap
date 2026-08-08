@@ -60,7 +60,7 @@ CREATE TABLE empresas (
     verificado_em TIMESTAMP NULL,
     email VARCHAR(120) NOT NULL UNIQUE,
     senha_hash VARCHAR(255) NOT NULL,
-    telefone VARCHAR(20),
+    telefone VARCHAR(20) NOT NULL UNIQUE,
     whatsapp VARCHAR(20),
     endereco TEXT,
     cep VARCHAR(9),

@@ -4,8 +4,7 @@ import NavBar from "./components/NavBar";
 
 import Busca from "./pages/Busca";
 import Resultados from "./pages/Resultados";
-import AuthCliente from "./pages/AuthCliente";
-import AuthEmpresa from "./pages/AuthEmpresa";
+import Entrar from "./pages/Entrar";
 import MinhasConversas from "./pages/MinhasConversas";
 import ConversaDetalhe from "./pages/ConversaDetalhe";
 import EstoqueEmpresa from "./pages/EstoqueEmpresa";
@@ -23,8 +22,8 @@ export default function App() {
           <Route path="/" element={<Busca />} />
           <Route path="/buscar" element={<Busca />} />
           <Route path="/resultados" element={<Resultados />} />
-          <Route path="/entrar" element={<AuthCliente />} />
-          <Route path="/empresa/entrar" element={<AuthEmpresa />} />
+          <Route path="/entrar" element={<Entrar tipoInicial="cliente" />} />
+          <Route path="/empresa/entrar" element={<Entrar tipoInicial="empresa" />} />
           <Route path="/conversas" element={<MinhasConversas />} />
           <Route path="/conversas/:id" element={<ConversaDetalhe />} />
           <Route path="/estoque" element={<EstoqueEmpresa />} />

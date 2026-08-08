@@ -12,7 +12,7 @@ export default function MinhaContaEmpresa() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
+  const [telefoneEhWhatsapp, setTelefoneEhWhatsapp] = useState(true);
   const [endereco, setEndereco] = useState("");
   const [cep, setCep] = useState("");
   const [erroPerfil, setErroPerfil] = useState("");
@@ -32,7 +32,7 @@ export default function MinhaContaEmpresa() {
       setNome(perfil.nome || "");
       setEmail(perfil.email || "");
       setTelefone(perfil.telefone || "");
-      setWhatsapp(perfil.whatsapp || "");
+      setTelefoneEhWhatsapp(Boolean(perfil.whatsapp));
       setEndereco(perfil.endereco || "");
       setCep(perfil.cep || "");
     });
@@ -44,7 +44,10 @@ export default function MinhaContaEmpresa() {
     setSucessoPerfil("");
     setSalvandoPerfil(true);
     try {
-      await api.atualizarMinhaEmpresa({ nome, email, telefone, whatsapp, endereco, cep }, empresa.token);
+      await api.atualizarMinhaEmpresa(
+        { nome, email, telefone, telefone_e_whatsapp: telefoneEhWhatsapp, endereco, cep },
+        empresa.token
+      );
       setSucessoPerfil("Dados atualizados.");
     } catch (err) {
       setErroPerfil(err.message);
@@ -107,12 +110,17 @@ export default function MinhaContaEmpresa() {
           <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>Telefone / WhatsApp</label>
-          <input className="input" value={telefone} onChange={(e) => setTelefone(e.target.value)} />
-        </div>
-        <div className="field" style={{ marginBottom: 16 }}>
-          <label>WhatsApp (com DDD)</label>
-          <input className="input" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} />
+          <label>Telefone (de preferência seu WhatsApp)</label>
+          <input className="input" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
+          <label style={{ display: "flex", alignItems: "flex-start", gap: 8, marginTop: 8, fontSize: 13 }}>
+            <input
+              type="checkbox"
+              checked={telefoneEhWhatsapp}
+              onChange={(e) => setTelefoneEhWhatsapp(e.target.checked)}
+              style={{ marginTop: 2 }}
+            />
+            <span>Esse número é WhatsApp (é como o cliente vai te chamar)</span>
+          </label>
         </div>
         <div className="field" style={{ marginBottom: 16 }}>
           <label>Endereço</label>

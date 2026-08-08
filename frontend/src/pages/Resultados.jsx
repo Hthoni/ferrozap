@@ -32,6 +32,7 @@ export default function Resultados() {
   const [linkSalvoId, setLinkSalvoId] = useState(null);
   const [whatsappClicadoId, setWhatsappClicadoId] = useState(null);
   const [linkWhatsapp, setLinkWhatsapp] = useState("");
+  const [somenteMensageriaId, setSomenteMensageriaId] = useState(null);
 
   const { cliente } = useAuth();
   const navigate = useNavigate();
@@ -55,19 +56,16 @@ export default function Resultados() {
     setTexto("");
     setLinkSalvoId(null);
     setWhatsappClicadoId(null);
+    setSomenteMensageriaId(null);
     setErro("");
   }
 
   function salvarESalvarLink(e, grupo) {
     e.preventDefault();
-    if (!grupo.whatsapp) {
-      setErro("Essa desmontadora ainda não cadastrou um número de WhatsApp.");
-      return;
-    }
     const melhorVeiculo = grupo.veiculos[0]; // já vem ordenado, exato primeiro
 
-    // Mensageria própria de volta — cria a conversa de verdade no
-    // nosso sistema (histórico, selo de lida/não lida, etc.)
+    // Mensageria própria — sempre acontece, com ou sem WhatsApp
+    // cadastrado (histórico, selo de lida/não lida, etc.)
     api
       .iniciarConversa(
         {
@@ -81,6 +79,14 @@ export default function Resultados() {
         cliente.token
       )
       .catch((err) => setErro(err.message));
+
+    if (!grupo.whatsapp) {
+      // Empresa sem WhatsApp cadastrado — segue só por mensageria,
+      // sem travar o cliente nem tentar montar link nenhum.
+      setSomenteMensageriaId(grupo.empresa_id);
+      setLinkSalvoId(null);
+      return;
+    }
 
     const nomeCliente = cliente?.nome || "um cliente";
     const mensagem =
@@ -159,7 +165,12 @@ export default function Resultados() {
               })}
             </ul>
 
-            {whatsappClicadoId === grupo.empresa_id ? (
+            {somenteMensageriaId === grupo.empresa_id ? (
+              <p style={{ fontSize: 13, margin: 0 }}>
+                Mensagem enviada pelo site. Essa desmontadora ainda não tem WhatsApp
+                cadastrado — acompanhe a resposta em Mensagens.
+              </p>
+            ) : whatsappClicadoId === grupo.empresa_id ? (
               <p
                 style={{
                   background: "var(--fz-aco)",

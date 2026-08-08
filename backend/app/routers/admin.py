@@ -28,7 +28,7 @@ class AdminEmpresaUpdate(BaseModel):
     nome: str | None = None
     email: EmailStr | None = None
     telefone: str | None = None
-    whatsapp: str | None = None
+    telefone_e_whatsapp: bool | None = None
     endereco: str | None = None
     cep: str | None = None
     latitude: float | None = None
@@ -162,8 +162,10 @@ def editar_empresa_admin(empresa_id: int, dados: AdminEmpresaUpdate, db: Session
         empresa.email = dados.email.strip().lower()
     if dados.telefone is not None:
         empresa.telefone = dados.telefone
-    if dados.whatsapp is not None:
-        empresa.whatsapp = dados.whatsapp
+        if dados.telefone_e_whatsapp is not False:
+            empresa.whatsapp = dados.telefone
+    if dados.telefone_e_whatsapp is not None:
+        empresa.whatsapp = empresa.telefone if dados.telefone_e_whatsapp else None
     if dados.endereco is not None:
         empresa.endereco = dados.endereco
     if dados.cep is not None:

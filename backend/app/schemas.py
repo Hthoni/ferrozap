@@ -10,8 +10,8 @@ class EmpresaCreate(BaseModel):
     uf: str = Field(min_length=2, max_length=2)
     email: EmailStr
     senha: str = Field(min_length=8)
-    telefone: str | None = None
-    whatsapp: str | None = None
+    telefone: str
+    telefone_e_whatsapp: bool = True
     endereco: str | None = None
     cep: str
 
@@ -60,7 +60,7 @@ class VeiculoDesmonteComModeloOut(VeiculoDesmonteOut):
 
 
 class EmpresaLogin(BaseModel):
-    email: EmailStr
+    telefone: str
     senha: str
 
 
@@ -130,7 +130,7 @@ class EmpresaUpdate(BaseModel):
     nome: str | None = None
     email: EmailStr | None = None
     telefone: str | None = None
-    whatsapp: str | None = None
+    telefone_e_whatsapp: bool | None = None
     endereco: str | None = None
     cep: str | None = None
 
@@ -202,6 +202,8 @@ class ConversaComVeiculoOut(ConversaOut):
     ano_fabricacao: int
     submodelo_nome: str | None = None
     tem_nao_lida: bool = False
+    empresa_nome: str
+    empresa_whatsapp: str | None = None
 
 
 class MensagemCreate(BaseModel):
