@@ -47,9 +47,15 @@ export default function NavBar() {
     return () => clearInterval(intervalo);
   }, [token]);
 
+  // CS-015: toda a navegação (marca + link de conta + barra de ações)
+  // agora vive dentro de um único <header>, em vez de dois elementos
+  // irmãos soltos -- landmark único, mais claro pra leitor de tela e
+  // pra manutenção. Visualmente nada muda: .cs-header continua com a
+  // mesma altura fixa da tarja, .cs-header__acoes continua sendo uma
+  // barra separada logo abaixo, no fluxo normal.
   return (
-    <>
-      <header className="cs-header">
+    <header>
+      <div className="cs-header">
         <div className="cs-header__tarja"></div>
         <Link className="cs-header__logo-link" to="/buscar" aria-label="Ir para a página inicial do Catasucata">
           <img className="cs-header__logo" src={logoAzul} alt="Catasucata" />
@@ -63,9 +69,9 @@ export default function NavBar() {
         {empresa && (
           <Link className="cs-header__link-conta" to="/empresa/minha-conta">Minha conta</Link>
         )}
-      </header>
+      </div>
       {(cliente || empresa) && (
-        <div className="cs-header__acoes">
+        <nav className="cs-header__acoes" aria-label="Navegação principal">
           {cliente && (
             <>
               <Link className="cs-header__acao" to="/buscar">Nova busca</Link>
@@ -84,8 +90,8 @@ export default function NavBar() {
               <Link className="cs-header__acao" to="/buscar">Nova busca</Link>
             </>
           )}
-        </div>
+        </nav>
       )}
-    </>
+    </header>
   );
 }
