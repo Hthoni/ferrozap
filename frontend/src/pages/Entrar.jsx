@@ -5,14 +5,14 @@ import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
 
 const CAMPOS_CADASTRO_EMPRESA = [
-  { nome: "nome", label: "Nome da empresa" },
-  { nome: "cnpj", label: "CNPJ" },
-  { nome: "credenciamento_detran", label: "Número do credenciamento no Detran" },
-  { nome: "uf", label: "UF (ex: SP)" },
-  { nome: "email", label: "E-mail" },
-  { nome: "telefone", label: "Telefone (de preferência seu WhatsApp — com DDD)" },
-  { nome: "endereco", label: "Endereço completo" },
-  { nome: "cep", label: "CEP" },
+  { nome: "nome", label: "Nome da empresa", autoComplete: "organization" },
+  { nome: "cnpj", label: "CNPJ", autoComplete: "off" },
+  { nome: "credenciamento_detran", label: "Número do credenciamento no Detran", autoComplete: "off" },
+  { nome: "uf", label: "UF (ex: SP)", autoComplete: "address-level1" },
+  { nome: "email", label: "E-mail", autoComplete: "email" },
+  { nome: "telefone", label: "Telefone (de preferência seu WhatsApp — com DDD)", autoComplete: "tel" },
+  { nome: "endereco", label: "Endereço completo", autoComplete: "street-address" },
+  { nome: "cep", label: "CEP", autoComplete: "postal-code" },
 ];
 
 export default function Entrar({ tipoInicial = "cliente" }) {
@@ -139,27 +139,37 @@ export default function Entrar({ tipoInicial = "cliente" }) {
       )}
 
       {tipo === "cliente" ? (
-        <form onSubmit={enviarCliente} className="blueprint" style={{ padding: 24 }}>
+        <form onSubmit={enviarCliente} className="blueprint" style={{ padding: 24 }} noValidate>
           <Corners />
           {modo === "cadastro" && (
             <div className="field" style={{ marginBottom: 16 }}>
-              <label>Nome</label>
-              <input className="input" value={nome} onChange={(e) => setNome(e.target.value)} required />
+              <label htmlFor="cliente-nome">Nome</label>
+              <input id="cliente-nome" name="name" autoComplete="name" className="input" value={nome} onChange={(e) => setNome(e.target.value)} required />
             </div>
           )}
           {modo === "cadastro" && (
             <div className="field" style={{ marginBottom: 16 }}>
-              <label>E-mail</label>
-              <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <label htmlFor="cliente-email">E-mail</label>
+              <input id="cliente-email" name="email" autoComplete="email" className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
           )}
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Telefone (com DDD)</label>
-            <input className="input" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
+            <label htmlFor="cliente-telefone">Telefone (com DDD)</label>
+            <input id="cliente-telefone" name="tel" autoComplete="tel" className="input" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
           </div>
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Senha</label>
-            <input className="input" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} minLength={8} required />
+            <label htmlFor="cliente-senha">Senha</label>
+            <input
+              id="cliente-senha"
+              name="password"
+              autoComplete={modo === "cadastro" ? "new-password" : "current-password"}
+              className="input"
+              type="password"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              minLength={8}
+              required
+            />
           </div>
           {modo === "cadastro" && (
             <>
@@ -173,19 +183,22 @@ export default function Entrar({ tipoInicial = "cliente" }) {
               </label>
             </>
           )}
-          {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
+          {erro && <p role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13, marginBottom: 12 }}>{erro}</p>}
           <button className="btn btn-primary btn-block" type="submit" disabled={carregando}>
             {carregando ? "Aguarde..." : modo === "login" ? "Entrar" : "Criar conta e entrar"}
           </button>
         </form>
       ) : (
-        <form onSubmit={enviarEmpresa} className="blueprint" style={{ padding: 24 }}>
+        <form onSubmit={enviarEmpresa} className="blueprint" style={{ padding: 24 }} noValidate>
           <Corners />
           {modo === "cadastro" &&
             CAMPOS_CADASTRO_EMPRESA.map((campo) => (
               <div className="field" style={{ marginBottom: 16 }} key={campo.nome}>
-                <label>{campo.label}</label>
+                <label htmlFor={`empresa-${campo.nome}`}>{campo.label}</label>
                 <input
+                  id={`empresa-${campo.nome}`}
+                  name={campo.nome}
+                  autoComplete={campo.autoComplete}
                   className="input"
                   value={formEmpresa[campo.nome] || ""}
                   onChange={(e) => atualizarCampoEmpresa(campo.nome, e.target.value)}
@@ -206,8 +219,11 @@ export default function Entrar({ tipoInicial = "cliente" }) {
             ))}
           {modo === "login" && (
             <div className="field" style={{ marginBottom: 16 }}>
-              <label>Telefone (com DDD)</label>
+              <label htmlFor="empresa-login-telefone">Telefone (com DDD)</label>
               <input
+                id="empresa-login-telefone"
+                name="tel"
+                autoComplete="tel"
                 className="input"
                 value={formEmpresa.telefone || ""}
                 onChange={(e) => atualizarCampoEmpresa("telefone", e.target.value)}
@@ -216,10 +232,20 @@ export default function Entrar({ tipoInicial = "cliente" }) {
             </div>
           )}
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Senha</label>
-            <input className="input" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} minLength={8} required />
+            <label htmlFor="empresa-senha">Senha</label>
+            <input
+              id="empresa-senha"
+              name="password"
+              autoComplete={modo === "cadastro" ? "new-password" : "current-password"}
+              className="input"
+              type="password"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              minLength={8}
+              required
+            />
           </div>
-          {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}
+          {erro && <p role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}
           <button className="btn btn-primary btn-block" type="submit" disabled={carregando}>
             {carregando ? "Aguarde..." : modo === "login" ? "Entrar" : "Enviar cadastro"}
           </button>
