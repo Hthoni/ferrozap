@@ -1,8 +1,259 @@
-.cs-header__logo {
+/* =========================================================================
+   Catasucata — camada de marca sobre o sistema Industry.
+   Carregue SEMPRE nesta ordem:
+       <link rel="stylesheet" href="css/industry.css">   (tokens + componentes)
+       <link rel="stylesheet" href="css/catasucata.css"> (marca + padroes do produto)
+   Nunca escreva hex, fonte ou px que os tokens ja carregam.
+   ========================================================================= */
+
+/* --- fontes ------------------------------------------------------------ */
+@import url("https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap");
+
+/* --- paleta da marca (handoff.md, seção 2) ------------------------------
+   Sobrescreve os tokens base do Industry com os valores exatos da
+   Catasucata. Único ponto de verdade da cor — nenhum componente
+   escreve hex direto. */
+:root {
+  --color-bg:         #f1f2f4;
+  --color-surface:    #ffffff;
+  --color-text:       #16181b;
+  --color-accent:     #2e5c8a;
+  --color-accent-600: #274e75;
+  --color-accent-300: #bfd0e0;
+  --color-accent-100: #e7edf4;
+  --color-neutral-700: #4e5359;
+  --color-neutral-600: #6b7076;
+  --color-neutral-500: #868a90;
+  --color-divider:    #cfd2d6;
+}
+
+/* --- aliases semanticos da marca --------------------------------------- */
+:root {
+  --fz-aco:        var(--color-accent);      /* cor da marca      */
+  --fz-aco-forte:  var(--color-accent-600);  /* texto/acao        */
+  --fz-aco-campo:  var(--color-accent-900);  /* faixa cheia       */
+  --fz-tinta:      var(--color-text);        /* texto             */
+  --fz-papel:      var(--color-bg);          /* fundo             */
+  --fz-fundo-foto: var(--color-neutral-100); /* fundo de produto  */
+  --fz-linha:      var(--color-divider);
+
+  /* estados funcionais — NAO sao cores de marca, so status de anuncio */
+  --fz-disponivel: #2f7a4d;
+  --fz-vendido:    #9a3b32;
+  --fz-whatsapp:   #25d366; /* cor oficial da marca WhatsApp, uso deliberado só no botão de envio */
+
+  --fz-max:        1180px;  /* largura maxima de conteudo */
+  --fz-gutter:     40px;
+}
+
+/* --- marca ------------------------------------------------------------- */
+.fz-logo { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; color: var(--fz-tinta); }
+.fz-logo svg { display: block; }
+.fz-logo-nome {
+  font-family: var(--font-heading); font-weight: 600;
+  font-size: 20px; letter-spacing: 0.05em; line-height: 1;
+}
+.fz-logo--reversa, .fz-logo--reversa .fz-logo-nome { color: var(--fz-papel); }
+
+/* --- estrutura de pagina ----------------------------------------------- */
+.fz-wrap { max-width: var(--fz-max); margin: 0 auto; padding: 0 var(--fz-gutter); }
+.fz-secao { padding: 40px 0; border-top: 1px solid var(--fz-linha); }
+.fz-secao-num {
+  font-family: var(--font-heading); font-size: 13px;
+  letter-spacing: 0.2em; color: var(--fz-aco-forte);
+}
+.fz-campo { background: var(--fz-aco-campo); color: var(--fz-papel); }
+.fz-campo h1, .fz-campo h2, .fz-campo h3 { color: var(--fz-papel); }
+
+/* --- rotulos / dados tecnicos ------------------------------------------ */
+.fz-rotulo {
+  font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+.fz-rotulo--aco { color: var(--fz-aco-forte); }
+.fz-codigo {           /* OEM, lote, placa — nunca em italico */
+  font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--color-neutral-700);
+}
+
+/* --- selo de desmontadora verificada ----------------------------------- */
+.fz-selo {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--fz-aco-forte);
+}
+.fz-selo svg { width: 15px; height: 15px; stroke-width: 1.5; }
+
+/* --- moldura de imagem (quadro de fio + marcas de canto) ----------------
+   Markup: <figure class="fz-foto blueprint">
+             <i class="corner tl"></i><i class="corner tr"></i>
+             <i class="corner bl"></i><i class="corner br"></i>
+             <img src="..." alt="...">
+           </figure>
+   Foto de PRODUTO nunca leva .duotone. Institucional leva.            */
+.fz-foto { margin: 0; padding: 16px; }
+.fz-foto img {
+  display: block; width: 100%; aspect-ratio: 4 / 3;
+  object-fit: cover; background: var(--fz-fundo-foto);
+  border-radius: 0;
+}
+
+/* --- card de peca ------------------------------------------------------ */
+.fz-card-peca {
+  display: flex; flex-direction: column; gap: var(--space-3);
+  padding: var(--space-4);
+  align-items: flex-start; /* sem isso, todo filho estica pra largura
+    total (padrão do flex column) — foi a causa da "caixa" larga onde
+    devia ser uma pilula pequena de distancia */
+}
+.fz-card-peca .fz-card-titulo {
+  font-family: var(--font-heading); font-weight: 600;
+  font-size: 24px; line-height: 1.1;
+}
+.fz-card-peca .fz-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.fz-preco-linha {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding-top: var(--space-2); border-top: 1px solid var(--fz-linha);
+}
+.fz-preco { font-family: var(--font-heading); font-size: 30px; line-height: 1; }
+.fz-preco-novo { font-size: 13px; color: var(--color-neutral-600); }
+
+/* --- grade de categorias (iconografia do catalogo) ---------------------- */
+.fz-categorias {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  border-top: 1px solid var(--fz-linha); border-left: 1px solid var(--fz-linha);
+}
+.fz-categoria {
+  display: flex; flex-direction: column; align-items: center; gap: var(--space-3);
+  padding: var(--space-6) var(--space-4); text-align: center; text-decoration: none;
+  border-right: 1px solid var(--fz-linha); border-bottom: 1px solid var(--fz-linha);
+  color: var(--fz-tinta);
+}
+.fz-categoria:hover { background: var(--color-accent-100); }
+.fz-categoria:active { background: var(--color-accent-200); }
+.fz-categoria svg { width: 30px; height: 30px; stroke-width: 1.5; color: var(--fz-aco-forte); }
+.fz-categoria span { font-family: var(--font-heading); font-size: 15px; letter-spacing: 0.04em; }
+
+/* --- status de anuncio -------------------------------------------------- */
+.fz-status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.fz-status::before { content: ""; width: 7px; height: 7px; }
+.fz-status--disponivel::before { background: var(--fz-disponivel); }
+.fz-status--vendido::before { background: var(--fz-vendido); }
+.fz-status--vendido { color: var(--color-neutral-600); }
+
+/* --- extensão do produto: terceiro estado de status para conversas
+   (aguardando resposta) — reaproveita --fz-aco, não introduz cor nova */
+.fz-status--aguardando::before { background: var(--fz-aco); }
+
+/* --- extensão do produto: legibilidade geral (desktop e mobile) --------- */
+body { font-size: 16px; }
+.card-body { font-size: 15px; }
+.field label { font-size: 14px; }
+.input, select.input, textarea.input { font-size: 16px; } /* 16px evita zoom automático do Safari no iOS ao focar campo */
+button, .btn { font-size: 15px; }
+
+/* Textos secundários (data, distância, legenda) eram pequenos demais
+   e com contraste baixo de propósito no sistema original (decoração
+   discreta). Aumentado sem perder a hierarquia visual — ainda menor
+   que o texto principal, só não ilegível. */
+.card-meta { font-size: 13px !important; color: var(--color-neutral-800) !important; }
+.fz-selo { font-size: 13px; }
+.fz-status { font-size: 13px; }
+.fz-rotulo { font-size: 12px; }
+.fz-status--vendido { color: var(--color-neutral-800); }
+
+/* --- cabeçalho (handoff.md, seção 1 "Regra de aplicação no cabeçalho") -
+   A tarja é o próprio cabeçalho: nasce atrás do hexágono e vai até a
+   borda direita da tela; à esquerda não fecha. O hexágono fica solto,
+   inteiro, entre a barra de status e a tarja — nunca clipar.
+   --header-h é a única medida que se ajusta; o resto é derivado.
+   Os botões de ação NÃO ficam dentro da tarja — ficam numa barra
+   abaixo dela, no fundo normal da página. */
+.cs-header {
+  --header-h: 56px;
+  --header-img-h: calc(var(--header-h) / 0.7275);
+  --header-img-left: 16px;
+  --header-top-gap: 30px; /* respiro acima do hexágono + espaço pro link de conta */
+  --tarja-left: calc(var(--header-img-left) + (var(--header-img-h) * 0.3697));
+  position: relative;
+  height: calc(var(--header-img-h) + var(--header-top-gap));
+  background: var(--color-bg);
+  overflow: visible;
+}
+.cs-header__tarja {
+  position: absolute;
+  bottom: 0;
+  left: var(--tarja-left);
+  right: 0;
+  height: var(--header-h);
+  background: #000000;
+}
+.cs-header__logo-link {
   position: absolute;
   bottom: 0;
   left: var(--header-img-left);
   height: var(--header-img-h);
+  display: block;
+  line-height: 0;
+}
+.cs-header__logo {
+  height: 100%;
   width: auto;
   display: block;
+}
+.cs-header__link-conta {
+  position: absolute;
+  top: 6px;
+  right: 16px;
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 12px;
+  text-decoration: none;
+  min-height: 44px; /* alvo de toque */
+  display: inline-flex; align-items: flex-start;
+}
+.cs-header__link-conta:hover { color: var(--color-accent); }
+.cs-header__acoes {
+  display: flex; gap: 6px;
+  justify-content: flex-end; /* botões se acumulam da direita pra esquerda */
+  padding: 10px 16px;
+  background: var(--color-bg);
+}
+.cs-header__acao {
+  background: none; border: 1px solid var(--color-divider); padding: 0 10px;
+  color: var(--color-text); text-transform: uppercase;
+  font-family: var(--font-body); font-size: 10px; letter-spacing: 0.07em;
+  white-space: nowrap; text-decoration: none;
+  height: 22px; display: inline-flex; align-items: center;
+  box-sizing: border-box;
+}
+.cs-header__acao:focus-visible {
+  outline: 2px solid var(--color-accent); outline-offset: 2px;
+}
+
+/* --- título da home: duas linhas, a segunda menor e mais clara --------- */
+.cs-titulo-home {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 44px;
+  line-height: 0.98;
+  margin: 0 0 2px;
+  color: var(--color-text);
+}
+.cs-titulo-home__linha2 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 29px;
+  line-height: 0.98;
+  margin: 0 0 24px;
+  color: var(--color-neutral-700);
+}
+@media (max-width: 900px) {
+  :root { --fz-gutter: 24px; }
+  .fz-wrap { padding-left: 20px !important; padding-right: 20px !important; }
+  .fz-categorias { grid-template-columns: repeat(3, 1fr); }
+  .fz-secao { padding: 28px 0; }
+}
+@media (max-width: 560px) {
+  .fz-categorias { grid-template-columns: repeat(2, 1fr); }
 }
