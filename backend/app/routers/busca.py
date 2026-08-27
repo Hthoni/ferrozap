@@ -123,12 +123,23 @@ def buscar(
             key=lambda v: (ordem_confianca[v["nivel_confianca"]], abs(v["ano_fabricacao"] - ano))
         )
 
-    # Ordena os cards (empresas): na aba compatibilidade, quem tem
-    # match exato vem primeiro, desempate por distância; na aba
-    # distância, é só distância, sem considerar match.
+    # Ordena os cards (empresas): na aba distância é só distância. Na
+    # aba compatibilidade, usa o MELHOR veículo de cada empresa (já é
+    # o primeiro da lista, por causa do sort acima) — nível de
+    # confiança primeiro, depois proximidade do ano buscado, distância
+    # só como desempate final. Antes disso, o critério de desempate
+    # dentro do mesmo nível de confiança era só distância, ignorando
+    # qual empresa tinha o ano mais próximo do buscado (CS-007).
     if ordenar_por == "distancia":
         resultado.sort(key=lambda g: g["distancia_km"])
     else:
-        resultado.sort(key=lambda g: (not g["tem_match_exato"], g["distancia_km"]))
+        def chave_compatibilidade(grupo):
+            melhor = grupo["veiculos"][0]
+            return (
+                ordem_confianca[melhor["nivel_confianca"]],
+                abs(melhor["ano_fabricacao"] - ano),
+                grupo["distancia_km"],
+            )
+        resultado.sort(key=chave_compatibilidade)
 
     return resultado
