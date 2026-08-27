@@ -227,14 +227,19 @@ export default function Busca() {
       <h1 className="cs-titulo-home">Sua peça existe.</h1>
       <p className="cs-titulo-home__linha2">Vamos encontrá-la?</p>
 
-      <form onSubmit={buscar} className="blueprint" style={{ padding: 24, maxWidth: 480 }}>
+      {/* CS-017: novalidate -- os erros próprios (abaixo) substituem os
+          balões nativos do navegador, que não seguem a identidade
+          visual nem são anunciados de forma consistente por leitor de tela. */}
+      <form onSubmit={buscar} className="blueprint" style={{ padding: 24, maxWidth: 480 }} noValidate>
         <Corners />
 
         {/* Fabricante */}
         {!fabricanteId && !modoTextoFabricante && (
           <div className="field" style={{ marginBottom: 8 }}>
-            <label>Fabricante</label>
+            <label htmlFor="campo-fabricante">Fabricante</label>
             <select
+              id="campo-fabricante"
+              name="fabricante"
               className="input"
               value=""
               onChange={(e) => {
@@ -263,13 +268,16 @@ export default function Busca() {
         )}
         {!fabricanteId && modoTextoFabricante && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Nome da marca</label>
+            <label htmlFor="campo-fabricante-texto">Nome da marca</label>
             <div style={{ display: "flex", gap: 8 }}>
               <input
+                id="campo-fabricante-texto"
+                name="fabricante-texto"
                 className="input"
                 value={textoFabricante}
                 onChange={(e) => setTextoFabricante(e.target.value)}
                 placeholder="Ex: Gurgel"
+                autoComplete="off"
               />
               <button
                 type="button"
@@ -293,9 +301,9 @@ export default function Busca() {
         )}
         {fabricanteId && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Fabricante</label>
+            <span id="rotulo-fabricante-escolhido" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Fabricante</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span className="fz-codigo">{fabricanteNome}</span>
+              <span className="fz-codigo" aria-labelledby="rotulo-fabricante-escolhido">{fabricanteNome}</span>
               <button type="button" className="btn btn-ghost" style={{ width: "auto", fontSize: 12 }} onClick={trocarFabricante}>
                 Trocar
               </button>
@@ -306,8 +314,8 @@ export default function Busca() {
         {/* Modelo — só aparece depois que o fabricante está resolvido */}
         {fabricanteId && !modeloId && !modoTextoModelo && (
           <div className="field" style={{ marginBottom: 8 }}>
-            <label>Modelo</label>
-            <select className="input" value={modeloId} onChange={(e) => setModeloId(e.target.value)} required>
+            <label htmlFor="campo-modelo">Modelo</label>
+            <select id="campo-modelo" name="modelo" className="input" value={modeloId} onChange={(e) => setModeloId(e.target.value)} required>
               <option value="">Selecione</option>
               {modelos.map((m) => (
                 <option key={m.id} value={m.id}>{m.nome}</option>
@@ -327,13 +335,16 @@ export default function Busca() {
         )}
         {fabricanteId && !modeloId && modoTextoModelo && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Nome do modelo</label>
+            <label htmlFor="campo-modelo-texto">Nome do modelo</label>
             <div style={{ display: "flex", gap: 8 }}>
               <input
+                id="campo-modelo-texto"
+                name="modelo-texto"
                 className="input"
                 value={textoModelo}
                 onChange={(e) => setTextoModelo(e.target.value)}
                 placeholder="Ex: BR-800"
+                autoComplete="off"
               />
               <button
                 type="button"
@@ -357,9 +368,9 @@ export default function Busca() {
         )}
         {modeloId && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Modelo</label>
+            <span id="rotulo-modelo-escolhido" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Modelo</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span className="fz-codigo">
+              <span className="fz-codigo" aria-labelledby="rotulo-modelo-escolhido">
                 {modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo}
               </span>
               <button
@@ -376,8 +387,8 @@ export default function Busca() {
 
         {temSubmodelo && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Versão (opcional)</label>
-            <select className="input" value={submodeloId} onChange={(e) => setSubmodeloId(e.target.value)}>
+            <label htmlFor="campo-submodelo">Versão (opcional)</label>
+            <select id="campo-submodelo" name="submodelo" className="input" value={submodeloId} onChange={(e) => setSubmodeloId(e.target.value)}>
               <option value="">Selecione</option>
               {submodelos.map((s) => (
                 <option key={s.id} value={s.id}>{s.nome}</option>
@@ -387,9 +398,11 @@ export default function Busca() {
         )}
 
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>Ano de fabricação</label>
+          <label htmlFor="campo-ano">Ano de fabricação</label>
           {temGeracaoReal ? (
             <select
+              id="campo-ano"
+              name="ano"
               className="input"
               value={ano}
               onChange={(e) => setAno(e.target.value)}
@@ -403,6 +416,8 @@ export default function Busca() {
             </select>
           ) : (
             <input
+              id="campo-ano"
+              name="ano"
               className="input"
               type="number"
               placeholder={modeloId ? "Digite o ano" : "Escolha o modelo primeiro"}
@@ -417,7 +432,7 @@ export default function Busca() {
         </div>
 
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>Seu CEP</label>
+          <label htmlFor="campo-cep">Seu CEP</label>
           {coordsGPS ? (
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="fz-codigo">Localização atual detectada</span>
@@ -445,6 +460,8 @@ export default function Busca() {
           ) : (
             <>
               <input
+                id="campo-cep"
+                name="cep"
                 className="input"
                 value={cep}
                 onChange={(e) => setCep(formatarCep(e.target.value))}
@@ -452,6 +469,7 @@ export default function Busca() {
                 placeholder="00000-000"
                 maxLength={9}
                 autoComplete="postal-code"
+                aria-describedby={erroLocalizacao ? "erro-localizacao" : undefined}
               />
               <button
                 type="button"
@@ -462,12 +480,12 @@ export default function Busca() {
               >
                 {buscandoLocalizacao ? "Obtendo localização..." : "Usar minha localização atual"}
               </button>
-              {erroLocalizacao && <p style={{ color: "var(--fz-vendido)", fontSize: 12, marginTop: 4 }}>{erroLocalizacao}</p>}
+              {erroLocalizacao && <p id="erro-localizacao" style={{ color: "var(--fz-vendido)", fontSize: 12, marginTop: 4 }}>{erroLocalizacao}</p>}
             </>
           )}
         </div>
 
-        {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}
+        {erro && <p role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}
         <button className="btn btn-primary btn-block" type="submit">Buscar</button>
       </form>
     </div>
