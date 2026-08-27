@@ -33,6 +33,7 @@ export default function Resultados() {
   const [whatsappClicadoId, setWhatsappClicadoId] = useState(null);
   const [linkWhatsapp, setLinkWhatsapp] = useState("");
   const [somenteMensageriaId, setSomenteMensageriaId] = useState(null);
+  const [enviando, setEnviando] = useState(false);
 
   const { cliente } = useAuth();
   const navigate = useNavigate();
@@ -60,14 +61,18 @@ export default function Resultados() {
     setErro("");
   }
 
-  function salvarESalvarLink(e, grupo) {
+  async function enviarESalvarLink(e, grupo) {
     e.preventDefault();
     const melhorVeiculo = grupo.veiculos[0]; // já vem ordenado, exato primeiro
+    setEnviando(true);
+    setErro("");
 
     // Mensageria própria — sempre acontece, com ou sem WhatsApp
-    // cadastrado (histórico, selo de lida/não lida, etc.)
-    api
-      .iniciarConversa(
+    // cadastrado (histórico, selo de lida/não lida, etc.). CS-013: o
+    // botão agora diz "Enviar" (era "Salvar"), porque isso aqui manda
+    // mensagem de verdade -- "Salvar" sugeria rascunho.
+    try {
+      await api.iniciarConversa(
         {
           veiculo_desmonte_id: melhorVeiculo.veiculo_id,
           modelo_id: Number(modeloId),
@@ -77,8 +82,13 @@ export default function Resultados() {
           texto,
         },
         cliente.token
-      )
-      .catch((err) => setErro(err.message));
+      );
+    } catch (err) {
+      setErro(err.message);
+      setEnviando(false);
+      return;
+    }
+    setEnviando(false);
 
     if (!grupo.whatsapp) {
       // Empresa sem WhatsApp cadastrado — segue só por mensageria,
@@ -101,6 +111,12 @@ export default function Resultados() {
     <div className="fz-wrap fz-secao">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h2 style={{ fontSize: 28, margin: 0 }}>Resultados</h2>
+        {/* CS-012: essa é a ÚNICA "Nova busca" que vive dentro da tela
+            de resultados agora (a outra, do empty state, foi removida
+            por ser redundante com essa mesma daqui). Ela carrega a
+            querystring atual (CS-006) -- a do cabeçalho, que aparece
+            em toda página, não carrega contexto nenhum de propósito,
+            é só um atalho genérico. */}
         <Link className="btn btn-primary" to={`/buscar?${params.toString()}`} style={{ width: "auto" }}>Nova busca</Link>
       </div>
 
@@ -124,14 +140,9 @@ export default function Resultados() {
       </div>
 
       {carregando && <p>Buscando...</p>}
-      {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
+      {erro && <p role="alert" style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
       {!carregando && !erro && resultados.length === 0 && (
-        <>
-          <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
-          <Link className="btn btn-primary" to={`/buscar?${params.toString()}`} style={{ display: "inline-block", width: "auto", marginTop: 12 }}>
-            Nova busca
-          </Link>
-        </>
+        <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
@@ -165,71 +176,83 @@ export default function Resultados() {
               })}
             </ul>
 
-            {somenteMensageriaId === grupo.empresa_id ? (
-              <p style={{ fontSize: 13, margin: 0 }}>
-                Mensagem enviada pelo site. Essa desmontadora ainda não tem WhatsApp
-                cadastrado — acompanhe a resposta em Mensagens.
-              </p>
-            ) : whatsappClicadoId === grupo.empresa_id ? (
-              <p
-                style={{
-                  background: "var(--fz-aco)",
-                  color: "#000",
-                  fontSize: 13,
-                  fontWeight: 600,
-                  padding: "10px 12px",
-                  margin: 0,
-                  width: "100%",
-                  boxSizing: "border-box",
-                }}
-              >
-                Mensagem criada para envio, você precisa enviá-la pelo seu próprio WhatsApp.
-              </p>
-            ) : linkSalvoId === grupo.empresa_id ? (
-              
-                className="btn btn-block"
-                href={linkWhatsapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setWhatsappClicadoId(grupo.empresa_id)}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                  background: "var(--fz-whatsapp)", color: "#fff", fontWeight: 600,
-                }}
-              >
-                <MessageCircle size={16} strokeWidth={1.5} /> Enviar WhatsApp
-              </a>
-            ) : empresaAbertaId === grupo.empresa_id ? (
-              <form onSubmit={(e) => salvarESalvarLink(e, grupo)} style={{ width: "100%" }}>
-                <textarea
-                  className="input"
-                  rows={2}
-                  style={{ resize: "vertical", maxHeight: 80, overflowY: "auto" }}
-                  placeholder="Descreva a peça que precisa"
-                  value={texto}
-                  onChange={(e) => setTexto(e.target.value)}
-                  autoFocus
-                  required
-                />
-                {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13, margin: "4px 0" }}>{erro}</p>}
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button className="btn btn-primary" style={{ flex: 1 }} type="submit">Salvar</button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    style={{ width: "auto" }}
-                    onClick={() => setEmpresaAbertaId(null)}
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <button className="btn btn-primary btn-block blueprint" onClick={() => abrirMensagem(grupo.empresa_id)}>
-                <Corners />
-                Falar com a desmontadora
-              </button>
-            )}
+            {/* CS-018: essa wrapper com marginTop:auto é o que fixa a
+                ação no rodapé do card, mesmo quando os cards vizinhos
+                têm mais linhas de veículo (esticando a coluna toda). */}
+            <div style={{ width: "100%", marginTop: "auto" }}>
+              {somenteMensageriaId === grupo.empresa_id ? (
+                <p style={{ fontSize: 13, margin: 0 }}>
+                  Mensagem enviada pelo site. Essa desmontadora ainda não tem WhatsApp
+                  cadastrado — acompanhe a resposta em Mensagens.
+                </p>
+              ) : whatsappClicadoId === grupo.empresa_id ? (
+                <p
+                  style={{
+                    background: "var(--fz-aco)",
+                    color: "#000",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    padding: "10px 12px",
+                    margin: 0,
+                    width: "100%",
+                    boxSizing: "border-box",
+                  }}
+                >
+                  Mensagem criada para envio, você precisa enviá-la pelo seu próprio WhatsApp.
+                </p>
+              ) : linkSalvoId === grupo.empresa_id ? (
+                <a
+                  className="btn btn-block"
+                  href={linkWhatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setWhatsappClicadoId(grupo.empresa_id)}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    background: "var(--fz-whatsapp)", color: "#fff", fontWeight: 600,
+                  }}
+                >
+                  <MessageCircle size={16} strokeWidth={1.5} /> Enviar WhatsApp
+                </a>
+              ) : empresaAbertaId === grupo.empresa_id ? (
+                <form onSubmit={(e) => enviarESalvarLink(e, grupo)} noValidate>
+                  <label htmlFor={`mensagem-${grupo.empresa_id}`} className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>
+                    Descreva a peça que precisa
+                  </label>
+                  <textarea
+                    id={`mensagem-${grupo.empresa_id}`}
+                    name="mensagem"
+                    className="input"
+                    rows={2}
+                    style={{ resize: "vertical", maxHeight: 80, overflowY: "auto" }}
+                    placeholder="Ex: para-choque dianteiro"
+                    value={texto}
+                    onChange={(e) => setTexto(e.target.value)}
+                    autoFocus
+                    required
+                  />
+                  {erro && <p role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13, margin: "4px 0" }}>{erro}</p>}
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button className="btn btn-primary" style={{ flex: 1 }} type="submit" disabled={enviando}>
+                      {enviando ? "Enviando..." : "Enviar"}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      style={{ width: "auto" }}
+                      onClick={() => setEmpresaAbertaId(null)}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <button className="btn btn-primary btn-block blueprint" onClick={() => abrirMensagem(grupo.empresa_id)}>
+                  <Corners />
+                  Falar com a desmontadora
+                </button>
+              )}
+            </div>
           </article>
         ))}
       </div>
