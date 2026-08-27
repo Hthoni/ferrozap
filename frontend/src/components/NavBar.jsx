@@ -51,7 +51,9 @@ export default function NavBar() {
     <>
       <header className="cs-header">
         <div className="cs-header__tarja"></div>
-        <img className="cs-header__logo" src={logoAzul} alt="Catasucata" />
+        <Link className="cs-header__logo-link" to="/buscar" aria-label="Ir para a página inicial do Catasucata">
+          <img className="cs-header__logo" src={logoAzul} alt="Catasucata" />
+        </Link>
         {!cliente && !empresa && (
           <Link className="cs-header__link-conta" to="/entrar">Entrar</Link>
         )}
