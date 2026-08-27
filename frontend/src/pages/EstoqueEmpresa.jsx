@@ -157,7 +157,7 @@ export default function EstoqueEmpresa() {
       <p className="fz-rotulo fz-rotulo--aco">{perfil?.nome || "Carregando..."}</p>
       <h2 style={{ fontSize: 32, margin: "8px 0 24px" }}>Meu estoque</h2>
 
-      <form onSubmit={cadastrar} className="blueprint" style={{ padding: 24, maxWidth: 440, marginBottom: 32 }}>
+      <form onSubmit={cadastrar} className="blueprint" style={{ padding: 24, maxWidth: 440, marginBottom: 32 }} noValidate>
         <Corners />
         <p className="card-title" style={{ marginBottom: 16 }}>
           {editandoId ? `Editando veículo #${editandoId}` : "Adicionar veículo em desmonte"}
@@ -165,8 +165,10 @@ export default function EstoqueEmpresa() {
 
         {!fabricanteId && !modoTextoFabricante && (
           <div className="field" style={{ marginBottom: 8 }}>
-            <label>Fabricante</label>
+            <label htmlFor="estoque-fabricante">Fabricante</label>
             <select
+              id="estoque-fabricante"
+              name="fabricante"
               className="input"
               value=""
               onChange={(e) => {
@@ -195,13 +197,16 @@ export default function EstoqueEmpresa() {
         )}
         {!fabricanteId && modoTextoFabricante && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Nome da marca</label>
+            <label htmlFor="estoque-fabricante-texto">Nome da marca</label>
             <div style={{ display: "flex", gap: 8 }}>
               <input
+                id="estoque-fabricante-texto"
+                name="fabricante-texto"
                 className="input"
                 value={textoFabricante}
                 onChange={(e) => setTextoFabricante(e.target.value)}
                 placeholder="Ex: Gurgel"
+                autoComplete="off"
               />
               <button
                 type="button"
@@ -225,9 +230,9 @@ export default function EstoqueEmpresa() {
         )}
         {fabricanteId && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Fabricante</label>
+            <span id="estoque-rotulo-fabricante" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Fabricante</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span className="fz-codigo">{fabricanteNome}</span>
+              <span className="fz-codigo" aria-labelledby="estoque-rotulo-fabricante">{fabricanteNome}</span>
               {!editandoId && (
                 <button type="button" className="btn btn-ghost" style={{ width: "auto", fontSize: 12 }} onClick={trocarFabricante}>
                   Trocar
@@ -239,8 +244,8 @@ export default function EstoqueEmpresa() {
 
         {fabricanteId && !modeloId && !modoTextoModelo && (
           <div className="field" style={{ marginBottom: 8 }}>
-            <label>Modelo</label>
-            <select className="input" value={modeloId} onChange={(e) => setModeloId(e.target.value)} required>
+            <label htmlFor="estoque-modelo">Modelo</label>
+            <select id="estoque-modelo" name="modelo" className="input" value={modeloId} onChange={(e) => setModeloId(e.target.value)} required>
               <option value="">Selecione</option>
               {modelos.map((m) => (
                 <option key={m.id} value={m.id}>{m.nome}</option>
@@ -260,13 +265,16 @@ export default function EstoqueEmpresa() {
         )}
         {fabricanteId && !modeloId && modoTextoModelo && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Nome do modelo</label>
+            <label htmlFor="estoque-modelo-texto">Nome do modelo</label>
             <div style={{ display: "flex", gap: 8 }}>
               <input
+                id="estoque-modelo-texto"
+                name="modelo-texto"
                 className="input"
                 value={textoModelo}
                 onChange={(e) => setTextoModelo(e.target.value)}
                 placeholder="Ex: BR-800"
+                autoComplete="off"
               />
               <button
                 type="button"
@@ -290,9 +298,9 @@ export default function EstoqueEmpresa() {
         )}
         {modeloId && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <label>Modelo</label>
+            <span id="estoque-rotulo-modelo" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Modelo</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span className="fz-codigo">
+              <span className="fz-codigo" aria-labelledby="estoque-rotulo-modelo">
                 {modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo}
               </span>
               {!editandoId && (
@@ -310,12 +318,12 @@ export default function EstoqueEmpresa() {
         )}
 
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>Ano de fabricação</label>
-          <input className="input" type="number" value={ano} onChange={(e) => setAno(e.target.value)} required />
+          <label htmlFor="estoque-ano">Ano de fabricação</label>
+          <input id="estoque-ano" name="ano" className="input" type="number" value={ano} onChange={(e) => setAno(e.target.value)} required />
         </div>
 
-        {erro && <p style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}
-        {sucesso && <p style={{ fontSize: 13 }}>{sucesso}</p>}
+        {erro && <p role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}
+        {sucesso && <p role="status" style={{ fontSize: 13 }}>{sucesso}</p>}
         <div style={{ display: "flex", gap: 8 }}>
           <button className="btn btn-primary" style={{ flex: 1 }} type="submit" disabled={enviando || !modeloId}>
             {enviando ? "Salvando..." : editandoId ? "Salvar alterações" : "Adicionar ao estoque"}
