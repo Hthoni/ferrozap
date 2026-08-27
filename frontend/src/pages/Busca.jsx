@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
+
+const ANO_MINIMO = 1950;
+const ANO_MAXIMO = new Date().getFullYear() + 1;
+
+function formatarCep(valor) {
+  const digitos = valor.replace(/\D/g, "").slice(0, 8);
+  if (digitos.length <= 5) return digitos;
+  return `${digitos.slice(0, 5)}-${digitos.slice(5)}`;
+}
+
+function cepValido(valor) {
+  return /^\d{5}-?\d{3}$/.test(valor.trim());
+}
 
 export default function Busca() {
   const [fabricantes, setFabricantes] = useState([]);
@@ -33,6 +46,39 @@ export default function Busca() {
 
   const { cliente } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // CS-006: reidrata o formulário a partir da querystring (ex: usuário
+  // veio de "Nova busca" na tela de resultados, carregando os campos
+  // anteriores em vez de nascer vazio).
+  useEffect(() => {
+    const fabId = searchParams.get("fabricanteId");
+    const fabNome = searchParams.get("fabricanteNome");
+    const modId = searchParams.get("modeloId");
+    const modNome = searchParams.get("modeloNome");
+    const subId = searchParams.get("submodeloId");
+    const anoUrl = searchParams.get("ano");
+    const cepUrl = searchParams.get("cep");
+
+    if (fabId && fabNome) {
+      setFabricanteId(fabId);
+      setFabricanteNome(fabNome);
+    } else if (fabNome) {
+      // marca digitada à mão (sem id numérico) — reabre em modo texto
+      setModoTextoFabricante(true);
+      setTextoFabricante(fabNome);
+    }
+    if (modId) setModeloId(modId);
+    else if (modNome) {
+      setModoTextoModelo(true);
+      setTextoModelo(modNome);
+    }
+    if (subId) setSubmodeloId(subId);
+    if (anoUrl) setAno(anoUrl);
+    if (cepUrl) setCep(cepUrl);
+    // roda só na primeira renderização — depois disso o usuário controla o formulário
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!cliente) return;
@@ -153,13 +199,22 @@ export default function Busca() {
       setErro("Preencha modelo, ano e CEP (ou use sua localização atual) para buscar.");
       return;
     }
+    if (cep && !coordsGPS && !cepValido(cep)) {
+      setErro("Esse CEP não parece válido. Confira o formato (ex: 01310-100).");
+      return;
+    }
+    const anoNumero = Number(ano);
+    if (!Number.isInteger(anoNumero) || anoNumero < ANO_MINIMO || anoNumero > ANO_MAXIMO) {
+      setErro(`Digite um ano entre ${ANO_MINIMO} e ${ANO_MAXIMO}.`);
+      return;
+    }
     if (cliente && cep) {
       api.atualizarMeuCep(cep, cliente.token).catch(() => {});
     }
     const nomeModelo = modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo;
     const nomeSubmodelo = submodelos.find((s) => String(s.id) === String(submodeloId))?.nome || "";
     const params = new URLSearchParams({
-      modeloId, ano, cep: cep || "", fabricanteNome, modeloNome: nomeModelo,
+      modeloId, ano, cep: cep || "", fabricanteId: fabricanteId || "", fabricanteNome, modeloNome: nomeModelo,
       submodeloId: submodeloId || "", submodeloNome: nomeSubmodelo,
       ...(coordsGPS ? { lat: coordsGPS.lat, lon: coordsGPS.lon } : {}),
     });
@@ -354,6 +409,8 @@ export default function Busca() {
               value={ano}
               onChange={(e) => setAno(e.target.value)}
               disabled={!modeloId}
+              min={ANO_MINIMO}
+              max={ANO_MAXIMO}
               required
             />
           )}
@@ -387,7 +444,15 @@ export default function Busca() {
             </div>
           ) : (
             <>
-              <input className="input" value={cep} onChange={(e) => setCep(e.target.value)} />
+              <input
+                className="input"
+                value={cep}
+                onChange={(e) => setCep(formatarCep(e.target.value))}
+                inputMode="numeric"
+                placeholder="00000-000"
+                maxLength={9}
+                autoComplete="postal-code"
+              />
               <button
                 type="button"
                 className="btn btn-ghost"
