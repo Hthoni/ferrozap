@@ -67,22 +67,22 @@ export default function ConversaDetalhe() {
   if (!token) return <div className="fz-wrap fz-secao"><p>Você precisa estar autenticado.</p></div>;
 
   return (
-    <div className="fz-wrap fz-secao" style={{ maxWidth: 560 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div className="fz-wrap fz-secao">
+      <div style={{ maxWidth: 560, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <p className="fz-rotulo fz-rotulo--aco" style={{ margin: 0 }}>Conversa #{id}</p>
         {cliente && (
           <Link className="btn btn-primary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
         )}
       </div>
       {veiculo && (
-        <h2 style={{ fontSize: 28, margin: "8px 0 24px" }}>
+        <h2 style={{ fontSize: 28, margin: "8px 0 24px", maxWidth: 560 }}>
           {veiculo.fabricante_nome} {veiculo.modelo_nome}
           {veiculo.submodelo_nome && ` ${veiculo.submodelo_nome}`} · {veiculo.ano_fabricacao}
         </h2>
       )}
-      {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
+      {erro && <p role="alert" style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12, margin: "24px 0" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, margin: "24px 0", maxWidth: 560 }}>
         {mensagens.map((m) => {
           const minha = m.remetente_tipo === meuTipo;
           return (
@@ -103,9 +103,11 @@ export default function ConversaDetalhe() {
         })}
       </div>
 
-      <form onSubmit={enviar} className="field">
-        <label>Responder</label>
+      <form onSubmit={enviar} className="field" style={{ maxWidth: 560 }} noValidate>
+        <label htmlFor="conversa-resposta">Responder</label>
         <textarea
+          id="conversa-resposta"
+          name="resposta"
           className="input"
           rows={3}
           value={texto}
@@ -127,6 +129,7 @@ export default function ConversaDetalhe() {
           style={{
             display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
             background: "var(--fz-whatsapp)", color: "#fff", fontWeight: 600, marginTop: 12,
+            maxWidth: 560,
           }}
         >
           <MessageCircle size={16} strokeWidth={1.5} /> Enviar também pelo WhatsApp
