@@ -74,58 +74,64 @@ export default function MinhaContaCliente() {
   }
 
   return (
-    <div className="fz-wrap fz-secao" style={{ maxWidth: 480 }}>
+    // CS-014: sem maxWidth aqui no wrap -- o alinhamento à esquerda
+    // fica igual ao das outras rotas (Busca, Resultados). O limite de
+    // largura vive em cada form individualmente, como nas outras telas.
+    <div className="fz-wrap fz-secao">
       <p className="fz-rotulo fz-rotulo--aco">Cliente final</p>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <h1 style={{ fontSize: 32, margin: 0 }}>Minha conta</h1>
         <Link className="btn btn-primary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
       </div>
 
-      <form onSubmit={salvarPerfil} className="blueprint" style={{ padding: 24, marginBottom: 24 }}>
+      <form onSubmit={salvarPerfil} className="blueprint" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
         <Corners />
         <p className="card-title" style={{ marginBottom: 16 }}>Dados pessoais</p>
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>Nome</label>
-          <input className="input" value={nome} onChange={(e) => setNome(e.target.value)} required />
+          <label htmlFor="conta-nome">Nome</label>
+          <input id="conta-nome" name="name" autoComplete="name" className="input" value={nome} onChange={(e) => setNome(e.target.value)} required />
         </div>
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>E-mail</label>
-          <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <label htmlFor="conta-email">E-mail</label>
+          <input id="conta-email" name="email" autoComplete="email" className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>Telefone</label>
-          <input className="input" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
+          <label htmlFor="conta-telefone">Telefone</label>
+          <input id="conta-telefone" name="tel" autoComplete="tel" className="input" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
         </div>
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>CEP de entrega</label>
-          <input className="input" value={cep} onChange={(e) => setCep(e.target.value)} />
+          <label htmlFor="conta-cep">CEP de entrega</label>
+          <input id="conta-cep" name="postal-code" autoComplete="postal-code" className="input" value={cep} onChange={(e) => setCep(e.target.value)} />
         </div>
-        {erroPerfil && <p style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erroPerfil}</p>}
-        {sucessoPerfil && <p style={{ fontSize: 13 }}>{sucessoPerfil}</p>}
+        {erroPerfil && <p role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erroPerfil}</p>}
+        {sucessoPerfil && <p role="status" style={{ fontSize: 13 }}>{sucessoPerfil}</p>}
         <button className="btn btn-primary btn-block" type="submit" disabled={salvandoPerfil}>
           {salvandoPerfil ? "Salvando..." : "Salvar dados"}
         </button>
       </form>
 
-      <form onSubmit={salvarSenha} className="blueprint" style={{ padding: 24, marginBottom: 24 }}>
+      {/* CS-016: "Alterar senha" agora tem o mesmo peso visual de
+          "Salvar dados" -- as duas são confirmações igualmente
+          importantes; antes o secondary parecia desabilitado. */}
+      <form onSubmit={salvarSenha} className="blueprint" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
         <Corners />
         <p className="card-title" style={{ marginBottom: 16 }}>Alterar senha</p>
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>Senha atual</label>
-          <input className="input" type="password" value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} required />
+          <label htmlFor="conta-senha-atual">Senha atual</label>
+          <input id="conta-senha-atual" name="current-password" autoComplete="current-password" className="input" type="password" value={senhaAtual} onChange={(e) => setSenhaAtual(e.target.value)} required />
         </div>
         <div className="field" style={{ marginBottom: 16 }}>
-          <label>Nova senha</label>
-          <input className="input" type="password" minLength={8} value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} required />
+          <label htmlFor="conta-senha-nova">Nova senha</label>
+          <input id="conta-senha-nova" name="new-password" autoComplete="new-password" className="input" type="password" minLength={8} value={senhaNova} onChange={(e) => setSenhaNova(e.target.value)} required />
         </div>
-        {erroSenha && <p style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erroSenha}</p>}
-        {sucessoSenha && <p style={{ fontSize: 13 }}>{sucessoSenha}</p>}
-        <button className="btn btn-secondary btn-block" type="submit" disabled={salvandoSenha}>
+        {erroSenha && <p role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erroSenha}</p>}
+        {sucessoSenha && <p role="status" style={{ fontSize: 13 }}>{sucessoSenha}</p>}
+        <button className="btn btn-primary btn-block" type="submit" disabled={salvandoSenha}>
           {salvandoSenha ? "Salvando..." : "Alterar senha"}
         </button>
       </form>
 
-      <button className="btn btn-ghost btn-block" onClick={sair} style={{ color: "var(--fz-vendido)" }}>
+      <button className="btn btn-ghost btn-block" onClick={sair} style={{ color: "var(--fz-vendido)", maxWidth: 480 }}>
         Sair da conta
       </button>
     </div>
