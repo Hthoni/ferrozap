@@ -101,7 +101,7 @@ export default function Resultados() {
     <div className="fz-wrap fz-secao">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h2 style={{ fontSize: 28, margin: 0 }}>Resultados</h2>
-        <Link className="btn btn-primary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
+        <Link className="btn btn-primary" to={`/buscar?${params.toString()}`} style={{ width: "auto" }}>Nova busca</Link>
       </div>
 
       <div className="seg" style={{ marginBottom: 20 }}>
@@ -128,7 +128,7 @@ export default function Resultados() {
       {!carregando && !erro && resultados.length === 0 && (
         <>
           <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
-          <Link className="btn btn-primary" to="/buscar" style={{ display: "inline-block", width: "auto", marginTop: 12 }}>
+          <Link className="btn btn-primary" to={`/buscar?${params.toString()}`} style={{ display: "inline-block", width: "auto", marginTop: 12 }}>
             Nova busca
           </Link>
         </>
@@ -186,7 +186,7 @@ export default function Resultados() {
                 Mensagem criada para envio, você precisa enviá-la pelo seu próprio WhatsApp.
               </p>
             ) : linkSalvoId === grupo.empresa_id ? (
-              <a
+              
                 className="btn btn-block"
                 href={linkWhatsapp}
                 target="_blank"
