@@ -42,10 +42,8 @@ export default function Resultados() {
   const { cliente } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
+  function carregarResultados() {
     if (semCadastro) {
-      // N-08: fabricante/modelo é sugestão pendente, sem id de
-      // catálogo -- não existe modelo_id nenhum pra consultar.
       setCarregando(false);
       return;
     }
@@ -56,6 +54,11 @@ export default function Resultados() {
       .then(setResultados)
       .catch((err) => setErro(err.message))
       .finally(() => setCarregando(false));
+  }
+
+  useEffect(() => {
+    carregarResultados();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modeloId, ano, cep, lat, lon, ordenarPor, semCadastro]);
 
   function abrirMensagem(empresaId) {
@@ -142,10 +145,16 @@ export default function Resultados() {
         <h2 style={{ fontSize: 28, margin: 0 }}>Resultados</h2>
       </div>
 
+      {/* N-12: alternador de ordenação não faz sentido com zero
+          resultado -- nada pra reordenar. */}
+      {!(!carregando && !erro && !semCadastro && resultados.length === 0) && (
       <div className="seg" style={{ marginBottom: 20 }}>
         <label className="seg-opt">
           <input
+            id="ordenar-compatibilidade"
+            name="ordenacao"
             type="radio"
+            value="compatibilidade"
             checked={ordenarPor === "compatibilidade"}
             onChange={() => setOrdenarPor("compatibilidade")}
           />
@@ -153,23 +162,32 @@ export default function Resultados() {
         </label>
         <label className="seg-opt">
           <input
+            id="ordenar-distancia"
+            name="ordenacao"
             type="radio"
+            value="distancia"
             checked={ordenarPor === "distancia"}
             onChange={() => setOrdenarPor("distancia")}
           />
           Distância
         </label>
       </div>
-
-      {/* CS-021 (v2): legenda explicando o código de cor dos anos nos
-          cards -- antes a cor sozinha (verde/vermelho) carregava o
-          significado, sem nenhum texto equivalente. */}
-      {!carregando && !erro && !semCadastro && resultados.length > 0 && (
-        <div className="cs-legenda">
-          <span><i style={{ background: "var(--fz-disponivel)" }}></i> Ano igual ao que você buscou</span>
-          <span><i style={{ background: "var(--fz-vendido)" }}></i> Ano aproximado, mesma peça deve servir</span>
-        </div>
       )}
+
+      {/* CS-021/N-16: legenda só mostra as categorias que realmente
+          aparecem nos resultados dessa busca -- item "ano igual" sem
+          nenhum resultado exato na lista não ajudava em nada. */}
+      {!carregando && !erro && !semCadastro && resultados.length > 0 && (() => {
+        const temExato = resultados.some((g) => g.veiculos.some((v) => v.nivel_confianca === "compativel_exato"));
+        const temAproximado = resultados.some((g) => g.veiculos.some((v) => v.nivel_confianca !== "compativel_exato"));
+        if (!temExato && !temAproximado) return null;
+        return (
+          <div className="cs-legenda">
+            {temExato && <span><i style={{ background: "var(--fz-disponivel)" }}></i> Ano igual ao que você buscou</span>}
+            {temAproximado && <span><i style={{ background: "var(--fz-aproximado)" }}></i> Ano aproximado, mesma peça deve servir</span>}
+          </div>
+        );
+      })()}
 
       {carregando && (
         // CS-019 (v2): esqueleto no lugar de só o texto "Buscando...",
@@ -185,7 +203,14 @@ export default function Resultados() {
           ))}
         </div>
       )}
-      {erro && <p role="alert" style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
+      {erro && (
+        <p role="alert" style={{ color: "var(--fz-vendido)", display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+          {erro}
+          <button type="button" className="btn btn-secondary" style={{ width: "auto" }} onClick={carregarResultados}>
+            Tentar de novo
+          </button>
+        </p>
+      )}
       {!carregando && !erro && semCadastro && (
         <p>
           Ainda não temos <strong>{fabricanteNome} {modeloNome}</strong> catalogado —
@@ -194,7 +219,12 @@ export default function Resultados() {
         </p>
       )}
       {!carregando && !erro && !semCadastro && resultados.length === 0 && (
-        <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
+        <>
+          <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
+          <Link className="btn btn-primary" to={`/buscar?${params.toString()}`} style={{ display: "inline-flex", width: "auto", padding: "0 24px" }}>
+            Ajustar busca
+          </Link>
+        </>
       )}
 
       {!semCadastro && !carregando && (
@@ -221,7 +251,7 @@ export default function Resultados() {
                     <span style={{ color: "var(--fz-tinta)" }}> / </span>
                     <span style={{ color: "var(--fz-disponivel)", fontWeight: 600 }}>{modeloNome}</span>
                     <span style={{ color: "var(--fz-tinta)" }}> / </span>
-                    <span style={{ color: exato ? "var(--fz-disponivel)" : "var(--fz-vendido)", fontWeight: 600 }}>
+                    <span style={{ color: exato ? "var(--fz-disponivel)" : "var(--fz-aproximado)", fontWeight: 600 }}>
                       {v.ano_fabricacao}
                     </span>
                   </li>
@@ -269,7 +299,7 @@ export default function Resultados() {
                 </a>
               ) : empresaAbertaId === grupo.empresa_id ? (
                 <form onSubmit={(e) => enviarESalvarLink(e, grupo)} noValidate>
-                  <label htmlFor={`mensagem-${grupo.empresa_id}`} className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>
+                  <label htmlFor={`mensagem-${grupo.empresa_id}`} className="cs-rotulo-campo" style={{ display: "block", marginBottom: 4 }}>
                     Descreva a peça que precisa
                   </label>
                   <textarea
