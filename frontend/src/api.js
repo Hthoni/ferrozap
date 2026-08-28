@@ -1,5 +1,18 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
+// CS-001/CS-004: quando o backend responde 401 em QUALQUER chamada
+// (não só a de enviar mensagem), a sessão em memória do React fica
+// "presa" achando que ainda está logado, mesmo com o token realmente
+// expirado -- porque o estado só é lido do localStorage uma vez, no
+// carregamento. Isso fazia o guard de rota deixar passar em navegação
+// interna (sem reload) e a tela mostrar o erro cru do backend. Esse
+// callback deixa o AuthContext se inscrever pra ser avisado sempre
+// que isso acontecer, e encerrar a sessão de verdade, reativamente.
+let aoExpirarSessao = null;
+export function registrarExpiracaoSessao(callback) {
+  aoExpirarSessao = callback;
+}
+
 async function chamar(caminho, { method = "GET", body, token } = {}) {
   const headers = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
@@ -28,6 +41,9 @@ async function chamar(caminho, { method = "GET", body, token } = {}) {
     const mensagem = dados?.detail || "Algo deu errado. Tente novamente.";
     const erro = new Error(typeof mensagem === "string" ? mensagem : "Dados inválidos.");
     erro.status = resposta.status;
+    if (resposta.status === 401) {
+      aoExpirarSessao?.();
+    }
     throw erro;
   }
 
