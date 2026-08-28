@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
@@ -26,10 +26,12 @@ export default function Busca() {
   const [fabricanteNome, setFabricanteNome] = useState("");
   const [modoTextoFabricante, setModoTextoFabricante] = useState(false);
   const [textoFabricante, setTextoFabricante] = useState("");
+  const [semCadastroReal, setSemCadastroReal] = useState(false);
 
   const [modeloId, setModeloId] = useState("");
   const [modoTextoModelo, setModoTextoModelo] = useState(false);
   const [textoModelo, setTextoModelo] = useState("");
+  const [modeloConfirmadoLivre, setModeloConfirmadoLivre] = useState(false);
 
   const [submodeloId, setSubmodeloId] = useState("");
   const [temSubmodelo, setTemSubmodelo] = useState(false);
@@ -42,11 +44,21 @@ export default function Busca() {
   const [buscandoLocalizacao, setBuscandoLocalizacao] = useState(false);
   const [erroLocalizacao, setErroLocalizacao] = useState("");
   const [erro, setErro] = useState("");
+  const [erroAno, setErroAno] = useState("");
+  const [erroCep, setErroCep] = useState("");
   const [resolvendo, setResolvendo] = useState(false);
 
   const { cliente } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  // CS-006 (v2): o efeito que reidrata da URL e o efeito que reage à
+  // troca de fabricante disparavam ao mesmo tempo no carregamento, e o
+  // segundo sempre zerava modeloId/ano de propósito (comportamento
+  // certo quando é o usuário trocando de fabricante manualmente, mas
+  // errado nesse caso). Guardamos o valor desejado aqui, e só aplicamos
+  // de fato depois que a lista de modelos daquele fabricante carregar.
+  const modeloIdDesejado = useRef(null);
+  const anoDesejado = useRef(null);
 
   // CS-006: reidrata o formulário a partir da querystring (ex: usuário
   // veio de "Nova busca" na tela de resultados, carregando os campos
@@ -61,6 +73,8 @@ export default function Busca() {
     const cepUrl = searchParams.get("cep");
 
     if (fabId && fabNome) {
+      modeloIdDesejado.current = modId || null;
+      anoDesejado.current = anoUrl || null;
       setFabricanteId(fabId);
       setFabricanteNome(fabNome);
     } else if (fabNome) {
@@ -68,13 +82,12 @@ export default function Busca() {
       setModoTextoFabricante(true);
       setTextoFabricante(fabNome);
     }
-    if (modId) setModeloId(modId);
-    else if (modNome) {
+    if (!fabId && modNome) {
       setModoTextoModelo(true);
       setTextoModelo(modNome);
     }
     if (subId) setSubmodeloId(subId);
-    if (anoUrl) setAno(anoUrl);
+    if (!fabId && anoUrl) setAno(anoUrl);
     if (cepUrl) setCep(cepUrl);
     // roda só na primeira renderização — depois disso o usuário controla o formulário
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -96,19 +109,29 @@ export default function Busca() {
 
   useEffect(() => {
     if (!fabricanteId) return;
-    setModeloId("");
     setSubmodelos([]);
     api.listarModelos(fabricanteId).then((lista) => {
       setModelos(lista);
       if (lista.length === 0) setModoTextoModelo(true);
+
+      const desejado = modeloIdDesejado.current;
+      modeloIdDesejado.current = null;
+      if (desejado && lista.some((m) => String(m.id) === String(desejado))) {
+        // Reidratação da URL: a lista já confirma que esse modelo
+        // existe pra esse fabricante — aplica agora, sem risco de
+        // corrida com o reset abaixo.
+        setModeloId(desejado);
+      } else {
+        setModeloId("");
+      }
     });
   }, [fabricanteId]);
 
   useEffect(() => {
     if (!modeloId) {
       setAnos([]);
-      setTemGeracaoReal(true);
-      setAno("");
+      setTemGeracaoReal(!modeloConfirmadoLivre); // sugestão sem cadastro real -> ano sempre texto livre
+      if (!modeloConfirmadoLivre) setAno("");
       setSubmodelos([]);
       setSubmodeloId("");
       setTemSubmodelo(false);
@@ -130,6 +153,11 @@ export default function Busca() {
     api.listarAnos(modeloId).then((resultado) => {
       setAnos(resultado.anos);
       setTemGeracaoReal(resultado.tem_geracao_real);
+      const desejado = anoDesejado.current;
+      if (desejado) {
+        anoDesejado.current = null;
+        setAno(desejado);
+      }
     });
   }, [modeloId, modelos]);
 
@@ -138,10 +166,20 @@ export default function Busca() {
     setResolvendo(true);
     setErro("");
     try {
-      const resultado = await api.criarOuObterFabricante(textoFabricante.trim());
-      setFabricanteId(String(resultado.id));
-      setFabricanteNome(resultado.nome);
-      setModoTextoFabricante(false);
+      const resultado = await api.sugerirFabricante(textoFabricante.trim());
+      if (resultado.id) {
+        // Já existia no catálogo (match por nome) -- segue fluxo normal.
+        setFabricanteId(String(resultado.id));
+        setFabricanteNome(resultado.nome);
+        setModoTextoFabricante(false);
+      } else {
+        // N-08: não existe ainda -- só ficou registrado como sugestão.
+        // Sem id real, não tem como buscar modelo por fabricante_id,
+        // então o modelo também vai direto pro modo texto.
+        setFabricanteNome(resultado.nome);
+        setSemCadastroReal(true);
+        setModoTextoModelo(true);
+      }
     } catch (err) {
       setErro(err.message);
     } finally {
@@ -154,9 +192,16 @@ export default function Busca() {
     setResolvendo(true);
     setErro("");
     try {
-      const resultado = await api.criarOuObterModelo(fabricanteId, textoModelo.trim());
-      setModeloId(String(resultado.id));
-      setModoTextoModelo(false);
+      if (semCadastroReal) {
+        const resultado = await api.sugerirModelo(fabricanteNome, textoModelo.trim());
+        setTextoModelo(resultado.nome);
+        setModeloConfirmadoLivre(true);
+        setModoTextoModelo(false);
+      } else {
+        const resultado = await api.criarOuObterModelo(fabricanteId, textoModelo.trim());
+        setModeloId(String(resultado.id));
+        setModoTextoModelo(false);
+      }
     } catch (err) {
       setErro(err.message);
     } finally {
@@ -169,6 +214,9 @@ export default function Busca() {
     setFabricanteNome("");
     setTextoFabricante("");
     setModeloId("");
+    setTextoModelo("");
+    setModoTextoModelo(false);
+    setSemCadastroReal(false);
     setModelos([]);
   }
 
@@ -195,17 +243,20 @@ export default function Busca() {
   function buscar(e) {
     e.preventDefault();
     setErro("");
-    if (!modeloId || !ano || (!cep && !coordsGPS)) {
+    setErroAno("");
+    setErroCep("");
+    const temModelo = modeloId || modeloConfirmadoLivre;
+    if (!temModelo || !ano || (!cep && !coordsGPS)) {
       setErro("Preencha modelo, ano e CEP (ou use sua localização atual) para buscar.");
       return;
     }
     if (cep && !coordsGPS && !cepValido(cep)) {
-      setErro("Esse CEP não parece válido. Confira o formato (ex: 01310-100).");
+      setErroCep("Esse CEP não parece válido. Confira o formato (ex: 01310-100).");
       return;
     }
     const anoNumero = Number(ano);
     if (!Number.isInteger(anoNumero) || anoNumero < ANO_MINIMO || anoNumero > ANO_MAXIMO) {
-      setErro(`Digite um ano entre ${ANO_MINIMO} e ${ANO_MAXIMO}.`);
+      setErroAno(`Digite um ano entre ${ANO_MINIMO} e ${ANO_MAXIMO}.`);
       return;
     }
     if (cliente && cep) {
@@ -214,8 +265,13 @@ export default function Busca() {
     const nomeModelo = modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo;
     const nomeSubmodelo = submodelos.find((s) => String(s.id) === String(submodeloId))?.nome || "";
     const params = new URLSearchParams({
-      modeloId, ano, cep: cep || "", fabricanteId: fabricanteId || "", fabricanteNome, modeloNome: nomeModelo,
+      modeloId: modeloId || "", ano, cep: cep || "", fabricanteId: fabricanteId || "", fabricanteNome, modeloNome: nomeModelo,
       submodeloId: submodeloId || "", submodeloNome: nomeSubmodelo,
+      // N-08: sem fabricanteId/modeloId reais (sugestão pendente) -- a
+      // tela de resultados usa essa flag pra não tentar buscar no
+      // catálogo (não existe modelo_id nenhum pra consultar) e mostrar
+      // direto o aviso de "peça ainda não catalogada".
+      semCadastro: !modeloId ? "1" : "",
       ...(coordsGPS ? { lat: coordsGPS.lat, lon: coordsGPS.lon } : {}),
     });
     navigate(`/resultados?${params.toString()}`);
@@ -299,7 +355,7 @@ export default function Busca() {
             </button>
           </div>
         )}
-        {fabricanteId && (
+        {(fabricanteId || semCadastroReal) && (
           <div className="field" style={{ marginBottom: 16 }}>
             <span id="rotulo-fabricante-escolhido" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Fabricante</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -366,7 +422,7 @@ export default function Busca() {
             </button>
           </div>
         )}
-        {modeloId && (
+        {(modeloId || modeloConfirmadoLivre) && (
           <div className="field" style={{ marginBottom: 16 }}>
             <span id="rotulo-modelo-escolhido" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Modelo</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -377,7 +433,7 @@ export default function Busca() {
                 type="button"
                 className="btn btn-ghost"
                 style={{ width: "auto", fontSize: 12 }}
-                onClick={() => { setModeloId(""); setTextoModelo(""); }}
+                onClick={() => { setModeloId(""); setTextoModelo(""); setModeloConfirmadoLivre(false); }}
               >
                 Trocar
               </button>
@@ -405,8 +461,10 @@ export default function Busca() {
               name="ano"
               className="input"
               value={ano}
-              onChange={(e) => setAno(e.target.value)}
-              disabled={!modeloId}
+              onChange={(e) => { setAno(e.target.value); setErroAno(""); }}
+              disabled={!modeloId && !modeloConfirmadoLivre}
+              aria-invalid={Boolean(erroAno)}
+              aria-describedby={erroAno ? "erro-ano" : undefined}
               required
             >
               <option value="">{modeloId ? "Selecione" : "Escolha o modelo primeiro"}</option>
@@ -422,13 +480,16 @@ export default function Busca() {
               type="number"
               placeholder={modeloId ? "Digite o ano" : "Escolha o modelo primeiro"}
               value={ano}
-              onChange={(e) => setAno(e.target.value)}
-              disabled={!modeloId}
+              onChange={(e) => { setAno(e.target.value); setErroAno(""); }}
+              disabled={!modeloId && !modeloConfirmadoLivre}
               min={ANO_MINIMO}
               max={ANO_MAXIMO}
+              aria-invalid={Boolean(erroAno)}
+              aria-describedby={erroAno ? "erro-ano" : undefined}
               required
             />
           )}
+          {erroAno && <p id="erro-ano" role="alert" style={{ color: "var(--fz-vendido)", fontSize: 12, marginTop: 4 }}>{erroAno}</p>}
         </div>
 
         <div className="field" style={{ marginBottom: 16 }}>
@@ -464,12 +525,13 @@ export default function Busca() {
                 name="cep"
                 className="input"
                 value={cep}
-                onChange={(e) => setCep(formatarCep(e.target.value))}
+                onChange={(e) => { setCep(formatarCep(e.target.value)); setErroCep(""); }}
                 inputMode="numeric"
                 placeholder="00000-000"
                 maxLength={9}
                 autoComplete="postal-code"
-                aria-describedby={erroLocalizacao ? "erro-localizacao" : undefined}
+                aria-invalid={Boolean(erroCep)}
+                aria-describedby={erroCep ? "erro-cep" : erroLocalizacao ? "erro-localizacao" : undefined}
               />
               <button
                 type="button"
@@ -480,6 +542,7 @@ export default function Busca() {
               >
                 {buscandoLocalizacao ? "Obtendo localização..." : "Usar minha localização atual"}
               </button>
+              {erroCep && <p id="erro-cep" role="alert" style={{ color: "var(--fz-vendido)", fontSize: 12, marginTop: 4 }}>{erroCep}</p>}
               {erroLocalizacao && <p id="erro-localizacao" style={{ color: "var(--fz-vendido)", fontSize: 12, marginTop: 4 }}>{erroLocalizacao}</p>}
             </>
           )}
