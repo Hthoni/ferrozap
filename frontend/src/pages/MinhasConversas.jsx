@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
+import useTitulo from "../hooks/useTitulo";
 
 const ROTULO_STATUS = { aguardando: "Aguardando", respondida: "Respondida", sem_resposta: "Sem resposta" };
 
 export default function MinhasConversas() {
+  useTitulo("Mensagens");
   const [conversas, setConversas] = useState([]);
   const [erro, setErro] = useState("");
   const { cliente } = useAuth();
