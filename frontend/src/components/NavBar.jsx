@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import logoAzul from "../assets/marca/catasucata-lockup-azul.svg";
@@ -31,6 +31,14 @@ function Selo({ quantidade }) {
 export default function NavBar() {
   const { cliente, empresa } = useAuth();
   const [naoLidas, setNaoLidas] = useState(0);
+  const location = useLocation();
+
+  // CS-012 (v2): esse é agora o ÚNICO "Nova busca" que existe no site
+  // -- a página de Resultados tinha uma cópia própria, com outro
+  // estilo, pra mesma ação. Quando o clique acontece a partir da
+  // própria tela de resultados, carrega a busca atual junto (mesmo
+  // efeito que a cópia removida tinha).
+  const linkNovaBusca = location.pathname === "/resultados" ? `/buscar${location.search}` : "/buscar";
 
   const token = cliente?.token || empresa?.token;
 
@@ -74,7 +82,7 @@ export default function NavBar() {
         <nav className="cs-header__acoes" aria-label="Navegação principal">
           {cliente && (
             <>
-              <Link className="cs-header__acao" to="/buscar">Nova busca</Link>
+              <Link className="cs-header__acao" to={linkNovaBusca}>Nova busca</Link>
               <Link className="cs-header__acao" to="/conversas">
                 Mensagens<Selo quantidade={naoLidas} />
               </Link>
@@ -87,7 +95,7 @@ export default function NavBar() {
               <Link className="cs-header__acao" to="/conversas-recebidas">
                 Mensagens<Selo quantidade={naoLidas} />
               </Link>
-              <Link className="cs-header__acao" to="/buscar">Nova busca</Link>
+              <Link className="cs-header__acao" to={linkNovaBusca}>Nova busca</Link>
             </>
           )}
         </nav>
