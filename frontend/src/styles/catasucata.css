@@ -40,6 +40,7 @@
   /* estados funcionais — NAO sao cores de marca, so status de anuncio */
   --fz-disponivel: #2f7a4d;
   --fz-vendido:    #9a3b32;
+  --fz-aproximado: #9c6b12; /* N-16: ano aproximado é opção válida, não erro -- vermelho lia como problema */
   --fz-whatsapp:   #25d366; /* cor oficial da marca WhatsApp, uso deliberado só no botão de envio */
 
   --fz-max:        1180px;  /* largura maxima de conteudo */
@@ -291,7 +292,14 @@ button, .btn { font-size: 15px; }
 .alvo-toque::before {
   content: "";
   position: absolute;
-  inset: -9px;
+  inset: -13px;
+}
+/* CS-022: o QA mediu de verdade (não é limitação de medição como eu
+   supunha antes) -- .btn-ghost/.alvo-toque com -9px ainda ficava
+   abaixo de 44px, e .btn-primary/.btn-secondary não tinham NENHUMA
+   expansão, incluindo o "Buscar", que é o CTA principal do produto. */
+.btn {
+  min-height: 44px;
 }
 
 /* --- CS-019 (v2): esqueleto de carregamento --------------------------- */
@@ -329,3 +337,15 @@ button, .btn { font-size: 15px; }
   display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;
 }
 .cs-footer a { color: var(--color-neutral-600); }
+
+/* --- N-02: label de campo/estado confirmado, sentence case -----------
+   .fz-rotulo é uppercase de propósito (eyebrow/tarja, tipo "MARKETPLACE
+   DE PEÇAS USADAS") -- usei ela por engano como rótulo pequeno acima
+   de valor escolhido (Fabricante/Modelo confirmados) e no label do
+   textarea de mensagem, o que misturava dois padrões de capitalização
+   na mesma tela sem motivo. Essa aqui é só o texto pequeno, sem
+   caixa alta nem letter-spacing. */
+.cs-rotulo-campo {
+  font-size: 13px;
+  color: var(--color-neutral-600);
+}
