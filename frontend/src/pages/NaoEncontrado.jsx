@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
+import useTitulo from "../hooks/useTitulo";
 
 export default function NaoEncontrado() {
+  useTitulo("Página não encontrada");
   return (
     <div className="fz-wrap fz-secao" style={{ textAlign: "center", paddingTop: 60 }}>
       <p className="fz-rotulo fz-rotulo--aco">Erro 404</p>
