@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
+import useTitulo from "../hooks/useTitulo";
 
 const ANO_MINIMO = 1950;
 const ANO_MAXIMO = new Date().getFullYear() + 1;
@@ -18,6 +19,7 @@ function cepValido(valor) {
 }
 
 export default function Busca() {
+  useTitulo("Buscar peça");
   const [fabricantes, setFabricantes] = useState([]);
   const [modelos, setModelos] = useState([]);
   const [carregandoModelos, setCarregandoModelos] = useState(false);
@@ -39,6 +41,7 @@ export default function Busca() {
   const [anos, setAnos] = useState([]);
   const [temGeracaoReal, setTemGeracaoReal] = useState(true);
   const [ano, setAno] = useState("");
+  const [anoLivreEscolhido, setAnoLivreEscolhido] = useState(false);
   const [cep, setCep] = useState("");
   const [cepSalvo, setCepSalvo] = useState(false);
   const [coordsGPS, setCoordsGPS] = useState(null);
@@ -156,6 +159,7 @@ export default function Busca() {
     api.listarAnos(modeloId).then((resultado) => {
       setAnos(resultado.anos);
       setTemGeracaoReal(resultado.tem_geracao_real);
+      setAnoLivreEscolhido(false);
       const desejado = anoDesejado.current;
       if (desejado) {
         anoDesejado.current = null;
@@ -181,6 +185,7 @@ export default function Busca() {
         // então o modelo também vai direto pro modo texto.
         setFabricanteNome(resultado.nome);
         setSemCadastroReal(true);
+        setModoTextoFabricante(false); // N-11: fechar o bloco de entrada, senão fica duplicado com o resumo
         setModoTextoModelo(true);
       }
     } catch (err) {
@@ -360,7 +365,7 @@ export default function Busca() {
         )}
         {(fabricanteId || semCadastroReal) && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <span id="rotulo-fabricante-escolhido" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Fabricante</span>
+            <span id="rotulo-fabricante-escolhido" className="cs-rotulo-campo" style={{ display: "block", marginBottom: 4 }}>Fabricante</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="fz-codigo" aria-labelledby="rotulo-fabricante-escolhido">{fabricanteNome}</span>
               <button type="button" className="btn btn-ghost alvo-toque" style={{ width: "auto", fontSize: 12 }} onClick={trocarFabricante}>
@@ -371,13 +376,13 @@ export default function Busca() {
         )}
 
         {/* Modelo — só aparece depois que o fabricante está resolvido */}
-        {fabricanteId && !modeloId && !modoTextoModelo && carregandoModelos && (
+        {(fabricanteId || semCadastroReal) && !modeloId && !modoTextoModelo && carregandoModelos && (
           <div className="field" style={{ marginBottom: 16 }}>
             <label>Modelo</label>
             <div className="cs-skeleton" style={{ height: 40 }}></div>
           </div>
         )}
-        {fabricanteId && !modeloId && !modoTextoModelo && !carregandoModelos && (
+        {(fabricanteId || semCadastroReal) && !modeloId && !modoTextoModelo && !carregandoModelos && (
           <div className="field" style={{ marginBottom: 8 }}>
             <label htmlFor="campo-modelo">Modelo</label>
             <select id="campo-modelo" name="modelo" className="input" value={modeloId} onChange={(e) => setModeloId(e.target.value)} required>
@@ -388,7 +393,7 @@ export default function Busca() {
             </select>
           </div>
         )}
-        {fabricanteId && !modeloId && !modoTextoModelo && !carregandoModelos && (
+        {(fabricanteId || semCadastroReal) && !modeloId && !modoTextoModelo && !carregandoModelos && (
           <button
             type="button"
             className="btn btn-ghost alvo-toque"
@@ -398,7 +403,7 @@ export default function Busca() {
             Não encontrou seu modelo? Digite aqui
           </button>
         )}
-        {fabricanteId && !modeloId && modoTextoModelo && (
+        {(fabricanteId || semCadastroReal) && !modeloId && modoTextoModelo && (
           <div className="field" style={{ marginBottom: 16 }}>
             <label htmlFor="campo-modelo-texto">Nome do modelo</label>
             <div style={{ display: "flex", gap: 8 }}>
@@ -433,7 +438,7 @@ export default function Busca() {
         )}
         {(modeloId || modeloConfirmadoLivre) && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <span id="rotulo-modelo-escolhido" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Modelo</span>
+            <span id="rotulo-modelo-escolhido" className="cs-rotulo-campo" style={{ display: "block", marginBottom: 4 }}>Modelo</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="fz-codigo" aria-labelledby="rotulo-modelo-escolhido">
                 {modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo}
@@ -464,13 +469,21 @@ export default function Busca() {
 
         <div className="field" style={{ marginBottom: 16 }}>
           <label htmlFor="campo-ano">Ano de fabricação</label>
-          {temGeracaoReal ? (
+          {temGeracaoReal && anos.length > 0 && !anoLivreEscolhido ? (
             <select
               id="campo-ano"
               name="ano"
               className="input"
               value={ano}
-              onChange={(e) => { setAno(e.target.value); setErroAno(""); }}
+              onChange={(e) => {
+                if (e.target.value === "__outro__") {
+                  setAnoLivreEscolhido(true);
+                  setAno("");
+                } else {
+                  setAno(e.target.value);
+                }
+                setErroAno("");
+              }}
               disabled={!modeloId && !modeloConfirmadoLivre}
               aria-invalid={Boolean(erroAno)}
               aria-describedby={erroAno ? "erro-ano" : undefined}
@@ -480,6 +493,11 @@ export default function Busca() {
               {anos.map((a) => (
                 <option key={a} value={a}>{a}</option>
               ))}
+              {/* CS-003 (UI): em vez de o campo inteiro trocar de tipo
+                  (select -> input) dependendo do modelo, o mesmo select
+                  sempre aparece primeiro, com essa opção pra revelar o
+                  campo livre quando o ano não está na lista. */}
+              <option value="__outro__">Outro ano...</option>
             </select>
           ) : (
             <input
@@ -487,7 +505,7 @@ export default function Busca() {
               name="ano"
               className="input"
               type="number"
-              placeholder={modeloId ? "Digite o ano" : "Escolha o modelo primeiro"}
+              placeholder={modeloId || modeloConfirmadoLivre ? "Digite o ano" : "Escolha o modelo primeiro"}
               value={ano}
               onChange={(e) => { setAno(e.target.value); setErroAno(""); }}
               disabled={!modeloId && !modeloConfirmadoLivre}
