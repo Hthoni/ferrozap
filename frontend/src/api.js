@@ -4,12 +4,23 @@ async function chamar(caminho, { method = "GET", body, token } = {}) {
   const headers = { "Content-Type": "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const resposta = await fetch(`${BASE_URL}${caminho}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-    cache: "no-store",
-  });
+  let resposta;
+  try {
+    resposta = await fetch(`${BASE_URL}${caminho}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      cache: "no-store",
+    });
+  } catch (falhaDeRede) {
+    // CS-031: fetch rejeita direto (sem nem chegar a ter resposta)
+    // quando não há internet ou o servidor está fora do ar -- sem
+    // isso, o erro cru ("Failed to fetch") ia parar na tela do
+    // usuário sem explicação nenhuma.
+    const erro = new Error("Não foi possível conectar. Confira sua internet e tente de novo.");
+    erro.status = 0;
+    throw erro;
+  }
 
   const dados = await resposta.json().catch(() => null);
 
