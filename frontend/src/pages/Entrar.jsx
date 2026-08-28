@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
+import useTitulo from "../hooks/useTitulo";
 
 const CAMPOS_CADASTRO_EMPRESA = [
   { nome: "nome", label: "Nome da empresa", autoComplete: "organization" },
@@ -16,6 +17,7 @@ const CAMPOS_CADASTRO_EMPRESA = [
 ];
 
 export default function Entrar({ tipoInicial = "cliente" }) {
+  useTitulo("Entrar");
   const [modo, setModo] = useState("login");
   const [tipo, setTipo] = useState(tipoInicial);
 
