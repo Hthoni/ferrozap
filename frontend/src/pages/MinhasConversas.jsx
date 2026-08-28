@@ -14,7 +14,15 @@ export default function MinhasConversas() {
 
   useEffect(() => {
     if (!cliente) return;
-    api.listarMinhasConversas(cliente.token).then(setConversas).catch((err) => setErro(err.message));
+    api.listarMinhasConversas(cliente.token).then(setConversas).catch((err) => {
+      // CS-001: token expirado mostrava o texto cru do backend aqui --
+      // esse era o único lugar do site que ainda fazia isso.
+      if (err.status === 401) {
+        setErro("Sua sessão expirou. Entre novamente para continuar.");
+      } else {
+        setErro(err.message);
+      }
+    });
   }, [cliente]);
 
   if (!cliente) {
@@ -28,12 +36,16 @@ export default function MinhasConversas() {
 
   return (
     <div className="fz-wrap fz-secao">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h2 style={{ fontSize: 32, margin: 0 }}>Mensagens</h2>
-        <Link className="btn btn-primary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
-      </div>
-      {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
-      {conversas.length === 0 && <p>Você ainda não iniciou nenhuma conversa.</p>}
+      <h2 style={{ fontSize: 32, marginBottom: 24 }}>Mensagens</h2>
+      {erro && (
+        <p role="alert" style={{ color: "var(--fz-vendido)" }}>
+          {erro}
+          {erro.includes("sessão expirou") && (
+            <> <Link to="/entrar" style={{ color: "inherit", textDecoration: "underline" }}>Entrar de novo</Link></>
+          )}
+        </p>
+      )}
+      {conversas.length === 0 && !erro && <p>Você ainda não iniciou nenhuma conversa.</p>}
       {conversas.map((c) => (
         <Link key={c.id} to={`/conversas/${c.id}`} style={{ textDecoration: "none", color: "inherit" }}>
           <div className="card" style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
