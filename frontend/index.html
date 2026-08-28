@@ -5,6 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="/favicon.svg" />
     <title>Catasucata — a sua peça existe, vamos encontrá-la?</title>
+
+    <!-- CS-027/028: como o site é uma SPA (conteúdo renderizado via
+         JavaScript), essas tags precisam ficar aqui, estáticas, no
+         próprio HTML -- o WhatsApp/Facebook/Google não executam o
+         JavaScript da página antes de gerar o preview de link, então
+         qualquer tag que só é criada depois de a página carregar (via
+         React) nunca é vista por eles. Por isso essas tags são
+         genéricas (a mesma pra qualquer página compartilhada), não
+         uma por rota -- fazer uma por rota exigiria pré-renderizar o
+         site no servidor, o que é uma mudança de arquitetura maior. -->
+    <meta name="description" content="Catasucata conecta você a desmontadoras credenciadas em todo o Brasil para encontrar peças usadas de procedência regular para o seu veículo." />
+    <meta property="og:title" content="Catasucata — encontre peças usadas com procedência" />
+    <meta property="og:description" content="Busque por marca, modelo e ano, e encontre desmontadoras credenciadas perto de você." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://catasucata.com.br" />
+    <meta property="og:locale" content="pt_BR" />
   </head>
   <body>
     <div id="root"></div>
