@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Fabricante, Modelo, Submodelo
+from app.models import Fabricante, Modelo, Submodelo, SugestaoCatalogo
 from app.services.geracao import anos_disponiveis
 
 router = APIRouter(prefix="/catalogo", tags=["catalogo"])
@@ -30,7 +30,7 @@ def listar_fabricantes(db: Session = Depends(get_db)):
     fabricantes = db.query(Fabricante).all()
     ordenados = sorted(
         fabricantes,
-        key=lambda f: (PRIORIDADE_FABRICANTES.get(f.nome, 999), f.nome),
+        key=lambda f: (PRIORIDADE_FABRICANTES.get(f.nome, 999), f.nome.casefold()),
     )
     return [{"id": f.id, "nome": f.nome} for f in ordenados]
 
@@ -120,3 +120,48 @@ def listar_submodelos(modelo_id: int, db: Session = Depends(get_db)):
 def listar_anos(modelo_id: int, db: Session = Depends(get_db)):
     anos, tem_geracao_real = anos_disponiveis(db, modelo_id)
     return {"anos": anos, "tem_geracao_real": tem_geracao_real}
+
+
+class SugestaoFabricanteCreate(BaseModel):
+    nome: str
+
+
+@router.post("/sugestoes/fabricante", status_code=201)
+def sugerir_fabricante(dados: SugestaoFabricanteCreate, db: Session = Depends(get_db)):
+    """
+    Fluxo de BUSCA do cliente (Busca.jsx) -- não cria fabricante real,
+    só registra a sugestão pra revisão manual (N-08). A busca segue
+    com o texto puro, sem id de catálogo.
+    """
+    nome = dados.nome.strip()
+    existe_no_catalogo = db.query(Fabricante).filter(Fabricante.nome.ilike(nome)).first()
+    if existe_no_catalogo:
+        return {"id": existe_no_catalogo.id, "nome": existe_no_catalogo.nome, "ja_existe": True}
+
+    db.add(SugestaoCatalogo(tipo="fabricante", nome=nome))
+    db.commit()
+    return {"id": None, "nome": nome, "ja_existe": False}
+
+
+class SugestaoModeloCreate(BaseModel):
+    fabricante_nome: str
+    nome: str
+
+
+@router.post("/sugestoes/modelo", status_code=201)
+def sugerir_modelo(dados: SugestaoModeloCreate, db: Session = Depends(get_db)):
+    """Mesma lógica do fabricante, para modelo (ver sugerir_fabricante)."""
+    nome = dados.nome.strip()
+    fabricante = db.query(Fabricante).filter(Fabricante.nome.ilike(dados.fabricante_nome.strip())).first()
+    if fabricante:
+        existe_no_catalogo = (
+            db.query(Modelo)
+            .filter(Modelo.fabricante_id == fabricante.id, Modelo.nome.ilike(nome))
+            .first()
+        )
+        if existe_no_catalogo:
+            return {"id": existe_no_catalogo.id, "nome": existe_no_catalogo.nome, "ja_existe": True}
+
+    db.add(SugestaoCatalogo(tipo="modelo", nome=nome, fabricante_nome=dados.fabricante_nome.strip()))
+    db.commit()
+    return {"id": None, "nome": nome, "ja_existe": False}
