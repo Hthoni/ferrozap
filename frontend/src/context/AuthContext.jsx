@@ -1,4 +1,5 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import { registrarExpiracaoSessao } from "../api";
 
 const AuthContext = createContext(null);
 
@@ -22,6 +23,19 @@ export function AuthProvider({ children }) {
     else localStorage.removeItem("catasucata_empresa");
     setEmpresaState(dados);
   };
+
+  // CS-001/CS-004: qualquer 401 vindo do backend (token expirado de
+  // verdade, não só localStorage apagado por fora) encerra as duas
+  // sessões de vez, reativamente -- o guard de rota passa a barrar
+  // corretamente na navegação seguinte, sem precisar de reload.
+  useEffect(() => {
+    registrarExpiracaoSessao(() => {
+      setClienteState(null);
+      setEmpresaState(null);
+      localStorage.removeItem("catasucata_cliente");
+      localStorage.removeItem("catasucata_empresa");
+    });
+  }, []);
 
   return (
     <AuthContext.Provider value={{ cliente, setCliente, empresa, setEmpresa }}>
