@@ -15,7 +15,9 @@ async function chamar(caminho, { method = "GET", body, token } = {}) {
 
   if (!resposta.ok) {
     const mensagem = dados?.detail || "Algo deu errado. Tente novamente.";
-    throw new Error(typeof mensagem === "string" ? mensagem : "Dados inválidos.");
+    const erro = new Error(typeof mensagem === "string" ? mensagem : "Dados inválidos.");
+    erro.status = resposta.status;
+    throw erro;
   }
 
   return dados;
@@ -31,6 +33,10 @@ export const api = {
     chamar("/catalogo/fabricantes", { method: "POST", body: { nome } }),
   criarOuObterModelo: (fabricanteId, nome) =>
     chamar("/catalogo/modelos", { method: "POST", body: { fabricante_id: fabricanteId, nome } }),
+  sugerirFabricante: (nome) =>
+    chamar("/catalogo/sugestoes/fabricante", { method: "POST", body: { nome } }),
+  sugerirModelo: (fabricanteNome, nome) =>
+    chamar("/catalogo/sugestoes/modelo", { method: "POST", body: { fabricante_nome: fabricanteNome, nome } }),
 
   // Busca
   buscar: ({ modeloId, ano, cep, lat, lon, ordenarPor }) => {
