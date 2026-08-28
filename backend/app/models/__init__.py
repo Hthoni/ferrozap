@@ -3,6 +3,7 @@ from app.models.empresa import Empresa, VeiculoDesmonte
 from app.models.usuario import UsuarioFinal
 from app.models.mensageria import Consulta, Conversa, Mensagem
 from app.models.lead import LeadWhatsapp
+from app.models.sugestao import SugestaoCatalogo
 
 __all__ = [
     "Fabricante",
@@ -16,4 +17,5 @@ __all__ = [
     "Conversa",
     "Mensagem",
     "LeadWhatsapp",
+    "SugestaoCatalogo",
 ]
