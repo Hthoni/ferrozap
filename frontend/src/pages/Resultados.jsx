@@ -4,6 +4,7 @@ import { BadgeCheck, MapPin, MessageCircle } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
+import useTitulo from "../hooks/useTitulo";
 
 function montarLinkWhatsapp(numero, mensagem) {
   const digitos = numero.replace(/\D/g, "");
@@ -12,6 +13,7 @@ function montarLinkWhatsapp(numero, mensagem) {
 }
 
 export default function Resultados() {
+  useTitulo("Resultados da busca");
   const [params] = useSearchParams();
   const modeloId = params.get("modeloId");
   const ano = params.get("ano");
