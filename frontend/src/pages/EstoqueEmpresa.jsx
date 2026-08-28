@@ -232,7 +232,7 @@ export default function EstoqueEmpresa() {
         )}
         {fabricanteId && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <span id="estoque-rotulo-fabricante" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Fabricante</span>
+            <span id="estoque-rotulo-fabricante" className="cs-rotulo-campo" style={{ display: "block", marginBottom: 4 }}>Fabricante</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="fz-codigo" aria-labelledby="estoque-rotulo-fabricante">{fabricanteNome}</span>
               {!editandoId && (
@@ -300,7 +300,7 @@ export default function EstoqueEmpresa() {
         )}
         {modeloId && (
           <div className="field" style={{ marginBottom: 16 }}>
-            <span id="estoque-rotulo-modelo" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Modelo</span>
+            <span id="estoque-rotulo-modelo" className="cs-rotulo-campo" style={{ display: "block", marginBottom: 4 }}>Modelo</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="fz-codigo" aria-labelledby="estoque-rotulo-modelo">
                 {modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo}
