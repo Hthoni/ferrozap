@@ -20,6 +20,7 @@ function cepValido(valor) {
 export default function Busca() {
   const [fabricantes, setFabricantes] = useState([]);
   const [modelos, setModelos] = useState([]);
+  const [carregandoModelos, setCarregandoModelos] = useState(false);
   const [submodelos, setSubmodelos] = useState([]);
 
   const [fabricanteId, setFabricanteId] = useState("");
@@ -110,8 +111,10 @@ export default function Busca() {
   useEffect(() => {
     if (!fabricanteId) return;
     setSubmodelos([]);
+    setCarregandoModelos(true);
     api.listarModelos(fabricanteId).then((lista) => {
       setModelos(lista);
+      setCarregandoModelos(false);
       if (lista.length === 0) setModoTextoModelo(true);
 
       const desejado = modeloIdDesejado.current;
@@ -315,7 +318,7 @@ export default function Busca() {
         {!fabricanteId && !modoTextoFabricante && (
           <button
             type="button"
-            className="btn btn-ghost"
+            className="btn btn-ghost alvo-toque"
             style={{ marginBottom: 16, padding: 0, fontSize: 13 }}
             onClick={() => setModoTextoFabricante(true)}
           >
@@ -347,7 +350,7 @@ export default function Busca() {
             </div>
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-ghost alvo-toque"
               style={{ marginTop: 8, padding: 0, fontSize: 13 }}
               onClick={() => { setModoTextoFabricante(false); setTextoFabricante(""); }}
             >
@@ -360,7 +363,7 @@ export default function Busca() {
             <span id="rotulo-fabricante-escolhido" className="fz-rotulo" style={{ display: "block", marginBottom: 4 }}>Fabricante</span>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="fz-codigo" aria-labelledby="rotulo-fabricante-escolhido">{fabricanteNome}</span>
-              <button type="button" className="btn btn-ghost" style={{ width: "auto", fontSize: 12 }} onClick={trocarFabricante}>
+              <button type="button" className="btn btn-ghost alvo-toque" style={{ width: "auto", fontSize: 12 }} onClick={trocarFabricante}>
                 Trocar
               </button>
             </div>
@@ -368,7 +371,13 @@ export default function Busca() {
         )}
 
         {/* Modelo — só aparece depois que o fabricante está resolvido */}
-        {fabricanteId && !modeloId && !modoTextoModelo && (
+        {fabricanteId && !modeloId && !modoTextoModelo && carregandoModelos && (
+          <div className="field" style={{ marginBottom: 16 }}>
+            <label>Modelo</label>
+            <div className="cs-skeleton" style={{ height: 40 }}></div>
+          </div>
+        )}
+        {fabricanteId && !modeloId && !modoTextoModelo && !carregandoModelos && (
           <div className="field" style={{ marginBottom: 8 }}>
             <label htmlFor="campo-modelo">Modelo</label>
             <select id="campo-modelo" name="modelo" className="input" value={modeloId} onChange={(e) => setModeloId(e.target.value)} required>
@@ -379,10 +388,10 @@ export default function Busca() {
             </select>
           </div>
         )}
-        {fabricanteId && !modeloId && !modoTextoModelo && (
+        {fabricanteId && !modeloId && !modoTextoModelo && !carregandoModelos && (
           <button
             type="button"
-            className="btn btn-ghost"
+            className="btn btn-ghost alvo-toque"
             style={{ marginBottom: 16, padding: 0, fontSize: 13 }}
             onClick={() => setModoTextoModelo(true)}
           >
@@ -414,7 +423,7 @@ export default function Busca() {
             </div>
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-ghost alvo-toque"
               style={{ marginTop: 8, padding: 0, fontSize: 13 }}
               onClick={() => { setModoTextoModelo(false); setTextoModelo(""); }}
             >
@@ -431,7 +440,7 @@ export default function Busca() {
               </span>
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="btn btn-ghost alvo-toque"
                 style={{ width: "auto", fontSize: 12 }}
                 onClick={() => { setModeloId(""); setTextoModelo(""); setModeloConfirmadoLivre(false); }}
               >
@@ -499,7 +508,7 @@ export default function Busca() {
               <span className="fz-codigo">Localização atual detectada</span>
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="btn btn-ghost alvo-toque"
                 style={{ width: "auto", fontSize: 12 }}
                 onClick={() => setCoordsGPS(null)}
               >
@@ -511,7 +520,7 @@ export default function Busca() {
               <span className="fz-codigo">{cep}</span>
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="btn btn-ghost alvo-toque"
                 style={{ width: "auto", fontSize: 12 }}
                 onClick={() => setCepSalvo(false)}
               >
@@ -535,7 +544,7 @@ export default function Busca() {
               />
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="btn btn-ghost alvo-toque"
                 style={{ width: "auto", padding: 0, fontSize: 13 }}
                 onClick={usarLocalizacaoAtual}
                 disabled={buscandoLocalizacao}
