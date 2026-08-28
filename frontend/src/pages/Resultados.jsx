@@ -22,6 +22,7 @@ export default function Resultados() {
   const modeloNome = params.get("modeloNome") || "";
   const submodeloId = params.get("submodeloId") || null;
   const submodeloNome = params.get("submodeloNome") || "";
+  const semCadastro = params.get("semCadastro") === "1";
 
   const [resultados, setResultados] = useState([]);
   const [ordenarPor, setOrdenarPor] = useState("compatibilidade");
@@ -34,11 +35,18 @@ export default function Resultados() {
   const [linkWhatsapp, setLinkWhatsapp] = useState("");
   const [somenteMensageriaId, setSomenteMensageriaId] = useState(null);
   const [enviando, setEnviando] = useState(false);
+  const [erroEnvio, setErroEnvio] = useState("");
 
   const { cliente } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (semCadastro) {
+      // N-08: fabricante/modelo é sugestão pendente, sem id de
+      // catálogo -- não existe modelo_id nenhum pra consultar.
+      setCarregando(false);
+      return;
+    }
     setCarregando(true);
     setErro("");
     api
@@ -46,7 +54,7 @@ export default function Resultados() {
       .then(setResultados)
       .catch((err) => setErro(err.message))
       .finally(() => setCarregando(false));
-  }, [modeloId, ano, cep, lat, lon, ordenarPor]);
+  }, [modeloId, ano, cep, lat, lon, ordenarPor, semCadastro]);
 
   function abrirMensagem(empresaId) {
     if (!cliente) {
@@ -59,18 +67,31 @@ export default function Resultados() {
     setWhatsappClicadoId(null);
     setSomenteMensageriaId(null);
     setErro("");
+    setErroEnvio("");
   }
 
   async function enviarESalvarLink(e, grupo) {
     e.preventDefault();
+    setErroEnvio("");
+
+    // N-01: revalida no momento do envio (não só ao abrir o formulário)
+    // -- sessão pode ter expirado nesse meio-tempo -- e bloqueia texto
+    // vazio explicitamente, já que o form tem noValidate (CS-017) e a
+    // validação nativa do required não roda mais sozinha.
+    if (!cliente) {
+      navigate("/entrar");
+      return;
+    }
+    if (!texto.trim()) {
+      setErroEnvio("Descreva a peça que você precisa antes de enviar.");
+      return;
+    }
+
     const melhorVeiculo = grupo.veiculos[0]; // já vem ordenado, exato primeiro
     setEnviando(true);
-    setErro("");
 
     // Mensageria própria — sempre acontece, com ou sem WhatsApp
-    // cadastrado (histórico, selo de lida/não lida, etc.). CS-013: o
-    // botão agora diz "Enviar" (era "Salvar"), porque isso aqui manda
-    // mensagem de verdade -- "Salvar" sugeria rascunho.
+    // cadastrado (histórico, selo de lida/não lida, etc.).
     try {
       await api.iniciarConversa(
         {
@@ -84,7 +105,13 @@ export default function Resultados() {
         cliente.token
       );
     } catch (err) {
-      setErro(err.message);
+      if (err.status === 401) {
+        // Sessão expirou entre abrir o formulário e clicar em enviar --
+        // mensagem amigável, nunca o texto técnico do backend.
+        setErroEnvio("Sua sessão expirou. Entre novamente para continuar.");
+      } else {
+        setErroEnvio(err.message);
+      }
       setEnviando(false);
       return;
     }
@@ -141,10 +168,18 @@ export default function Resultados() {
 
       {carregando && <p>Buscando...</p>}
       {erro && <p role="alert" style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
-      {!carregando && !erro && resultados.length === 0 && (
+      {!carregando && !erro && semCadastro && (
+        <p>
+          Ainda não temos <strong>{fabricanteNome} {modeloNome}</strong> catalogado —
+          anotamos seu interesse. Assim que alguma desmontadora cadastrar esse veículo,
+          ele passa a aparecer nas buscas.
+        </p>
+      )}
+      {!carregando && !erro && !semCadastro && resultados.length === 0 && (
         <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
       )}
 
+      {!semCadastro && (
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
         {resultados.map((grupo) => (
           <article className="fz-card-peca blueprint" key={grupo.empresa_id}>
@@ -227,11 +262,19 @@ export default function Resultados() {
                     style={{ resize: "vertical", maxHeight: 80, overflowY: "auto" }}
                     placeholder="Ex: para-choque dianteiro"
                     value={texto}
-                    onChange={(e) => setTexto(e.target.value)}
+                    onChange={(e) => { setTexto(e.target.value); setErroEnvio(""); }}
+                    aria-invalid={Boolean(erroEnvio)}
+                    aria-describedby={erroEnvio ? `erro-mensagem-${grupo.empresa_id}` : undefined}
                     autoFocus
-                    required
                   />
-                  {erro && <p role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13, margin: "4px 0" }}>{erro}</p>}
+                  {erroEnvio && (
+                    <p id={`erro-mensagem-${grupo.empresa_id}`} role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13, margin: "4px 0" }}>
+                      {erroEnvio}
+                      {erroEnvio.includes("sessão expirou") && (
+                        <> <Link to="/entrar" style={{ color: "inherit", textDecoration: "underline" }}>Entrar de novo</Link></>
+                      )}
+                    </p>
+                  )}
                   <div style={{ display: "flex", gap: 8 }}>
                     <button className="btn btn-primary" style={{ flex: 1 }} type="submit" disabled={enviando}>
                       {enviando ? "Enviando..." : "Enviar"}
@@ -256,6 +299,7 @@ export default function Resultados() {
           </article>
         ))}
       </div>
+      )}
     </div>
   );
 }
