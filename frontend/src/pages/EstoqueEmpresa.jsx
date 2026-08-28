@@ -188,7 +188,7 @@ export default function EstoqueEmpresa() {
         {!fabricanteId && !modoTextoFabricante && (
           <button
             type="button"
-            className="btn btn-ghost"
+            className="btn btn-ghost alvo-toque"
             style={{ marginBottom: 16, padding: 0, fontSize: 13 }}
             onClick={() => setModoTextoFabricante(true)}
           >
@@ -220,7 +220,7 @@ export default function EstoqueEmpresa() {
             </div>
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-ghost alvo-toque"
               style={{ marginTop: 8, padding: 0, fontSize: 13 }}
               onClick={() => { setModoTextoFabricante(false); setTextoFabricante(""); }}
             >
@@ -234,7 +234,7 @@ export default function EstoqueEmpresa() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="fz-codigo" aria-labelledby="estoque-rotulo-fabricante">{fabricanteNome}</span>
               {!editandoId && (
-                <button type="button" className="btn btn-ghost" style={{ width: "auto", fontSize: 12 }} onClick={trocarFabricante}>
+                <button type="button" className="btn btn-ghost alvo-toque" style={{ width: "auto", fontSize: 12 }} onClick={trocarFabricante}>
                   Trocar
                 </button>
               )}
@@ -256,7 +256,7 @@ export default function EstoqueEmpresa() {
         {fabricanteId && !modeloId && !modoTextoModelo && (
           <button
             type="button"
-            className="btn btn-ghost"
+            className="btn btn-ghost alvo-toque"
             style={{ marginBottom: 16, padding: 0, fontSize: 13 }}
             onClick={() => setModoTextoModelo(true)}
           >
@@ -288,7 +288,7 @@ export default function EstoqueEmpresa() {
             </div>
             <button
               type="button"
-              className="btn btn-ghost"
+              className="btn btn-ghost alvo-toque"
               style={{ marginTop: 8, padding: 0, fontSize: 13 }}
               onClick={() => { setModoTextoModelo(false); setTextoModelo(""); }}
             >
@@ -306,7 +306,7 @@ export default function EstoqueEmpresa() {
               {!editandoId && (
                 <button
                   type="button"
-                  className="btn btn-ghost"
+                  className="btn btn-ghost alvo-toque"
                   style={{ width: "auto", fontSize: 12 }}
                   onClick={() => { setModeloId(""); setTextoModelo(""); }}
                 >
@@ -350,7 +350,7 @@ export default function EstoqueEmpresa() {
             <button className="btn btn-secondary" style={{ width: "auto", fontSize: 13, padding: "6px 14px" }} onClick={() => iniciarEdicao(v)}>
               Editar
             </button>
-            <button className="btn btn-ghost" style={{ width: "auto", fontSize: 13, padding: "6px 14px", color: "var(--fz-vendido)" }} onClick={() => apagar(v.id)}>
+            <button className="btn btn-ghost alvo-toque" style={{ width: "auto", fontSize: 13, padding: "6px 14px", color: "var(--fz-vendido)" }} onClick={() => apagar(v.id)}>
               Apagar
             </button>
           </div>
