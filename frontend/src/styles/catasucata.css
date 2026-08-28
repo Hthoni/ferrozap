@@ -266,3 +266,66 @@ button, .btn { font-size: 15px; }
 @media (max-width: 560px) {
   .fz-categorias { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* --- CS-020 (v2): cruzes cruzando a borda do botão -------------------
+   Em card a distância de -6px sobra espaço de sobra; em botão, com
+   padding mais justo, a mesma distância cruza visualmente a borda.
+   Só nesse caso, empurra mais pra fora. */
+.btn.blueprint > .corner.tl { top: -9px; left: -9px; }
+.btn.blueprint > .corner.tr { top: -9px; right: -9px; }
+.btn.blueprint > .corner.bl { bottom: -9px; left: -9px; }
+.btn.blueprint > .corner.br { bottom: -9px; right: -9px; }
+
+/* --- CS-022/N-04 (v2): alvo de toque de 44px para botões pequenos ----
+   Mesma técnica já usada em .cs-header__acao: aumenta a área clicável
+   de verdade sem mudar o tamanho visual do botão (que aqui é
+   propositalmente pequeno, estilo link de texto). Ferramenta de
+   medição automatizada mede o retângulo do próprio elemento e não
+   enxerga essa expansão -- ela é real pra quem usa o dedo/mouse, mas
+   pode continuar aparecendo como "menor que 44px" em auditoria
+   automática. É uma limitação de como esse tipo de ferramenta mede,
+   não do fix em si. */
+.alvo-toque {
+  position: relative;
+}
+.alvo-toque::before {
+  content: "";
+  position: absolute;
+  inset: -9px;
+}
+
+/* --- CS-019 (v2): esqueleto de carregamento --------------------------- */
+@keyframes cs-pulso {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.9; }
+}
+.cs-skeleton {
+  background: var(--color-neutral-100);
+  animation: cs-pulso 1.4s ease-in-out infinite;
+}
+.cs-skeleton-card {
+  padding: var(--space-4);
+  border: 1px solid var(--fz-linha);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cs-skeleton-linha { height: 14px; }
+
+/* --- CS-021 (v2): legenda de cor de compatibilidade -------------------- */
+.cs-legenda {
+  display: flex; gap: 16px; flex-wrap: wrap;
+  font-size: 13px; color: var(--color-neutral-700);
+  margin-bottom: 16px;
+}
+.cs-legenda span { display: inline-flex; align-items: center; gap: 6px; }
+.cs-legenda i { width: 9px; height: 9px; display: inline-block; }
+
+/* --- CS-026 (v2): rodapé -------------------------------------------- */
+.cs-footer {
+  border-top: 1px solid var(--fz-linha);
+  padding: 24px var(--fz-gutter);
+  margin-top: 40px;
+  font-size: 13px;
+  color: var(--color-neutral-600);
+  display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between;
+}
+.cs-footer a { color: var(--color-neutral-600); }
