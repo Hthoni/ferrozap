@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
+import useTitulo from "../hooks/useTitulo";
 
 export default function EstoqueEmpresa() {
+  useTitulo("Meu estoque");
   const { empresa } = useAuth();
   const [perfil, setPerfil] = useState(null);
   const [fabricantes, setFabricantes] = useState([]);
