@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
+import useTitulo from "../hooks/useTitulo";
 
 function montarLinkWhatsapp(numero, mensagem) {
   const digitos = numero.replace(/\D/g, "");
@@ -11,6 +12,7 @@ function montarLinkWhatsapp(numero, mensagem) {
 }
 
 export default function ConversaDetalhe() {
+  useTitulo("Conversa");
   const { id } = useParams();
   const { cliente, empresa } = useAuth();
   const token = cliente?.token || empresa?.token;
