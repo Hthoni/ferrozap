@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
+import useTitulo from "../hooks/useTitulo";
 
 export default function MinhaContaEmpresa() {
+  useTitulo("Minha conta");
   const { empresa, setEmpresa } = useAuth();
   const navigate = useNavigate();
 
