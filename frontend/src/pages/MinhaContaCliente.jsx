@@ -101,7 +101,19 @@ export default function MinhaContaCliente() {
         </div>
         <div className="field" style={{ marginBottom: 16 }}>
           <label htmlFor="conta-cep">CEP de entrega</label>
-          <input id="conta-cep" name="postal-code" autoComplete="postal-code" className="input" value={cep} onChange={(e) => setCep(e.target.value)} />
+          <input
+            id="conta-cep"
+            name="postal-code"
+            autoComplete="postal-code"
+            className="input"
+            inputMode="numeric"
+            maxLength={9}
+            value={cep}
+            onChange={(e) => {
+              const digitos = e.target.value.replace(/\D/g, "").slice(0, 8);
+              setCep(digitos.length <= 5 ? digitos : `${digitos.slice(0, 5)}-${digitos.slice(5)}`);
+            }}
+          />
         </div>
         {erroPerfil && <p role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erroPerfil}</p>}
         {sucessoPerfil && <p role="status" style={{ fontSize: 13 }}>{sucessoPerfil}</p>}
