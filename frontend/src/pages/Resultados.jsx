@@ -138,13 +138,6 @@ export default function Resultados() {
     <div className="fz-wrap fz-secao">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h2 style={{ fontSize: 28, margin: 0 }}>Resultados</h2>
-        {/* CS-012: essa é a ÚNICA "Nova busca" que vive dentro da tela
-            de resultados agora (a outra, do empty state, foi removida
-            por ser redundante com essa mesma daqui). Ela carrega a
-            querystring atual (CS-006) -- a do cabeçalho, que aparece
-            em toda página, não carrega contexto nenhum de propósito,
-            é só um atalho genérico. */}
-        <Link className="btn btn-primary" to={`/buscar?${params.toString()}`} style={{ width: "auto" }}>Nova busca</Link>
       </div>
 
       <div className="seg" style={{ marginBottom: 20 }}>
@@ -166,7 +159,30 @@ export default function Resultados() {
         </label>
       </div>
 
-      {carregando && <p>Buscando...</p>}
+      {/* CS-021 (v2): legenda explicando o código de cor dos anos nos
+          cards -- antes a cor sozinha (verde/vermelho) carregava o
+          significado, sem nenhum texto equivalente. */}
+      {!carregando && !erro && !semCadastro && resultados.length > 0 && (
+        <div className="cs-legenda">
+          <span><i style={{ background: "var(--fz-disponivel)" }}></i> Ano igual ao que você buscou</span>
+          <span><i style={{ background: "var(--fz-vendido)" }}></i> Ano aproximado, mesma peça deve servir</span>
+        </div>
+      )}
+
+      {carregando && (
+        // CS-019 (v2): esqueleto no lugar de só o texto "Buscando...",
+        // ocupando o mesmo espaço que os cards de verdade vão ocupar.
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
+          {[1, 2, 3].map((n) => (
+            <div className="cs-skeleton-card" key={n}>
+              <div className="cs-skeleton cs-skeleton-linha" style={{ width: "70%" }}></div>
+              <div className="cs-skeleton cs-skeleton-linha" style={{ width: "50%" }}></div>
+              <div className="cs-skeleton cs-skeleton-linha" style={{ width: "90%" }}></div>
+              <div className="cs-skeleton" style={{ height: 34, marginTop: "auto" }}></div>
+            </div>
+          ))}
+        </div>
+      )}
       {erro && <p role="alert" style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
       {!carregando && !erro && semCadastro && (
         <p>
@@ -179,7 +195,7 @@ export default function Resultados() {
         <p>Nenhum desmonte compatível encontrado ainda para esse veículo.</p>
       )}
 
-      {!semCadastro && (
+      {!semCadastro && !carregando && (
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
         {resultados.map((grupo) => (
           <article className="fz-card-peca blueprint" key={grupo.empresa_id}>
