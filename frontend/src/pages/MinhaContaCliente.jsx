@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
@@ -81,10 +81,7 @@ export default function MinhaContaCliente() {
     // largura vive em cada form individualmente, como nas outras telas.
     <div className="fz-wrap fz-secao">
       <p className="fz-rotulo fz-rotulo--aco">Cliente final</p>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-        <h1 style={{ fontSize: 32, margin: 0 }}>Minha conta</h1>
-        <Link className="btn btn-primary" to="/buscar" style={{ width: "auto" }}>Nova busca</Link>
-      </div>
+      <h1 style={{ fontSize: 32, margin: "8px 0 24px" }}>Minha conta</h1>
 
       <form onSubmit={salvarPerfil} className="blueprint" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
         <Corners />
