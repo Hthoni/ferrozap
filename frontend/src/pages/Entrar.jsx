@@ -141,7 +141,7 @@ export default function Entrar({ tipoInicial = "cliente" }) {
       )}
 
       {tipo === "cliente" ? (
-        <form onSubmit={enviarCliente} className="blueprint" style={{ padding: 24, background: "var(--color-surface)" }} noValidate>
+        <form onSubmit={enviarCliente} className="blueprint cs-painel" style={{ padding: 24 }} noValidate>
           <Corners />
           {modo === "cadastro" && (
             <div className="field" style={{ marginBottom: 16 }}>
@@ -191,7 +191,7 @@ export default function Entrar({ tipoInicial = "cliente" }) {
           </button>
         </form>
       ) : (
-        <form onSubmit={enviarEmpresa} className="blueprint" style={{ padding: 24, background: "var(--color-surface)" }} noValidate>
+        <form onSubmit={enviarEmpresa} className="blueprint cs-painel" style={{ padding: 24 }} noValidate>
           <Corners />
           {modo === "cadastro" &&
             CAMPOS_CADASTRO_EMPRESA.map((campo) => (
