@@ -159,6 +159,23 @@ export default function EstoqueEmpresa() {
       <p className="fz-rotulo fz-rotulo--aco">{perfil?.nome || "Carregando..."}</p>
       <h2 style={{ fontSize: 32, margin: "8px 0 24px" }}>Meu estoque</h2>
 
+      <div className="card cs-painel" style={{ marginBottom: 24, maxWidth: 440 }}>
+        <p className="card-title" style={{ margin: 0 }}>Tem um estoque grande?</p>
+        <p className="card-body" style={{ margin: 0 }}>
+          Baixe o modelo de planilha, preencha um veículo por linha e nos envie de volta
+          (pelo WhatsApp ou e-mail que você já usa com a gente). A gente confere e sobe
+          tudo de uma vez pra você — sem precisar cadastrar veículo por veículo aqui.
+        </p>
+        <a
+          className="btn btn-secondary alvo-toque"
+          href="/modelos/catasucata-modelo-estoque.xlsx"
+          download
+          style={{ width: "auto", display: "inline-flex" }}
+        >
+          Baixar modelo de planilha (.xlsx)
+        </a>
+      </div>
+
       <form onSubmit={cadastrar} className="blueprint cs-painel" style={{ padding: 24, maxWidth: 440, marginBottom: 32 }} noValidate>
         <Corners />
         <p className="card-title" style={{ marginBottom: 16 }}>
