@@ -354,6 +354,24 @@ button, .btn { font-size: 15px; }
 .fz-card-peca {
   background: color-mix(in srgb, var(--color-surface) 50%, transparent);
 }
+/* Estado não-selecionado do alternador (Já tenho conta / Nova conta,
+   Cliente / Desmontadora) também não tinha fundo nenhum -- mesmo
+   problema do fz-card-peca, resolvido do mesmo jeito. O estado
+   selecionado (azul sólido, .seg-opt:has(input:checked)) fica como
+   está, não é painel de conteúdo, é indicador de seleção. */
+.seg-opt:not(:has(input:checked)) {
+  background: color-mix(in srgb, var(--color-surface) 50%, transparent);
+}
+
+/* Fabricante/Modelo confirmados ficavam sem nenhuma borda -- só texto
+   solto dentro do painel. Só a borda aqui, de propósito -- sem fundo
+   branco, pra não parecer campo ainda editável tipo Ano/CEP; é um
+   valor já escolhido, com aparência própria. */
+.cs-campo-confirmado {
+  border: 1px solid var(--color-divider);
+  padding: 6px 10px;
+  box-sizing: border-box;
+}
 
 /* --- N-02: label de campo/estado confirmado, sentence case -----------
    .fz-rotulo é uppercase de propósito (eyebrow/tarja, tipo "MARKETPLACE
