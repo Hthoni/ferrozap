@@ -366,7 +366,7 @@ export default function Busca() {
         {(fabricanteId || semCadastroReal) && (
           <div className="field" style={{ marginBottom: 16 }}>
             <span id="rotulo-fabricante-escolhido" className="cs-rotulo-campo" style={{ display: "block", marginBottom: 4 }}>Fabricante</span>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div className="cs-campo-confirmado" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="fz-codigo" aria-labelledby="rotulo-fabricante-escolhido">{fabricanteNome}</span>
               <button type="button" className="btn btn-ghost alvo-toque" style={{ width: "auto", fontSize: 12 }} onClick={trocarFabricante}>
                 Trocar
@@ -439,7 +439,7 @@ export default function Busca() {
         {(modeloId || modeloConfirmadoLivre) && (
           <div className="field" style={{ marginBottom: 16 }}>
             <span id="rotulo-modelo-escolhido" className="cs-rotulo-campo" style={{ display: "block", marginBottom: 4 }}>Modelo</span>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div className="cs-campo-confirmado" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span className="fz-codigo" aria-labelledby="rotulo-modelo-escolhido">
                 {modelos.find((m) => String(m.id) === String(modeloId))?.nome || textoModelo}
               </span>
