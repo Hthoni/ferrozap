@@ -155,11 +155,11 @@ export default function EstoqueEmpresa() {
   }
 
   return (
-    <div className="fz-wrap fz-secao">
+    <div className="fz-wrap fz-secao cs-fundo-padrao">
       <p className="fz-rotulo fz-rotulo--aco">{perfil?.nome || "Carregando..."}</p>
       <h2 style={{ fontSize: 32, margin: "8px 0 24px" }}>Meu estoque</h2>
 
-      <form onSubmit={cadastrar} className="blueprint" style={{ padding: 24, maxWidth: 440, marginBottom: 32 }} noValidate>
+      <form onSubmit={cadastrar} className="blueprint" style={{ padding: 24, maxWidth: 440, marginBottom: 32, background: "var(--color-surface)" }} noValidate>
         <Corners />
         <p className="card-title" style={{ marginBottom: 16 }}>
           {editandoId ? `Editando veículo #${editandoId}` : "Adicionar veículo em desmonte"}
