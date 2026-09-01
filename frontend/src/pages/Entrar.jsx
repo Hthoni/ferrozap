@@ -104,7 +104,7 @@ export default function Entrar({ tipoInicial = "cliente" }) {
   }
 
   return (
-    <div className="fz-wrap fz-secao" style={{ maxWidth: 520 }}>
+    <div className="fz-wrap fz-secao cs-fundo-padrao" style={{ maxWidth: 520 }}>
       <p className="fz-rotulo fz-rotulo--aco">
         {tipo === "cliente" ? "Cliente final" : "Desmontadora"}
       </p>
@@ -141,7 +141,7 @@ export default function Entrar({ tipoInicial = "cliente" }) {
       )}
 
       {tipo === "cliente" ? (
-        <form onSubmit={enviarCliente} className="blueprint" style={{ padding: 24 }} noValidate>
+        <form onSubmit={enviarCliente} className="blueprint" style={{ padding: 24, background: "var(--color-surface)" }} noValidate>
           <Corners />
           {modo === "cadastro" && (
             <div className="field" style={{ marginBottom: 16 }}>
@@ -191,7 +191,7 @@ export default function Entrar({ tipoInicial = "cliente" }) {
           </button>
         </form>
       ) : (
-        <form onSubmit={enviarEmpresa} className="blueprint" style={{ padding: 24 }} noValidate>
+        <form onSubmit={enviarEmpresa} className="blueprint" style={{ padding: 24, background: "var(--color-surface)" }} noValidate>
           <Corners />
           {modo === "cadastro" &&
             CAMPOS_CADASTRO_EMPRESA.map((campo) => (
