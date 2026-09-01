@@ -349,3 +349,29 @@ button, .btn { font-size: 15px; }
   font-size: 13px;
   color: var(--color-neutral-600);
 }
+
+/* --- Fundo com padrão de peças ------------------------------------------
+   Números não-negociáveis do spec: ladrilho 420px, opacidade 0,23,
+   atrás do conteúdo, sem capturar clique, rolando junto com a página
+   (não fixo na viewport). Opacidade fica na camada, nunca no SVG --
+   o traço do arquivo é azul cheio de propósito, pra permitir trocar
+   de paleta depois só trocando o arquivo, sem recalcular nada aqui. */
+.cs-fundo-padrao {
+  position: relative;
+  background: var(--color-bg);
+}
+.cs-fundo-padrao::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/assets/padrao-mecanico-d.svg");
+  background-size: 420px 420px;
+  background-repeat: repeat;
+  opacity: 0.23;
+  pointer-events: none;
+  z-index: 0;
+}
+.cs-fundo-padrao > * {
+  position: relative;
+  z-index: 1;
+}
