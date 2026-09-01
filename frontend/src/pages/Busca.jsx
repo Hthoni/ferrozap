@@ -286,7 +286,7 @@ export default function Busca() {
   }
 
   return (
-    <div className="fz-wrap fz-secao" style={{ borderTop: 0 }}>
+    <div className="fz-wrap fz-secao cs-fundo-padrao" style={{ borderTop: 0 }}>
       <p className="fz-rotulo fz-rotulo--aco">Marketplace de peças usadas</p>
       <h1 className="cs-titulo-home">Sua peça existe.</h1>
       <p className="cs-titulo-home__linha2">Vamos encontrá-la?</p>
@@ -294,7 +294,7 @@ export default function Busca() {
       {/* CS-017: novalidate -- os erros próprios (abaixo) substituem os
           balões nativos do navegador, que não seguem a identidade
           visual nem são anunciados de forma consistente por leitor de tela. */}
-      <form onSubmit={buscar} className="blueprint" style={{ padding: 24, maxWidth: 480 }} noValidate>
+      <form onSubmit={buscar} className="blueprint" style={{ padding: 24, maxWidth: 480, background: "var(--color-surface)" }} noValidate>
         <Corners />
 
         {/* Fabricante */}
