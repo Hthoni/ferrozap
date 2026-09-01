@@ -294,7 +294,7 @@ export default function Busca() {
       {/* CS-017: novalidate -- os erros próprios (abaixo) substituem os
           balões nativos do navegador, que não seguem a identidade
           visual nem são anunciados de forma consistente por leitor de tela. */}
-      <form onSubmit={buscar} className="blueprint" style={{ padding: 24, maxWidth: 480, background: "var(--color-surface)" }} noValidate>
+      <form onSubmit={buscar} className="blueprint cs-painel" style={{ padding: 24, maxWidth: 480 }} noValidate>
         <Corners />
 
         {/* Fabricante */}
