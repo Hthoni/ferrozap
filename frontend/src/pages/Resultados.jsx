@@ -140,7 +140,7 @@ export default function Resultados() {
   }
 
   return (
-    <div className="fz-wrap fz-secao">
+    <div className="fz-wrap fz-secao cs-fundo-padrao">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <h2 style={{ fontSize: 28, margin: 0 }}>Resultados</h2>
       </div>
