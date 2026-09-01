@@ -338,18 +338,21 @@ button, .btn { font-size: 15px; }
 }
 .cs-footer a { color: var(--color-neutral-600); }
 
-/* --- Painéis a 80% de transparência (20% de opacidade) -----------------
-   Pedido do time: todo bloco de conteúdo (card, formulário) deixa a
-   textura do fundo vazar por trás, em vez de ser um branco liso
-   cortando o padrão. Nas páginas sem .cs-fundo-padrao (Conversas
-   recebidas, Minha conta) isso não muda nada visualmente -- não tem
-   textura atrás pra vazar, então o branco bem transparente sobre
-   cinza liso já fica indistinguível de opaco. */
+/* --- Painéis a 50% de transparência (50% de opacidade) -----------------
+   Pedido do time: todo bloco de conteúdo (card, formulário, card de
+   resultado) deixa a textura do fundo vazar por trás, em vez de ser
+   um branco liso cortando o padrão -- ou totalmente sem filtro, que
+   era o caso do .fz-card-peca antes (não tinha fundo nenhum próprio).
+   Nas páginas sem .cs-fundo-padrao (Conversas recebidas, Minha conta)
+   isso não muda nada visualmente -- não tem textura atrás pra vazar. */
 .card {
-  background: color-mix(in srgb, var(--color-surface) 20%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 50%, transparent);
 }
 .cs-painel {
-  background: color-mix(in srgb, var(--color-surface) 20%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 50%, transparent);
+}
+.fz-card-peca {
+  background: color-mix(in srgb, var(--color-surface) 50%, transparent);
 }
 
 /* --- N-02: label de campo/estado confirmado, sentence case -----------
