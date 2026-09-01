@@ -338,18 +338,18 @@ button, .btn { font-size: 15px; }
 }
 .cs-footer a { color: var(--color-neutral-600); }
 
-/* --- Painéis a 90% de opacidade, não 100% ------------------------------
+/* --- Painéis a 80% de transparência (20% de opacidade) -----------------
    Pedido do time: todo bloco de conteúdo (card, formulário) deixa a
-   textura do fundo vazar de leve por trás, em vez de ser um branco
-   liso cortando o padrão. Nas páginas sem .cs-fundo-padrao (Conversas
+   textura do fundo vazar por trás, em vez de ser um branco liso
+   cortando o padrão. Nas páginas sem .cs-fundo-padrao (Conversas
    recebidas, Minha conta) isso não muda nada visualmente -- não tem
-   textura atrás pra vazar, então o branco a 90% sobre cinza liso já
-   fica indistinguível de 100%. */
+   textura atrás pra vazar, então o branco bem transparente sobre
+   cinza liso já fica indistinguível de opaco. */
 .card {
-  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 20%, transparent);
 }
 .cs-painel {
-  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 20%, transparent);
 }
 
 /* --- N-02: label de campo/estado confirmado, sentence case -----------
