@@ -1,0 +1,292 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480 480">
+  <defs>
+    <g id="p-nut" fill="none" stroke="#2E5C8A" stroke-width="1.4" stroke-linejoin="round">
+      <polygon points="17,0 8.5,14.7 -8.5,14.7 -17,0 -8.5,-14.7 8.5,-14.7"></polygon>
+      <circle cx="0" cy="0" r="7"></circle>
+    </g>
+    <g id="p-gear" fill="none" stroke="#2E5C8A" stroke-width="1.4" stroke-linejoin="round">
+      <circle cx="0" cy="0" r="11.5"></circle>
+      <circle cx="0" cy="0" r="4.5"></circle>
+      <rect x="-2.6" y="-17" width="5.2" height="6"></rect>
+      <rect x="-2.6" y="-17" width="5.2" height="6" transform="rotate(45)"></rect>
+      <rect x="-2.6" y="-17" width="5.2" height="6" transform="rotate(90)"></rect>
+      <rect x="-2.6" y="-17" width="5.2" height="6" transform="rotate(135)"></rect>
+      <rect x="-2.6" y="-17" width="5.2" height="6" transform="rotate(180)"></rect>
+      <rect x="-2.6" y="-17" width="5.2" height="6" transform="rotate(225)"></rect>
+      <rect x="-2.6" y="-17" width="5.2" height="6" transform="rotate(270)"></rect>
+      <rect x="-2.6" y="-17" width="5.2" height="6" transform="rotate(315)"></rect>
+    </g>
+    <g id="p-disco" fill="none" stroke="#2E5C8A" stroke-width="1.4">
+      <circle cx="0" cy="0" r="17"></circle>
+      <circle cx="0" cy="0" r="6"></circle>
+      <circle cx="11.5" cy="0" r="1.7"></circle>
+      <circle cx="5.75" cy="9.96" r="1.7"></circle>
+      <circle cx="-5.75" cy="9.96" r="1.7"></circle>
+      <circle cx="-11.5" cy="0" r="1.7"></circle>
+      <circle cx="-5.75" cy="-9.96" r="1.7"></circle>
+      <circle cx="5.75" cy="-9.96" r="1.7"></circle>
+    </g>
+    <g id="p-roda" fill="none" stroke="#2E5C8A" stroke-width="1.4">
+      <circle cx="0" cy="0" r="16"></circle>
+      <circle cx="0" cy="0" r="4.5"></circle>
+      <line x1="0" y1="-5" x2="0" y2="-15"></line>
+      <line x1="4.76" y1="-1.55" x2="14.27" y2="-4.64"></line>
+      <line x1="2.94" y1="4.05" x2="8.82" y2="12.14"></line>
+      <line x1="-2.94" y1="4.05" x2="-8.82" y2="12.14"></line>
+      <line x1="-4.76" y1="-1.55" x2="-14.27" y2="-4.64"></line>
+    </g>
+    <g id="p-vela" fill="none" stroke="#2E5C8A" stroke-width="1.4" stroke-linejoin="round">
+      <line x1="0" y1="-21" x2="0" y2="-15"></line>
+      <path d="M-4.5,-15 L4.5,-15 L5.5,-7 L-5.5,-7 Z"></path>
+      <polygon points="-6.5,-7 6.5,-7 6.5,0 -6.5,0"></polygon>
+      <rect x="-4.5" y="0" width="9" height="12"></rect>
+      <line x1="-4.5" y1="3.5" x2="4.5" y2="3.5"></line>
+      <line x1="-4.5" y1="7" x2="4.5" y2="7"></line>
+      <path d="M0,12 L0,18 M-3.5,18 L3.5,18"></path>
+    </g>
+    <g id="p-pistao" fill="none" stroke="#2E5C8A" stroke-width="1.4" stroke-linejoin="round">
+      <rect x="-11" y="-17" width="22" height="18"></rect>
+      <line x1="-11" y1="-10" x2="11" y2="-10"></line>
+      <line x1="-11" y1="-6.5" x2="11" y2="-6.5"></line>
+      <line x1="-11" y1="-3" x2="11" y2="-3"></line>
+      <path d="M-4,1 L-2.5,13 M4,1 L2.5,13"></path>
+      <circle cx="0" cy="16" r="4"></circle>
+    </g>
+    <g id="p-mola" fill="none" stroke="#2E5C8A" stroke-width="1.4" stroke-linejoin="round">
+      <path d="M-10,-17 L10,-17 M-10,-12 L10,-7 L-10,-2 L10,3 L-10,8 L10,13 M-10,17 L10,17"></path>
+      <path d="M-10,-17 L-10,-12 M10,13 L10,17"></path>
+    </g>
+    <g id="p-filtro-oleo" fill="none" stroke="#2E5C8A" stroke-width="1.4" stroke-linejoin="round">
+      <rect x="-11" y="-13" width="22" height="28" rx="2"></rect>
+      <rect x="-8" y="-17" width="16" height="4"></rect>
+      <line x1="-11" y1="-4" x2="11" y2="-4"></line>
+      <line x1="-11" y1="2" x2="11" y2="2"></line>
+      <line x1="-11" y1="8" x2="11" y2="8"></line>
+    </g>
+    <g id="p-filtro-ar" fill="none" stroke="#2E5C8A" stroke-width="1.4">
+      <circle cx="0" cy="0" r="16.5"></circle>
+      <circle cx="0" cy="0" r="9"></circle>
+      <line x1="0" y1="-9" x2="0" y2="-16.5"></line>
+      <line x1="6.36" y1="-6.36" x2="11.67" y2="-11.67"></line>
+      <line x1="9" y1="0" x2="16.5" y2="0"></line>
+      <line x1="6.36" y1="6.36" x2="11.67" y2="11.67"></line>
+      <line x1="0" y1="9" x2="0" y2="16.5"></line>
+      <line x1="-6.36" y1="6.36" x2="-11.67" y2="11.67"></line>
+      <line x1="-9" y1="0" x2="-16.5" y2="0"></line>
+      <line x1="-6.36" y1="-6.36" x2="-11.67" y2="-11.67"></line>
+    </g>
+    <g id="p-rolamento" fill="none" stroke="#2E5C8A" stroke-width="1.4">
+      <circle cx="0" cy="0" r="17"></circle>
+      <circle cx="0" cy="0" r="12.5"></circle>
+      <circle cx="0" cy="0" r="6.5"></circle>
+      <circle cx="0" cy="0" r="3"></circle>
+      <circle cx="0" cy="-9.5" r="2.6"></circle>
+      <circle cx="8.23" cy="-4.75" r="2.6"></circle>
+      <circle cx="8.23" cy="4.75" r="2.6"></circle>
+      <circle cx="0" cy="9.5" r="2.6"></circle>
+      <circle cx="-8.23" cy="4.75" r="2.6"></circle>
+      <circle cx="-8.23" cy="-4.75" r="2.6"></circle>
+    </g>
+    <g id="p-parafuso" fill="none" stroke="#2E5C8A" stroke-width="1.4" stroke-linejoin="round">
+      <polygon points="-9,-18 9,-18 9,-10 -9,-10"></polygon>
+      <line x1="-9" y1="-14" x2="9" y2="-14"></line>
+      <rect x="-5" y="-10" width="10" height="26"></rect>
+      <line x1="-5" y1="-4" x2="5" y2="-4"></line>
+      <line x1="-5" y1="1" x2="5" y2="1"></line>
+      <line x1="-5" y1="6" x2="5" y2="6"></line>
+      <line x1="-5" y1="11" x2="5" y2="11"></line>
+    </g>
+    <g id="p-correia" fill="none" stroke="#2E5C8A" stroke-width="1.4">
+      <circle cx="-9" cy="-3" r="10"></circle>
+      <circle cx="-9" cy="-3" r="3.5"></circle>
+      <circle cx="11" cy="7" r="6.5"></circle>
+      <circle cx="11" cy="7" r="2.4"></circle>
+      <line x1="-4.5" y1="-11.9" x2="13.9" y2="1.2"></line>
+      <line x1="-13.5" y1="5.9" x2="8.1" y2="12.8"></line>
+    </g>
+    <g id="p-bateria" fill="none" stroke="#2E5C8A" stroke-width="1.4" stroke-linejoin="round">
+      <rect x="-16" y="-9" width="32" height="20"></rect>
+      <rect x="-12" y="-13" width="6" height="4"></rect>
+      <rect x="6" y="-13" width="6" height="4"></rect>
+      <line x1="-11.5" y1="1" x2="-5.5" y2="1"></line>
+      <line x1="-8.5" y1="-2" x2="-8.5" y2="4"></line>
+      <line x1="5.5" y1="1" x2="11.5" y2="1"></line>
+    </g>
+    <g id="p-amortecedor" fill="none" stroke="#2E5C8A" stroke-width="1.4" stroke-linejoin="round">
+      <circle cx="0" cy="-17" r="3.4"></circle>
+      <line x1="0" y1="-13.6" x2="0" y2="-9"></line>
+      <rect x="-5.5" y="-9" width="11" height="22"></rect>
+      <line x1="-5.5" y1="-3" x2="5.5" y2="-3"></line>
+      <circle cx="0" cy="16.5" r="3.4"></circle>
+    </g>
+  </defs>
+
+  <g opacity="1">
+    <use href="#p-pistao" transform="translate(20.0,17.2) rotate(21) scale(0.44)"></use>
+    <use href="#p-filtro-ar" transform="translate(59.2,20.0) rotate(21) scale(0.44)"></use>
+    <use href="#p-filtro-oleo" transform="translate(99.0,22.3) rotate(-18) scale(0.44)"></use>
+    <use href="#p-mola" transform="translate(141.6,17.0) rotate(-8) scale(0.76)"></use>
+    <use href="#p-mola" transform="translate(141.6,497.0) rotate(-8) scale(0.76)"></use>
+    <use href="#p-correia" transform="translate(179.7,20.8) rotate(7) scale(0.76)"></use>
+    <use href="#p-bateria" transform="translate(216.8,17.0) rotate(6) scale(0.44)"></use>
+    <use href="#p-pistao" transform="translate(257.8,16.5) rotate(-4) scale(0.44)"></use>
+    <use href="#p-vela" transform="translate(301.0,19.1) rotate(-24) scale(0.64)"></use>
+    <use href="#p-filtro-oleo" transform="translate(337.1,19.0) rotate(-18) scale(0.44)"></use>
+    <use href="#p-disco" transform="translate(378.1,21.6) rotate(-20) scale(0.64)"></use>
+    <use href="#p-parafuso" transform="translate(420.9,18.9) rotate(17) scale(0.54)"></use>
+    <use href="#p-bateria" transform="translate(459.3,16.5) rotate(-9) scale(0.54)"></use>
+
+    <use href="#p-gear" transform="translate(43.4,60.2) rotate(-1) scale(0.64)"></use>
+    <use href="#p-amortecedor" transform="translate(81.7,61.2) rotate(-5) scale(0.44)"></use>
+    <use href="#p-nut" transform="translate(118.8,60.8) rotate(18) scale(0.44)"></use>
+    <use href="#p-filtro-ar" transform="translate(164.9,57.0) rotate(-26) scale(0.44)"></use>
+    <use href="#p-rolamento" transform="translate(205.1,58.2) rotate(-21) scale(0.64)"></use>
+    <use href="#p-vela" transform="translate(240.0,60.0) rotate(20) scale(0.64)"></use>
+    <use href="#p-disco" transform="translate(278.7,58.9) rotate(-15) scale(0.54)"></use>
+    <use href="#p-bateria" transform="translate(324.6,58.7) rotate(-23) scale(0.76)"></use>
+    <use href="#p-gear" transform="translate(362.7,59.4) rotate(19) scale(0.64)"></use>
+    <use href="#p-parafuso" transform="translate(401.3,62.2) rotate(18) scale(0.54)"></use>
+    <use href="#p-amortecedor" transform="translate(440.0,61.8) rotate(7) scale(0.64)"></use>
+    <use href="#p-pistao" transform="translate(3.7,60.5) rotate(-17) scale(0.44)"></use>
+    <use href="#p-pistao" transform="translate(483.7,60.5) rotate(-17) scale(0.44)"></use>
+
+    <use href="#p-nut" transform="translate(31.2,97.1) rotate(22) scale(0.76)"></use>
+    <use href="#p-roda" transform="translate(71.1,97.0) rotate(-12) scale(0.44)"></use>
+    <use href="#p-correia" transform="translate(108.8,101.5) rotate(5) scale(0.54)"></use>
+    <use href="#p-bateria" transform="translate(151.0,97.2) rotate(-2) scale(0.44)"></use>
+    <use href="#p-mola" transform="translate(191.1,98.8) rotate(-7) scale(0.44)"></use>
+    <use href="#p-disco" transform="translate(231.5,96.4) rotate(-19) scale(0.64)"></use>
+    <use href="#p-pistao" transform="translate(269.6,96.8) rotate(22) scale(0.76)"></use>
+    <use href="#p-amortecedor" transform="translate(308.8,100.6) rotate(-14) scale(0.44)"></use>
+    <use href="#p-parafuso" transform="translate(346.2,101.7) rotate(20) scale(0.76)"></use>
+    <use href="#p-filtro-oleo" transform="translate(390.8,100.9) rotate(-12) scale(0.64)"></use>
+    <use href="#p-bateria" transform="translate(426.2,103.1) rotate(-24) scale(0.54)"></use>
+    <use href="#p-roda" transform="translate(464.8,102.4) rotate(8) scale(0.76)"></use>
+    <use href="#p-roda" transform="translate(-15.2,102.4) rotate(8) scale(0.76)"></use>
+
+    <use href="#p-pistao" transform="translate(52.9,141.6) rotate(8) scale(0.54)"></use>
+    <use href="#p-disco" transform="translate(89.7,139.9) rotate(10) scale(0.44)"></use>
+    <use href="#p-gear" transform="translate(131.0,139.4) rotate(26) scale(0.54)"></use>
+    <use href="#p-vela" transform="translate(168.8,139.3) rotate(-2) scale(0.54)"></use>
+    <use href="#p-parafuso" transform="translate(212.9,139.1) rotate(-22) scale(0.76)"></use>
+    <use href="#p-mola" transform="translate(246.8,139.1) rotate(-17) scale(0.64)"></use>
+    <use href="#p-correia" transform="translate(288.6,137.3) rotate(0) scale(0.76)"></use>
+    <use href="#p-bateria" transform="translate(326.7,139.9) rotate(-11) scale(0.54)"></use>
+    <use href="#p-nut" transform="translate(373.0,139.4) rotate(22) scale(0.54)"></use>
+    <use href="#p-amortecedor" transform="translate(409.0,142.6) rotate(0) scale(0.44)"></use>
+    <use href="#p-filtro-ar" transform="translate(448.9,143.4) rotate(23) scale(0.76)"></use>
+    <use href="#p-parafuso" transform="translate(9.5,142.5) rotate(-26) scale(0.76)"></use>
+    <use href="#p-parafuso" transform="translate(489.5,142.5) rotate(-26) scale(0.76)"></use>
+
+    <use href="#p-filtro-oleo" transform="translate(33.6,182.8) rotate(-18) scale(0.76)"></use>
+    <use href="#p-pistao" transform="translate(73.0,179.6) rotate(7) scale(0.44)"></use>
+    <use href="#p-vela" transform="translate(110.6,178.1) rotate(10) scale(0.54)"></use>
+    <use href="#p-rolamento" transform="translate(156.5,182.2) rotate(11) scale(0.44)"></use>
+    <use href="#p-correia" transform="translate(196.8,182.5) rotate(13) scale(0.76)"></use>
+    <use href="#p-amortecedor" transform="translate(235.6,177.1) rotate(13) scale(0.54)"></use>
+    <use href="#p-mola" transform="translate(277.0,177.5) rotate(18) scale(0.76)"></use>
+    <use href="#p-roda" transform="translate(313.3,178.6) rotate(20) scale(0.76)"></use>
+    <use href="#p-vela" transform="translate(352.6,180.6) rotate(-4) scale(0.54)"></use>
+    <use href="#p-rolamento" transform="translate(391.5,180.0) rotate(16) scale(0.76)"></use>
+    <use href="#p-pistao" transform="translate(437.4,183.4) rotate(7) scale(0.54)"></use>
+    <use href="#p-nut" transform="translate(476.3,183.4) rotate(8) scale(0.54)"></use>
+    <use href="#p-nut" transform="translate(-3.7,183.4) rotate(8) scale(0.54)"></use>
+
+    <use href="#p-mola" transform="translate(55.1,221.0) rotate(21) scale(0.64)"></use>
+    <use href="#p-correia" transform="translate(97.2,220.7) rotate(-21) scale(0.76)"></use>
+    <use href="#p-filtro-ar" transform="translate(133.6,218.5) rotate(-18) scale(0.54)"></use>
+    <use href="#p-vela" transform="translate(173.8,218.9) rotate(10) scale(0.44)"></use>
+    <use href="#p-disco" transform="translate(215.5,223.6) rotate(6) scale(0.64)"></use>
+    <use href="#p-rolamento" transform="translate(256.4,223.4) rotate(-6) scale(0.76)"></use>
+    <use href="#p-pistao" transform="translate(299.0,217.4) rotate(13) scale(0.54)"></use>
+    <use href="#p-nut" transform="translate(339.5,222.4) rotate(11) scale(0.44)"></use>
+    <use href="#p-filtro-oleo" transform="translate(379.5,220.5) rotate(-8) scale(0.64)"></use>
+    <use href="#p-gear" transform="translate(412.5,223.4) rotate(23) scale(0.44)"></use>
+    <use href="#p-amortecedor" transform="translate(457.0,220.3) rotate(-25) scale(0.76)"></use>
+    <use href="#p-rolamento" transform="translate(16.5,216.4) rotate(-9) scale(0.44)"></use>
+
+    <use href="#p-disco" transform="translate(27.9,258.5) rotate(15) scale(0.44)"></use>
+    <use href="#p-mola" transform="translate(66.7,260.2) rotate(3) scale(0.76)"></use>
+    <use href="#p-nut" transform="translate(106.3,256.6) rotate(15) scale(0.54)"></use>
+    <use href="#p-bateria" transform="translate(145.4,257.2) rotate(-13) scale(0.54)"></use>
+    <use href="#p-filtro-ar" transform="translate(185.4,261.8) rotate(-15) scale(0.76)"></use>
+    <use href="#p-amortecedor" transform="translate(226.3,257.7) rotate(22) scale(0.64)"></use>
+    <use href="#p-rolamento" transform="translate(268.3,260.0) rotate(-4) scale(0.54)"></use>
+    <use href="#p-disco" transform="translate(303.5,260.5) rotate(-13) scale(0.44)"></use>
+    <use href="#p-filtro-oleo" transform="translate(341.4,258.8) rotate(-17) scale(0.54)"></use>
+    <use href="#p-vela" transform="translate(383.8,259.9) rotate(10) scale(0.54)"></use>
+    <use href="#p-filtro-ar" transform="translate(424.1,260.2) rotate(-4) scale(0.64)"></use>
+    <use href="#p-correia" transform="translate(466.4,261.3) rotate(-14) scale(0.76)"></use>
+    <use href="#p-correia" transform="translate(-13.6,261.3) rotate(-14) scale(0.76)"></use>
+
+    <use href="#p-rolamento" transform="translate(42.8,302.6) rotate(14) scale(0.54)"></use>
+    <use href="#p-pistao" transform="translate(83.9,300.0) rotate(-7) scale(0.54)"></use>
+    <use href="#p-roda" transform="translate(126.2,301.7) rotate(-3) scale(0.76)"></use>
+    <use href="#p-filtro-oleo" transform="translate(162.9,302.3) rotate(11) scale(0.76)"></use>
+    <use href="#p-amortecedor" transform="translate(206.2,298.2) rotate(-21) scale(0.44)"></use>
+    <use href="#p-correia" transform="translate(249.4,298.9) rotate(-24) scale(0.76)"></use>
+    <use href="#p-filtro-ar" transform="translate(288.9,299.4) rotate(-2) scale(0.76)"></use>
+    <use href="#p-vela" transform="translate(323.9,302.9) rotate(15) scale(0.64)"></use>
+    <use href="#p-mola" transform="translate(365.5,299.0) rotate(-19) scale(0.54)"></use>
+    <use href="#p-rolamento" transform="translate(406.3,303.3) rotate(-17) scale(0.76)"></use>
+    <use href="#p-amortecedor" transform="translate(447.4,302.2) rotate(-20) scale(0.64)"></use>
+    <use href="#p-filtro-oleo" transform="translate(4.0,300.7) rotate(-9) scale(0.64)"></use>
+    <use href="#p-filtro-oleo" transform="translate(484.0,300.7) rotate(-9) scale(0.64)"></use>
+
+    <use href="#p-roda" transform="translate(29.4,341.9) rotate(9) scale(0.76)"></use>
+    <use href="#p-correia" transform="translate(73.2,340.2) rotate(5) scale(0.44)"></use>
+    <use href="#p-gear" transform="translate(108.5,338.6) rotate(-13) scale(0.54)"></use>
+    <use href="#p-mola" transform="translate(149.9,338.3) rotate(6) scale(0.54)"></use>
+    <use href="#p-vela" transform="translate(188.5,338.0) rotate(-16) scale(0.44)"></use>
+    <use href="#p-nut" transform="translate(234.2,343.3) rotate(1) scale(0.76)"></use>
+    <use href="#p-parafuso" transform="translate(270.8,343.3) rotate(-6) scale(0.64)"></use>
+    <use href="#p-roda" transform="translate(311.2,337.9) rotate(8) scale(0.64)"></use>
+    <use href="#p-correia" transform="translate(354.1,337.8) rotate(-17) scale(0.44)"></use>
+    <use href="#p-filtro-oleo" transform="translate(393.4,339.6) rotate(15) scale(0.44)"></use>
+    <use href="#p-gear" transform="translate(427.7,342.1) rotate(6) scale(0.44)"></use>
+    <use href="#p-rolamento" transform="translate(469.1,337.1) rotate(-17) scale(0.54)"></use>
+    <use href="#p-rolamento" transform="translate(-10.9,337.1) rotate(-17) scale(0.54)"></use>
+
+    <use href="#p-nut" transform="translate(58.2,382.7) rotate(-21) scale(0.76)"></use>
+    <use href="#p-disco" transform="translate(99.0,379.3) rotate(0) scale(0.54)"></use>
+    <use href="#p-vela" transform="translate(141.1,383.3) rotate(-15) scale(0.54)"></use>
+    <use href="#p-roda" transform="translate(176.1,376.5) rotate(16) scale(0.54)"></use>
+    <use href="#p-filtro-ar" transform="translate(217.9,377.3) rotate(-8) scale(0.64)"></use>
+    <use href="#p-parafuso" transform="translate(261.0,380.3) rotate(-21) scale(0.54)"></use>
+    <use href="#p-nut" transform="translate(298.8,379.0) rotate(-3) scale(0.76)"></use>
+    <use href="#p-amortecedor" transform="translate(339.6,376.9) rotate(-25) scale(0.76)"></use>
+    <use href="#p-mola" transform="translate(377.1,383.5) rotate(1) scale(0.76)"></use>
+    <use href="#p-filtro-oleo" transform="translate(418.7,377.7) rotate(14) scale(0.76)"></use>
+    <use href="#p-gear" transform="translate(459.0,383.4) rotate(-12) scale(0.54)"></use>
+    <use href="#p-pistao" transform="translate(21.7,382.0) rotate(11) scale(0.64)"></use>
+
+    <use href="#p-parafuso" transform="translate(33.7,417.1) rotate(13) scale(0.44)"></use>
+    <use href="#p-disco" transform="translate(73.8,420.9) rotate(9) scale(0.44)"></use>
+    <use href="#p-amortecedor" transform="translate(117.1,417.5) rotate(-25) scale(0.44)"></use>
+    <use href="#p-mola" transform="translate(156.2,419.6) rotate(-19) scale(0.64)"></use>
+    <use href="#p-rolamento" transform="translate(199.6,421.5) rotate(-19) scale(0.44)"></use>
+    <use href="#p-filtro-oleo" transform="translate(235.8,419.1) rotate(-6) scale(0.44)"></use>
+    <use href="#p-pistao" transform="translate(275.5,420.7) rotate(-8) scale(0.64)"></use>
+    <use href="#p-disco" transform="translate(319.6,419.9) rotate(-15) scale(0.76)"></use>
+    <use href="#p-parafuso" transform="translate(355.5,422.5) rotate(-2) scale(0.64)"></use>
+    <use href="#p-amortecedor" transform="translate(397.4,421.6) rotate(-17) scale(0.44)"></use>
+    <use href="#p-roda" transform="translate(438.4,418.9) rotate(-4) scale(0.76)"></use>
+    <use href="#p-nut" transform="translate(476.9,417.4) rotate(-4) scale(0.44)"></use>
+    <use href="#p-nut" transform="translate(-3.1,417.4) rotate(-4) scale(0.44)"></use>
+
+    <use href="#p-vela" transform="translate(51.9,461.7) rotate(-1) scale(0.44)"></use>
+    <use href="#p-disco" transform="translate(92.4,456.4) rotate(-23) scale(0.54)"></use>
+    <use href="#p-rolamento" transform="translate(133.8,461.6) rotate(15) scale(0.44)"></use>
+    <use href="#p-gear" transform="translate(169.1,459.0) rotate(10) scale(0.54)"></use>
+    <use href="#p-roda" transform="translate(208.7,459.1) rotate(18) scale(0.64)"></use>
+    <use href="#p-correia" transform="translate(249.1,461.7) rotate(23) scale(0.44)"></use>
+    <use href="#p-vela" transform="translate(294.4,460.4) rotate(7) scale(0.44)"></use>
+    <use href="#p-disco" transform="translate(330.2,460.5) rotate(8) scale(0.44)"></use>
+    <use href="#p-mola" transform="translate(371.6,461.9) rotate(-15) scale(0.76)"></use>
+    <use href="#p-mola" transform="translate(371.6,-18.1) rotate(-15) scale(0.76)"></use>
+    <use href="#p-rolamento" transform="translate(409.8,456.7) rotate(-23) scale(0.54)"></use>
+    <use href="#p-parafuso" transform="translate(450.5,463.5) rotate(-13) scale(0.54)"></use>
+    <use href="#p-correia" transform="translate(13.2,463.5) rotate(10) scale(0.54)"></use>
+    <use href="#p-correia" transform="translate(493.2,463.5) rotate(10) scale(0.54)"></use>
+  </g>
+</svg>
