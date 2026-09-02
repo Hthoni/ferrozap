@@ -1,13 +1,14 @@
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth import criar_token
 from app.database import get_db
 from app.deps import get_usuario_atual
-from app.models import Empresa, UsuarioFinal
+from app.models import Admin, Empresa, TokenRedefinicaoSenha, UsuarioFinal
 from app.schemas import (
     EmpresaLogin,
     SenhaUpdate,
@@ -19,8 +20,94 @@ from app.schemas import (
     UsuarioFinalUpdate,
 )
 from app.security import hash_senha, verificar_senha
+from app.services.email import email_redefinicao_senha
 
 router = APIRouter(prefix="/auth", tags=["autenticacao"])
+
+
+class AdminLogin(BaseModel):
+    usuario: str
+    senha: str
+
+
+@router.post("/admin/login", response_model=TokenOut)
+def login_admin(dados: AdminLogin, db: Session = Depends(get_db)):
+    admin = db.query(Admin).filter(Admin.usuario == dados.usuario).first()
+    if not admin or not verificar_senha(dados.senha, admin.senha_hash):
+        raise HTTPException(status_code=401, detail="Usuário ou senha inválidos.")
+    if not admin.ativo:
+        raise HTTPException(status_code=403, detail="Administrador inativo.")
+    return TokenOut(access_token=criar_token(admin.id, "admin"))
+
+
+class EsqueciSenhaRequest(BaseModel):
+    tipo: str  # "usuario_final" | "empresa"
+    identificador: str  # e-mail (usuario_final) ou telefone (empresa)
+
+
+FRONTEND_URL = "https://catasucata.com.br"
+
+
+@router.post("/esqueci-senha")
+def esqueci_senha(dados: EsqueciSenhaRequest, db: Session = Depends(get_db)):
+    """
+    Resposta sempre genérica, exista ou não a conta -- não revela pra
+    quem está pedindo se aquele e-mail/telefone tem cadastro ou não
+    (evita descobrir contas de terceiros por tentativa e erro).
+    """
+    resposta = {"ok": True, "mensagem": "Se existir uma conta com esse dado, enviamos as instruções por e-mail."}
+
+    if dados.tipo == "usuario_final":
+        usuario = db.query(UsuarioFinal).filter(UsuarioFinal.email == dados.identificador.strip().lower()).first()
+        if not usuario or not usuario.email:
+            return resposta
+        sujeito_id, email_destino = usuario.id, usuario.email
+    elif dados.tipo == "empresa":
+        empresa = db.query(Empresa).filter(Empresa.telefone == dados.identificador).first()
+        if not empresa or not empresa.email:
+            return resposta
+        sujeito_id, email_destino = empresa.id, empresa.email
+    else:
+        raise HTTPException(status_code=400, detail="Tipo inválido.")
+
+    token_registro = TokenRedefinicaoSenha(
+        token=TokenRedefinicaoSenha.gerar_token(),
+        tipo=dados.tipo,
+        sujeito_id=sujeito_id,
+        expira_em=TokenRedefinicaoSenha.calcular_expiracao(),
+    )
+    db.add(token_registro)
+    db.commit()
+
+    link = f"{FRONTEND_URL}/#/redefinir-senha?token={token_registro.token}&tipo={dados.tipo}"
+    email_redefinicao_senha(email_destino, link)
+    return resposta
+
+
+class RedefinirSenhaRequest(BaseModel):
+    token: str
+    senha_nova: str
+
+
+@router.post("/redefinir-senha")
+def redefinir_senha(dados: RedefinirSenhaRequest, db: Session = Depends(get_db)):
+    registro = db.query(TokenRedefinicaoSenha).filter(TokenRedefinicaoSenha.token == dados.token).first()
+    if not registro or registro.usado:
+        raise HTTPException(status_code=400, detail="Link inválido ou já utilizado.")
+    if registro.expira_em.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="Link expirado. Peça um novo.")
+
+    if registro.tipo == "usuario_final":
+        sujeito = db.query(UsuarioFinal).filter(UsuarioFinal.id == registro.sujeito_id).first()
+    else:
+        sujeito = db.query(Empresa).filter(Empresa.id == registro.sujeito_id).first()
+    if not sujeito:
+        raise HTTPException(status_code=404, detail="Conta não encontrada.")
+
+    sujeito.senha_hash = hash_senha(dados.senha_nova)
+    registro.usado = True
+    db.commit()
+    return {"ok": True}
 
 
 @router.post("/empresas/login", response_model=TokenOut)
