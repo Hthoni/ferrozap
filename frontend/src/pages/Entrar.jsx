@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
@@ -172,6 +172,11 @@ export default function Entrar({ tipoInicial = "cliente" }) {
               minLength={8}
               required
             />
+            {modo === "login" && (
+              <Link to="/esqueci-senha" style={{ display: "block", marginTop: 6, fontSize: 13 }}>
+                Esqueci minha senha
+              </Link>
+            )}
           </div>
           {modo === "cadastro" && (
             <>
@@ -246,6 +251,11 @@ export default function Entrar({ tipoInicial = "cliente" }) {
               minLength={8}
               required
             />
+            {modo === "login" && (
+              <Link to="/esqueci-senha?tipo=empresa" style={{ display: "block", marginTop: 6, fontSize: 13 }}>
+                Esqueci minha senha
+              </Link>
+            )}
           </div>
           {erro && <p role="alert" style={{ color: "var(--fz-vendido)", fontSize: 13 }}>{erro}</p>}
           <button className="btn btn-primary btn-block" type="submit" disabled={carregando}>
