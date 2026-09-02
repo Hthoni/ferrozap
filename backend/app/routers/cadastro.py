@@ -16,6 +16,7 @@ from app.schemas import (
 )
 from app.security import hash_senha, verificar_senha
 from app.services.geracao import resolver_geracao
+from app.telefone import normalizar_telefone
 
 router = APIRouter(prefix="/empresas", tags=["cadastro"])
 
@@ -23,6 +24,7 @@ router = APIRouter(prefix="/empresas", tags=["cadastro"])
 @router.post("/", response_model=EmpresaOut, status_code=201)
 def cadastrar_empresa(dados: EmpresaCreate, db: Session = Depends(get_db)):
     """Cadastro público — sem autenticação, é aqui que a empresa nasce."""
+    telefone_normalizado = normalizar_telefone(dados.telefone)
     empresa = Empresa(
         nome=dados.nome,
         cnpj=dados.cnpj,
@@ -30,8 +32,8 @@ def cadastrar_empresa(dados: EmpresaCreate, db: Session = Depends(get_db)):
         uf=dados.uf.upper(),
         email=dados.email.strip().lower(),
         senha_hash=hash_senha(dados.senha),
-        telefone=dados.telefone,
-        whatsapp=dados.telefone if dados.telefone_e_whatsapp else None,
+        telefone=telefone_normalizado,
+        whatsapp=telefone_normalizado if dados.telefone_e_whatsapp else None,
         endereco=dados.endereco,
         cep=dados.cep,
     )
@@ -67,13 +69,13 @@ def atualizar_minha_empresa(
     if dados.email is not None:
         empresa.email = dados.email.strip().lower()
     if dados.telefone is not None:
-        empresa.telefone = dados.telefone
+        empresa.telefone = normalizar_telefone(dados.telefone)
         # Se o telefone mudou e a empresa não disse explicitamente
         # "não é WhatsApp" nesse mesmo pedido, mantém acompanhando o
         # telefone novo (comportamento mais previsível que deixar o
         # WhatsApp desatualizado silenciosamente).
         if dados.telefone_e_whatsapp is not False:
-            empresa.whatsapp = dados.telefone
+            empresa.whatsapp = empresa.telefone
     if dados.telefone_e_whatsapp is not None:
         empresa.whatsapp = empresa.telefone if dados.telefone_e_whatsapp else None
     if dados.endereco is not None:
