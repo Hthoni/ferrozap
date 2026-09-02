@@ -102,7 +102,7 @@ export default function MinhaContaEmpresa() {
         </div>
       )}
 
-      <form onSubmit={salvarPerfil} className="blueprint" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
+      <form onSubmit={salvarPerfil} className="blueprint cs-painel" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
         <Corners />
         <p className="card-title" style={{ marginBottom: 16 }}>Dados de contato</p>
         <div className="field" style={{ marginBottom: 16 }}>
@@ -143,7 +143,7 @@ export default function MinhaContaEmpresa() {
 
       {/* CS-016: mesmo peso visual de "Salvar dados" -- as duas são
           confirmações igualmente importantes. */}
-      <form onSubmit={salvarSenha} className="blueprint" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
+      <form onSubmit={salvarSenha} className="blueprint cs-painel" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
         <Corners />
         <p className="card-title" style={{ marginBottom: 16 }}>Alterar senha</p>
         <div className="field" style={{ marginBottom: 16 }}>
