@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { useAuth } from "../context/AuthContext";
 import Corners from "../components/Corners";
+import useTitulo from "../hooks/useTitulo";
 
 export default function AdminPainel() {
+  useTitulo("Painel de admin");
+  const { admin, setAdmin } = useAuth();
+  const navigate = useNavigate();
+  const token = admin?.token;
+
   const [aba, setAba] = useState("pendentes");
   const [pendentes, setPendentes] = useState([]);
   const [empresas, setEmpresas] = useState([]);
@@ -14,22 +22,30 @@ export default function AdminPainel() {
   const [formUsuario, setFormUsuario] = useState({});
   const [erro, setErro] = useState("");
   const [mensagem, setMensagem] = useState("");
+  const [senhaGerada, setSenhaGerada] = useState(null); // {alvo, senha, emailEnviado}
 
   function carregarPendentes() {
-    api.listarPendentes().then(setPendentes).catch((err) => setErro(err.message));
+    api.listarPendentes(token).then(setPendentes).catch((err) => setErro(err.message));
   }
   function carregarEmpresas() {
-    api.listarTodasEmpresas().then(setEmpresas).catch((err) => setErro(err.message));
+    api.listarTodasEmpresas(token).then(setEmpresas).catch((err) => setErro(err.message));
   }
   function carregarUsuarios() {
-    api.listarTodosUsuarios().then(setUsuarios).catch((err) => setErro(err.message));
+    api.listarTodosUsuarios(token).then(setUsuarios).catch((err) => setErro(err.message));
   }
 
   useEffect(() => {
+    if (!token) return;
     carregarPendentes();
     carregarEmpresas();
     carregarUsuarios();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  function sair() {
+    setAdmin(null);
+    navigate("/admin/entrar");
+  }
 
   function atualizarCoordenada(empresaId, campo, valor) {
     setCoordenadas((atual) => ({ ...atual, [empresaId]: { ...atual[empresaId], [campo]: valor } }));
@@ -44,7 +60,7 @@ export default function AdminPainel() {
         status_verificacao: status,
         latitude: paraNumero(coord.latitude),
         longitude: paraNumero(coord.longitude),
-      });
+      }, token);
       setMensagem(`Empresa #${empresaId} atualizada para "${status}".`);
       carregarPendentes();
       carregarEmpresas();
@@ -55,7 +71,7 @@ export default function AdminPainel() {
 
   async function alternarAtivoEmpresa(id, ativo) {
     try {
-      await api.atualizarAtivoEmpresa(id, !ativo);
+      await api.atualizarAtivoEmpresa(id, !ativo, token);
       carregarEmpresas();
     } catch (err) {
       setErro(err.message);
@@ -64,7 +80,7 @@ export default function AdminPainel() {
 
   async function alternarAtivoUsuario(id, ativo) {
     try {
-      await api.atualizarAtivoUsuario(id, !ativo);
+      await api.atualizarAtivoUsuario(id, !ativo, token);
       carregarUsuarios();
     } catch (err) {
       setErro(err.message);
@@ -98,7 +114,7 @@ export default function AdminPainel() {
         cep: formEmpresa.cep,
         latitude: paraNumero(formEmpresa.latitude),
         longitude: paraNumero(formEmpresa.longitude),
-      });
+      }, token);
       setMensagem("Empresa atualizada.");
       setEditandoEmpresaId(null);
       carregarEmpresas();
@@ -119,7 +135,7 @@ export default function AdminPainel() {
   async function salvarEdicaoUsuario(id) {
     setErro(""); setMensagem("");
     try {
-      await api.editarUsuarioAdmin(id, formUsuario);
+      await api.editarUsuarioAdmin(id, formUsuario, token);
       setMensagem("Cliente atualizado.");
       setEditandoUsuarioId(null);
       carregarUsuarios();
@@ -128,12 +144,51 @@ export default function AdminPainel() {
     }
   }
 
+  async function resetarSenhaEmpresa(e) {
+    if (!window.confirm(`Redefinir a senha de "${e.nome}"? Uma senha temporária será gerada.`)) return;
+    setErro(""); setMensagem("");
+    try {
+      const resultado = await api.resetarSenhaEmpresaAdmin(e.id, token);
+      setSenhaGerada({ alvo: e.nome, senha: resultado.senha_temporaria, emailEnviado: resultado.email_enviado });
+    } catch (err) {
+      setErro(err.message);
+    }
+  }
+
+  async function resetarSenhaUsuario(u) {
+    if (!window.confirm(`Redefinir a senha de "${u.nome}"? Uma senha temporária será gerada.`)) return;
+    setErro(""); setMensagem("");
+    try {
+      const resultado = await api.resetarSenhaUsuarioAdmin(u.id, token);
+      setSenhaGerada({ alvo: u.nome, senha: resultado.senha_temporaria, emailEnviado: resultado.email_enviado });
+    } catch (err) {
+      setErro(err.message);
+    }
+  }
+
   return (
     <div className="fz-wrap fz-secao">
-      <p className="fz-rotulo" style={{ color: "var(--fz-vendido)" }}>
-        Sem autenticação de admin ainda — uso interno apenas
-      </p>
-      <h2 style={{ fontSize: 32, margin: "8px 0 24px" }}>Painel de admin</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <h2 style={{ fontSize: 32, margin: 0 }}>Painel de admin</h2>
+        <button className="btn btn-ghost alvo-toque" style={{ width: "auto" }} onClick={sair}>Sair</button>
+      </div>
+
+      {senhaGerada && (
+        <div className="card" style={{ marginBottom: 24, border: "1px solid var(--color-accent)" }}>
+          <p className="card-title" style={{ margin: 0 }}>Senha redefinida para {senhaGerada.alvo}</p>
+          <p style={{ fontSize: 20, fontWeight: "bold", letterSpacing: "0.05em", margin: "8px 0" }}>
+            {senhaGerada.senha}
+          </p>
+          <p className="card-meta" style={{ margin: 0 }}>
+            {senhaGerada.emailEnviado
+              ? "Também enviamos essa senha por e-mail pra pessoa."
+              : "Não foi possível enviar por e-mail (conta sem e-mail cadastrado, ou envio de e-mail não configurado) — repasse essa senha manualmente."}
+          </p>
+          <button className="btn btn-secondary" style={{ marginTop: 12, width: "auto" }} onClick={() => setSenhaGerada(null)}>
+            Fechar
+          </button>
+        </div>
+      )}
 
       <div className="seg" style={{ marginBottom: 24 }}>
         <label className="seg-opt">
@@ -150,14 +205,14 @@ export default function AdminPainel() {
         </label>
       </div>
 
-      {erro && <p style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
-      {mensagem && <p>{mensagem}</p>}
+      {erro && <p role="alert" style={{ color: "var(--fz-vendido)" }}>{erro}</p>}
+      {mensagem && <p role="status">{mensagem}</p>}
 
       {aba === "pendentes" && (
         <>
           {pendentes.length === 0 && <p>Nenhuma empresa aguardando aprovação.</p>}
           {pendentes.map((e) => (
-            <div key={e.id} className="blueprint" style={{ padding: 24, maxWidth: 480, marginBottom: 24 }}>
+            <div key={e.id} className="blueprint" style={{ padding: 24, maxWidth: 480, marginBottom: 24, background: "var(--color-surface)" }}>
               <Corners />
               <p className="card-title">{e.nome}</p>
               <p className="fz-codigo" style={{ margin: "8px 0" }}>
@@ -247,20 +302,23 @@ export default function AdminPainel() {
                   </div>
                 </div>
               ) : (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                   <div>
                     <p style={{ fontWeight: 500, margin: 0 }}>{e.nome}</p>
                     <p className="card-meta">{e.email} · UF {e.uf} · plano {e.plano}</p>
                   </div>
-                  <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                     <span className={`tag ${e.status_verificacao === "verificado" ? "tag-accent" : "tag-neutral"}`}>
                       {e.status_verificacao}
                     </span>
-                    <button className="btn btn-ghost" style={{ width: "auto", fontSize: 12 }} onClick={() => iniciarEdicaoEmpresa(e)}>
+                    <button className="btn btn-ghost alvo-toque" style={{ width: "auto", fontSize: 12 }} onClick={() => iniciarEdicaoEmpresa(e)}>
                       Editar
                     </button>
+                    <button className="btn btn-ghost alvo-toque" style={{ width: "auto", fontSize: 12 }} onClick={() => resetarSenhaEmpresa(e)}>
+                      Resetar senha
+                    </button>
                     <button
-                      className="btn btn-ghost"
+                      className="btn btn-ghost alvo-toque"
                       style={{ width: "auto", fontSize: 12, color: e.ativo ? "var(--fz-vendido)" : undefined }}
                       onClick={() => alternarAtivoEmpresa(e.id, e.ativo)}
                     >
@@ -298,17 +356,20 @@ export default function AdminPainel() {
                   </div>
                 </div>
               ) : (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
                   <div>
                     <p style={{ fontWeight: 500, margin: 0 }}>{u.nome}</p>
                     <p className="card-meta">{u.email} · {u.telefone}</p>
                   </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button className="btn btn-ghost" style={{ width: "auto", fontSize: 12 }} onClick={() => iniciarEdicaoUsuario(u)}>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button className="btn btn-ghost alvo-toque" style={{ width: "auto", fontSize: 12 }} onClick={() => iniciarEdicaoUsuario(u)}>
                       Editar
                     </button>
+                    <button className="btn btn-ghost alvo-toque" style={{ width: "auto", fontSize: 12 }} onClick={() => resetarSenhaUsuario(u)}>
+                      Resetar senha
+                    </button>
                     <button
-                      className="btn btn-ghost"
+                      className="btn btn-ghost alvo-toque"
                       style={{ width: "auto", fontSize: 12, color: u.ativo ? "var(--fz-vendido)" : undefined }}
                       onClick={() => alternarAtivoUsuario(u.id, u.ativo)}
                     >
