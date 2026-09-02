@@ -212,7 +212,7 @@ export default function AdminPainel() {
         <>
           {pendentes.length === 0 && <p>Nenhuma empresa aguardando aprovação.</p>}
           {pendentes.map((e) => (
-            <div key={e.id} className="blueprint" style={{ padding: 24, maxWidth: 480, marginBottom: 24, background: "var(--color-surface)" }}>
+            <div key={e.id} className="blueprint cs-painel" style={{ padding: 24, maxWidth: 480, marginBottom: 24 }}>
               <Corners />
               <p className="card-title">{e.nome}</p>
               <p className="fz-codigo" style={{ margin: "8px 0" }}>
