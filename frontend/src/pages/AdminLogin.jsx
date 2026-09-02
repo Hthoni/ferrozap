@@ -33,7 +33,7 @@ export default function AdminLogin() {
     <div className="fz-wrap fz-secao" style={{ maxWidth: 400 }}>
       <p className="fz-rotulo fz-rotulo--aco">Área restrita</p>
       <h1 style={{ fontSize: 32, margin: "8px 0 24px" }}>Administração</h1>
-      <form onSubmit={enviar} className="blueprint" style={{ padding: 24, background: "var(--color-surface)" }} noValidate>
+      <form onSubmit={enviar} className="blueprint cs-painel" style={{ padding: 24 }} noValidate>
         <Corners />
         <div className="field" style={{ marginBottom: 16 }}>
           <label htmlFor="admin-usuario">Usuário</label>
