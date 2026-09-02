@@ -43,7 +43,7 @@ export default function EsqueciSenha({ tipoInicial = "usuario_final" }) {
           </Link>
         </div>
       ) : (
-        <form onSubmit={enviar} className="blueprint" style={{ padding: 24, background: "var(--color-surface)" }} noValidate>
+        <form onSubmit={enviar} className="blueprint cs-painel" style={{ padding: 24 }} noValidate>
           <Corners />
 
           <div className="seg" style={{ marginBottom: 16, width: "100%" }}>
