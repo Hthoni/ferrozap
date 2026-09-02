@@ -61,7 +61,7 @@ export default function RedefinirSenha() {
           </button>
         </div>
       ) : (
-        <form onSubmit={enviar} className="blueprint" style={{ padding: 24, background: "var(--color-surface)" }} noValidate>
+        <form onSubmit={enviar} className="blueprint cs-painel" style={{ padding: 24 }} noValidate>
           <Corners />
           <div className="field" style={{ marginBottom: 16 }}>
             <label htmlFor="redefinir-senha-nova">Nova senha</label>
