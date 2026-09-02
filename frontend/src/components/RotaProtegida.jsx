@@ -6,19 +6,21 @@ import { useAuth } from "../context/AuthContext";
  * redireciona pro login em vez de deixar a pagina renderizar com dado
  * vazio/erro de token.
  *
- * tipo: "cliente" | "empresa" | "qualquer" (aceita as duas sessoes,
- * usado em telas compartilhadas como a conversa)
+ * tipo: "cliente" | "empresa" | "admin" | "qualquer" (aceita as duas
+ * sessoes de cliente/empresa, usado em telas compartilhadas como a
+ * conversa -- não inclui admin de propósito, área bem separada)
  */
 export default function RotaProtegida({ tipo, children }) {
-  const { cliente, empresa } = useAuth();
+  const { cliente, empresa, admin } = useAuth();
 
   const autenticado =
     tipo === "cliente" ? Boolean(cliente) :
     tipo === "empresa" ? Boolean(empresa) :
+    tipo === "admin" ? Boolean(admin) :
     Boolean(cliente || empresa);
 
   if (!autenticado) {
-    return <Navigate to="/entrar" replace />;
+    return <Navigate to={tipo === "admin" ? "/admin/entrar" : "/entrar"} replace />;
   }
 
   return children;
