@@ -11,6 +11,7 @@ function lerSessao(chave) {
 export function AuthProvider({ children }) {
   const [cliente, setClienteState] = useState(() => lerSessao("catasucata_cliente"));
   const [empresa, setEmpresaState] = useState(() => lerSessao("catasucata_empresa"));
+  const [admin, setAdminState] = useState(() => lerSessao("catasucata_admin"));
 
   const setCliente = (dados) => {
     if (dados) localStorage.setItem("catasucata_cliente", JSON.stringify(dados));
@@ -24,6 +25,12 @@ export function AuthProvider({ children }) {
     setEmpresaState(dados);
   };
 
+  const setAdmin = (dados) => {
+    if (dados) localStorage.setItem("catasucata_admin", JSON.stringify(dados));
+    else localStorage.removeItem("catasucata_admin");
+    setAdminState(dados);
+  };
+
   // CS-001/CS-004: qualquer 401 vindo do backend (token expirado de
   // verdade, não só localStorage apagado por fora) encerra as duas
   // sessões de vez, reativamente -- o guard de rota passa a barrar
@@ -32,13 +39,15 @@ export function AuthProvider({ children }) {
     registrarExpiracaoSessao(() => {
       setClienteState(null);
       setEmpresaState(null);
+      setAdminState(null);
       localStorage.removeItem("catasucata_cliente");
       localStorage.removeItem("catasucata_empresa");
+      localStorage.removeItem("catasucata_admin");
     });
   }, []);
 
   return (
-    <AuthContext.Provider value={{ cliente, setCliente, empresa, setEmpresa }}>
+    <AuthContext.Provider value={{ cliente, setCliente, empresa, setEmpresa, admin, setAdmin }}>
       {children}
     </AuthContext.Provider>
   );
