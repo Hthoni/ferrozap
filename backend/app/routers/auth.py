@@ -21,6 +21,7 @@ from app.schemas import (
 )
 from app.security import hash_senha, verificar_senha
 from app.services.email import email_redefinicao_senha
+from app.telefone import normalizar_telefone
 
 router = APIRouter(prefix="/auth", tags=["autenticacao"])
 
@@ -63,7 +64,7 @@ def esqueci_senha(dados: EsqueciSenhaRequest, db: Session = Depends(get_db)):
             return resposta
         sujeito_id, email_destino = usuario.id, usuario.email
     elif dados.tipo == "empresa":
-        empresa = db.query(Empresa).filter(Empresa.telefone == dados.identificador).first()
+        empresa = db.query(Empresa).filter(Empresa.telefone == normalizar_telefone(dados.identificador)).first()
         if not empresa or not empresa.email:
             return resposta
         sujeito_id, email_destino = empresa.id, empresa.email
@@ -112,7 +113,7 @@ def redefinir_senha(dados: RedefinirSenhaRequest, db: Session = Depends(get_db))
 
 @router.post("/empresas/login", response_model=TokenOut)
 def login_empresa(dados: EmpresaLogin, db: Session = Depends(get_db)):
-    empresa = db.query(Empresa).filter(Empresa.telefone == dados.telefone).first()
+    empresa = db.query(Empresa).filter(Empresa.telefone == normalizar_telefone(dados.telefone)).first()
     if not empresa or not verificar_senha(dados.senha, empresa.senha_hash):
         raise HTTPException(status_code=401, detail="Telefone ou senha inválidos.")
     if not empresa.ativo:
@@ -128,7 +129,7 @@ def cadastrar_usuario_final(dados: UsuarioFinalCreate, db: Session = Depends(get
     usuario = UsuarioFinal(
         nome=dados.nome,
         email=dados.email,
-        telefone=dados.telefone,
+        telefone=normalizar_telefone(dados.telefone),
         senha_hash=hash_senha(dados.senha),
         aceite_termos=dados.aceite_termos,
         aceite_promocional=dados.aceite_promocional,
@@ -148,7 +149,7 @@ def cadastrar_usuario_final(dados: UsuarioFinalCreate, db: Session = Depends(get
 def login_usuario_final(dados: UsuarioFinalLogin, db: Session = Depends(get_db)):
     usuario = (
         db.query(UsuarioFinal)
-        .filter(UsuarioFinal.telefone == dados.telefone)
+        .filter(UsuarioFinal.telefone == normalizar_telefone(dados.telefone))
         .first()
     )
     if not usuario or not verificar_senha(dados.senha, usuario.senha_hash):
@@ -172,7 +173,7 @@ def atualizar_meu_perfil(
     if dados.email is not None:
         usuario.email = dados.email.strip().lower()
     if dados.telefone is not None:
-        usuario.telefone = dados.telefone
+        usuario.telefone = normalizar_telefone(dados.telefone)
     if dados.cep is not None:
         usuario.cep = dados.cep
     try:
