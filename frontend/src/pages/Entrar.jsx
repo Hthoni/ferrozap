@@ -11,7 +11,7 @@ const CAMPOS_CADASTRO_EMPRESA = [
   { nome: "credenciamento_detran", label: "Número do credenciamento no Detran", autoComplete: "off" },
   { nome: "uf", label: "UF (ex: SP)", autoComplete: "address-level1" },
   { nome: "email", label: "E-mail", autoComplete: "email" },
-  { nome: "telefone", label: "Telefone (de preferência seu WhatsApp — com DDD)", autoComplete: "tel" },
+  { nome: "telefone", label: "Telefone (de preferência seu WhatsApp — com DDD, ex: 21999887766)", autoComplete: "tel", placeholder: "21999887766" },
   { nome: "endereco", label: "Endereço completo", autoComplete: "street-address" },
   { nome: "cep", label: "CEP", autoComplete: "postal-code" },
 ];
@@ -104,7 +104,8 @@ export default function Entrar({ tipoInicial = "cliente" }) {
   }
 
   return (
-    <div className="fz-wrap fz-secao cs-fundo-padrao" style={{ maxWidth: 520 }}>
+    <div className="fz-wrap fz-secao">
+      <div style={{ maxWidth: 520, margin: "0 auto" }}>
       <p className="fz-rotulo fz-rotulo--aco">
         {tipo === "cliente" ? "Cliente final" : "Desmontadora"}
       </p>
@@ -156,8 +157,8 @@ export default function Entrar({ tipoInicial = "cliente" }) {
             </div>
           )}
           <div className="field" style={{ marginBottom: 16 }}>
-            <label htmlFor="cliente-telefone">Telefone (com DDD)</label>
-            <input id="cliente-telefone" name="tel" autoComplete="tel" className="input" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
+            <label htmlFor="cliente-telefone">Telefone (com DDD, ex: 21999887766)</label>
+            <input id="cliente-telefone" name="tel" autoComplete="tel" inputMode="tel" className="input" placeholder="Ex: 21999887766" value={telefone} onChange={(e) => setTelefone(e.target.value)} required />
           </div>
           <div className="field" style={{ marginBottom: 16 }}>
             <label htmlFor="cliente-senha">Senha</label>
@@ -207,6 +208,8 @@ export default function Entrar({ tipoInicial = "cliente" }) {
                   name={campo.nome}
                   autoComplete={campo.autoComplete}
                   className="input"
+                  placeholder={campo.placeholder}
+                  inputMode={campo.nome === "telefone" ? "tel" : undefined}
                   value={formEmpresa[campo.nome] || ""}
                   onChange={(e) => atualizarCampoEmpresa(campo.nome, e.target.value)}
                   required={campo.nome !== "endereco"}
@@ -226,12 +229,14 @@ export default function Entrar({ tipoInicial = "cliente" }) {
             ))}
           {modo === "login" && (
             <div className="field" style={{ marginBottom: 16 }}>
-              <label htmlFor="empresa-login-telefone">Telefone (com DDD)</label>
+              <label htmlFor="empresa-login-telefone">Telefone (com DDD, ex: 21999887766)</label>
               <input
                 id="empresa-login-telefone"
                 name="tel"
                 autoComplete="tel"
+                inputMode="tel"
                 className="input"
+                placeholder="Ex: 21999887766"
                 value={formEmpresa.telefone || ""}
                 onChange={(e) => atualizarCampoEmpresa("telefone", e.target.value)}
                 required
@@ -263,6 +268,7 @@ export default function Entrar({ tipoInicial = "cliente" }) {
           </button>
         </form>
       )}
+      </div>
     </div>
   );
 }
