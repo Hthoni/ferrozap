@@ -10,6 +10,7 @@ from app.deps import get_admin_atual
 from app.models import Admin, Empresa, UsuarioFinal
 from app.security import hash_senha
 from app.services.email import email_senha_redefinida_pelo_admin
+from app.telefone import normalizar_telefone
 
 # Toda rota abaixo exige token de admin válido (Depends(get_admin_atual)).
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -162,9 +163,9 @@ def editar_empresa_admin(empresa_id: int, dados: AdminEmpresaUpdate, db: Session
     if dados.email is not None:
         empresa.email = dados.email.strip().lower()
     if dados.telefone is not None:
-        empresa.telefone = dados.telefone
+        empresa.telefone = normalizar_telefone(dados.telefone)
         if dados.telefone_e_whatsapp is not False:
-            empresa.whatsapp = dados.telefone
+            empresa.whatsapp = empresa.telefone
     if dados.telefone_e_whatsapp is not None:
         empresa.whatsapp = empresa.telefone if dados.telefone_e_whatsapp else None
     if dados.endereco is not None:
@@ -214,7 +215,7 @@ def editar_usuario_admin(usuario_id: int, dados: AdminUsuarioUpdate, db: Session
     if dados.email is not None:
         usuario.email = dados.email.strip().lower()
     if dados.telefone is not None:
-        usuario.telefone = dados.telefone
+        usuario.telefone = normalizar_telefone(dados.telefone)
     if dados.cep is not None:
         usuario.cep = dados.cep
     try:
