@@ -114,15 +114,24 @@ export const api = {
   contarNaoLidas: (token) => chamar("/conversas/contagem-nao-lidas", { token }),
 
   // Admin
-  listarPendentes: () => chamar("/admin/empresas/pendentes"),
-  aprovarEmpresa: (empresaId, dados) =>
-    chamar(`/admin/empresas/${empresaId}/verificacao`, { method: "PATCH", body: dados }),
-  listarTodasEmpresas: () => chamar("/admin/empresas"),
-  listarTodosUsuarios: () => chamar("/admin/usuarios"),
-  atualizarAtivoEmpresa: (id, ativo) =>
-    chamar(`/admin/empresas/${id}/ativo`, { method: "PATCH", body: { ativo } }),
-  editarEmpresaAdmin: (id, dados) => chamar(`/admin/empresas/${id}`, { method: "PATCH", body: dados }),
-  atualizarAtivoUsuario: (id, ativo) =>
-    chamar(`/admin/usuarios/${id}/ativo`, { method: "PATCH", body: { ativo } }),
-  editarUsuarioAdmin: (id, dados) => chamar(`/admin/usuarios/${id}`, { method: "PATCH", body: dados }),
+  loginAdmin: ({ usuario, senha }) => chamar("/auth/admin/login", { method: "POST", body: { usuario, senha } }),
+  listarPendentes: (token) => chamar("/admin/empresas/pendentes", { token }),
+  aprovarEmpresa: (empresaId, dados, token) =>
+    chamar(`/admin/empresas/${empresaId}/verificacao`, { method: "PATCH", body: dados, token }),
+  listarTodasEmpresas: (token) => chamar("/admin/empresas", { token }),
+  listarTodosUsuarios: (token) => chamar("/admin/usuarios", { token }),
+  atualizarAtivoEmpresa: (id, ativo, token) =>
+    chamar(`/admin/empresas/${id}/ativo`, { method: "PATCH", body: { ativo }, token }),
+  editarEmpresaAdmin: (id, dados, token) => chamar(`/admin/empresas/${id}`, { method: "PATCH", body: dados, token }),
+  atualizarAtivoUsuario: (id, ativo, token) =>
+    chamar(`/admin/usuarios/${id}/ativo`, { method: "PATCH", body: { ativo }, token }),
+  editarUsuarioAdmin: (id, dados, token) => chamar(`/admin/usuarios/${id}`, { method: "PATCH", body: dados, token }),
+  resetarSenhaEmpresaAdmin: (id, token) => chamar(`/admin/empresas/${id}/resetar-senha`, { method: "POST", token }),
+  resetarSenhaUsuarioAdmin: (id, token) => chamar(`/admin/usuarios/${id}/resetar-senha`, { method: "POST", token }),
+
+  // Esqueci minha senha (cliente e empresa)
+  esqueciSenha: (tipo, identificador) =>
+    chamar("/auth/esqueci-senha", { method: "POST", body: { tipo, identificador } }),
+  redefinirSenha: (token, senhaNova) =>
+    chamar("/auth/redefinir-senha", { method: "POST", body: { token, senha_nova: senhaNova } }),
 };
