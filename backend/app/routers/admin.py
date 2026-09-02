@@ -6,11 +6,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models import Empresa, UsuarioFinal
+from app.deps import get_admin_atual
+from app.models import Admin, Empresa, UsuarioFinal
+from app.security import hash_senha
+from app.services.email import email_senha_redefinida_pelo_admin
 
-# TODO: proteger com autenticação de admin antes de ir para produção.
-# Ainda não existe conceito de usuário admin no sistema — só empresa e
-# usuário final. Ver docs/decisoes.md, seção "Pendências em aberto".
+# Toda rota abaixo exige token de admin válido (Depends(get_admin_atual)).
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
@@ -43,7 +44,7 @@ class AdminUsuarioUpdate(BaseModel):
 
 
 @router.get("/empresas/pendentes")
-def listar_pendentes(db: Session = Depends(get_db)):
+def listar_pendentes(db: Session = Depends(get_db), admin: Admin = Depends(get_admin_atual)):
     empresas = (
         db.query(Empresa).filter(Empresa.status_verificacao == "pendente").all()
     )
@@ -63,7 +64,7 @@ def listar_pendentes(db: Session = Depends(get_db)):
 
 
 @router.get("/empresas")
-def listar_todas_empresas(db: Session = Depends(get_db)):
+def listar_todas_empresas(db: Session = Depends(get_db), admin: Admin = Depends(get_admin_atual)):
     empresas = db.query(Empresa).order_by(Empresa.criado_em.desc()).all()
     return [
         {
@@ -88,7 +89,7 @@ def listar_todas_empresas(db: Session = Depends(get_db)):
 
 
 @router.get("/usuarios")
-def listar_todos_usuarios(db: Session = Depends(get_db)):
+def listar_todos_usuarios(db: Session = Depends(get_db), admin: Admin = Depends(get_admin_atual)):
     usuarios = db.query(UsuarioFinal).order_by(UsuarioFinal.criado_em.desc()).all()
     return [
         {
@@ -106,7 +107,7 @@ def listar_todos_usuarios(db: Session = Depends(get_db)):
 
 @router.patch("/empresas/{empresa_id}/verificacao")
 def atualizar_verificacao(
-    empresa_id: int, dados: VerificacaoUpdate, db: Session = Depends(get_db)
+    empresa_id: int, dados: VerificacaoUpdate, db: Session = Depends(get_db), admin: Admin = Depends(get_admin_atual)
 ):
     if dados.status_verificacao not in ("verificado", "rejeitado"):
         raise HTTPException(status_code=400, detail="Status inválido.")
@@ -142,7 +143,7 @@ def atualizar_verificacao(
 
 
 @router.patch("/empresas/{empresa_id}/ativo")
-def atualizar_ativo_empresa(empresa_id: int, dados: AtivoUpdate, db: Session = Depends(get_db)):
+def atualizar_ativo_empresa(empresa_id: int, dados: AtivoUpdate, db: Session = Depends(get_db), admin: Admin = Depends(get_admin_atual)):
     empresa = db.query(Empresa).filter(Empresa.id == empresa_id).first()
     if not empresa:
         raise HTTPException(status_code=404, detail="Empresa não encontrada.")
@@ -152,7 +153,7 @@ def atualizar_ativo_empresa(empresa_id: int, dados: AtivoUpdate, db: Session = D
 
 
 @router.patch("/empresas/{empresa_id}")
-def editar_empresa_admin(empresa_id: int, dados: AdminEmpresaUpdate, db: Session = Depends(get_db)):
+def editar_empresa_admin(empresa_id: int, dados: AdminEmpresaUpdate, db: Session = Depends(get_db), admin: Admin = Depends(get_admin_atual)):
     empresa = db.query(Empresa).filter(Empresa.id == empresa_id).first()
     if not empresa:
         raise HTTPException(status_code=404, detail="Empresa não encontrada.")
@@ -194,7 +195,7 @@ def editar_empresa_admin(empresa_id: int, dados: AdminEmpresaUpdate, db: Session
 
 
 @router.patch("/usuarios/{usuario_id}/ativo")
-def atualizar_ativo_usuario(usuario_id: int, dados: AtivoUpdate, db: Session = Depends(get_db)):
+def atualizar_ativo_usuario(usuario_id: int, dados: AtivoUpdate, db: Session = Depends(get_db), admin: Admin = Depends(get_admin_atual)):
     usuario = db.query(UsuarioFinal).filter(UsuarioFinal.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
@@ -204,7 +205,7 @@ def atualizar_ativo_usuario(usuario_id: int, dados: AtivoUpdate, db: Session = D
 
 
 @router.patch("/usuarios/{usuario_id}")
-def editar_usuario_admin(usuario_id: int, dados: AdminUsuarioUpdate, db: Session = Depends(get_db)):
+def editar_usuario_admin(usuario_id: int, dados: AdminUsuarioUpdate, db: Session = Depends(get_db), admin: Admin = Depends(get_admin_atual)):
     usuario = db.query(UsuarioFinal).filter(UsuarioFinal.id == usuario_id).first()
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
@@ -228,4 +229,48 @@ def editar_usuario_admin(usuario_id: int, dados: AdminUsuarioUpdate, db: Session
         "email": usuario.email,
         "telefone": usuario.telefone,
         "cep": usuario.cep,
+    }
+
+import secrets
+import string
+
+
+def _gerar_senha_temporaria() -> str:
+    alfabeto = string.ascii_letters + string.digits
+    return "".join(secrets.choice(alfabeto) for _ in range(10))
+
+
+@router.post("/empresas/{empresa_id}/resetar-senha")
+def resetar_senha_empresa(empresa_id: int, db: Session = Depends(get_db), admin: Admin = Depends(get_admin_atual)):
+    empresa = db.query(Empresa).filter(Empresa.id == empresa_id).first()
+    if not empresa:
+        raise HTTPException(status_code=404, detail="Empresa não encontrada.")
+    senha_temporaria = _gerar_senha_temporaria()
+    empresa.senha_hash = hash_senha(senha_temporaria)
+    db.commit()
+    email_enviado = False
+    if empresa.email:
+        email_enviado = email_senha_redefinida_pelo_admin(empresa.email, senha_temporaria)
+    return {
+        "id": empresa.id,
+        "senha_temporaria": senha_temporaria,
+        "email_enviado": email_enviado,
+    }
+
+
+@router.post("/usuarios/{usuario_id}/resetar-senha")
+def resetar_senha_usuario(usuario_id: int, db: Session = Depends(get_db), admin: Admin = Depends(get_admin_atual)):
+    usuario = db.query(UsuarioFinal).filter(UsuarioFinal.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    senha_temporaria = _gerar_senha_temporaria()
+    usuario.senha_hash = hash_senha(senha_temporaria)
+    db.commit()
+    email_enviado = False
+    if usuario.email:
+        email_enviado = email_senha_redefinida_pelo_admin(usuario.email, senha_temporaria)
+    return {
+        "id": usuario.id,
+        "senha_temporaria": senha_temporaria,
+        "email_enviado": email_enviado,
     }
