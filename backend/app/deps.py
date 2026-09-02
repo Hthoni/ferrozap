@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import decodificar_token
 from app.database import get_db
-from app.models import Empresa, UsuarioFinal
+from app.models import Admin, Empresa, UsuarioFinal
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
@@ -16,6 +16,19 @@ def _extrair_payload(token: str | None) -> dict:
     if payload is None:
         raise HTTPException(status_code=401, detail="Token inválido ou expirado.")
     return payload
+
+
+def get_admin_atual(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+) -> Admin:
+    payload = _extrair_payload(token)
+    if payload.get("tipo") != "admin":
+        raise HTTPException(status_code=403, detail="Acesso restrito a administradores.")
+    admin = db.query(Admin).filter(Admin.id == int(payload["sub"])).first()
+    if admin is None or not admin.ativo:
+        raise HTTPException(status_code=401, detail="Administrador não encontrado ou inativo.")
+    return admin
 
 
 def get_empresa_atual(
