@@ -83,7 +83,7 @@ export default function MinhaContaCliente() {
       <p className="fz-rotulo fz-rotulo--aco">Cliente final</p>
       <h1 style={{ fontSize: 32, margin: "8px 0 24px" }}>Minha conta</h1>
 
-      <form onSubmit={salvarPerfil} className="blueprint" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
+      <form onSubmit={salvarPerfil} className="blueprint cs-painel" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
         <Corners />
         <p className="card-title" style={{ marginBottom: 16 }}>Dados pessoais</p>
         <div className="field" style={{ marginBottom: 16 }}>
@@ -124,7 +124,7 @@ export default function MinhaContaCliente() {
       {/* CS-016: "Alterar senha" agora tem o mesmo peso visual de
           "Salvar dados" -- as duas são confirmações igualmente
           importantes; antes o secondary parecia desabilitado. */}
-      <form onSubmit={salvarSenha} className="blueprint" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
+      <form onSubmit={salvarSenha} className="blueprint cs-painel" style={{ padding: 24, marginBottom: 24, maxWidth: 480 }} noValidate>
         <Corners />
         <p className="card-title" style={{ marginBottom: 16 }}>Alterar senha</p>
         <div className="field" style={{ marginBottom: 16 }}>
