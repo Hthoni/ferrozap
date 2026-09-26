@@ -1,10 +1,13 @@
 import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
+from app.database import get_db
 from app.rate_limit import limiter
 from app.routers import admin, auth, busca, cadastro, catalogo, leads, mensageria
 
@@ -40,3 +43,17 @@ app.include_router(mensageria.router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/manter-banco-ativo")
+def manter_banco_ativo(db: Session = Depends(get_db)):
+    """
+    Só existe pra ser chamado pelo Cloud Scheduler, de tempos em tempos
+    -- o Supabase (plano gratuito) pausa o projeto sozinho depois de 7
+    dias sem nenhuma consulta ao banco. Essa consulta é a mais barata
+    possível (não lê tabela nenhuma), só o suficiente pra contar como
+    "atividade" e evitar a pausa automática. Separado do /health de
+    propósito -- esse aqui não deveria depender do banco pra responder.
+    """
+    db.execute(text("SELECT 1"))
+    return {"status": "ok", "banco": "ativo"}
